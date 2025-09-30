@@ -1,11 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
   output   = "../generated"
 }
-
 
 datasource db {
   provider = "postgresql"
@@ -15,7 +12,7 @@ datasource db {
 model Usuario {
   id             Int       @id @default(autoincrement())
   email          String    @unique
-  password_hash  String
+  password_hash  String?   
   nombre         String
   apellido       String
   activo         Boolean   @default(true)
@@ -23,4 +20,7 @@ model Usuario {
   ultimo_acceso  DateTime?
   avatar_url     String?   @db.VarChar(500)
   bio            String?
+  
+  google_id      String?   @unique
+  provider       String?   @default("local") 
 }

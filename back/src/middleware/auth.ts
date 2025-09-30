@@ -1,41 +1,114 @@
-import { Response, NextFunction } from 'express';
+// src/middleware/auth.ts
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
-import { AuthRequest, JWTPayload, IUser } from '../types';
+import { PrismaClient } from '../../generated';
 
-export const authMiddleware = async (
-  req: AuthRequest, 
+const prisma = new PrismaClient();
+
+interface JWTPayload {
+  id: number;
+  email: string;
+  nombre: string;
+  apellido: string;
+}
+
+// Middleware para proteger rutas
+export const authenticateToken = async (
+  req: Request, 
   res: Response, 
   next: NextFunction
 ): Promise<void> => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const authHeader = req.headers.authorization;
     
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       res.status(401).json({ 
-        success: false,
-        message: 'Acceso denegado. No token provided.' 
+        error: 'Access denied. No token provided.' 
       });
       return;
     }
+
+    const token = authHeader.split(' ')[1];
     
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JWTPayload;
-    const user: IUser | null = await User.findById(decoded.id);
+    // Verificar token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
     
-    if (!user) {
-      res.status(401).json({ 
-        success: false,
-        message: 'Token inválido.' 
+    // Buscar usuario en la base de datos
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: decoded.id }
+    });
+
+    if (!usuario || !usuario.activo) {
+      res.status(403).json({ 
+        error: 'User not found or inactive' 
       });
       return;
     }
-    
-    req.user = user;
+
+    // Agregar usuario al request
+    (req.user as any) = {
+      id: usuario.id,
+      email: usuario.email,
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      provider: usuario.provider
+    };
+
     next();
   } catch (error) {
-    res.status(401).json({ 
-      success: false,
-      message: 'Token inválido.' 
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({ 
+        error: 'Invalid token' 
+      });
+      return;
+    }
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ 
+        error: 'Token expired' 
+      });
+      return;
+    }
+    
+    console.error('Auth middleware error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error' 
     });
+  }
+};
+
+// Middleware opcional (permite acceso sin token)
+export const optionalAuth = async (
+  req: Request, 
+  res: Response, 
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      next();
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
+    
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: decoded.id }
+    });
+
+    if (usuario && usuario.activo) {
+      (req.user as any) = {
+        id: usuario.id,
+        email: usuario.email,
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        provider: usuario.provider
+      };
+    }
+
+    next();
+  } catch (error) {
+    next();
   }
 };

@@ -1,61 +1,61 @@
-import express, { Application, Request, Response } from 'express';
-import passport from 'passport';
-import session from 'express-session';
-import cors from 'cors';
+// src/server.ts
 import dotenv from 'dotenv';
-
-// Importar configuraciones
-import './config/database';
-import './config/passport';
-import authRoutes from './routes/auth';
-
 dotenv.config();
 
-const app: Application = express();
+import express, { Request, Response, NextFunction } from 'express';
+import session from 'express-session';
+import passport from 'passport';
+import cors from 'cors';
+import authRoutes from './routes/auth';
 
-// Middlewares
+const app = express();
+
+
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true
 }));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
-// Configuración de sesión
+
 app.use(session({
-  secret: process.env.SESSION_SECRET as string,
+  secret: process.env.SESSION_SECRET || 'default-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    maxAge: 24 * 60 * 60 * 1000 
   }
 }));
 
-// Inicializar Passport
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Rutas
+import './config/passport';
+
+
 app.use('/api/auth', authRoutes);
 
-// Ruta de prueba
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Auth API funcionando correctamente' });
+
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({ status: 'OK', message: 'Server is running' });
 });
 
-// Manejo de errores
-app.use((err: Error, req: Request, res: Response, next: any) => {
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ 
-    success: false, 
-    message: 'Error interno del servidor' 
+    error: 'Something went wrong!',
+    message: err.message 
   });
 });
 
-const PORT: number = parseInt(process.env.PORT as string) || 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });

@@ -130,7 +130,9 @@ exports.Prisma.UsuarioScalarFieldEnum = {
   fecha_registro: 'fecha_registro',
   ultimo_acceso: 'ultimo_acceso',
   avatar_url: 'avatar_url',
-  bio: 'bio'
+  bio: 'bio',
+  google_id: 'google_id',
+  provider: 'provider'
 };
 
 exports.Prisma.SortOrder = {

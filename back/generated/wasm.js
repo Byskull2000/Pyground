@@ -102,7 +102,9 @@ exports.Prisma.UsuarioScalarFieldEnum = {
   fecha_registro: 'fecha_registro',
   ultimo_acceso: 'ultimo_acceso',
   avatar_url: 'avatar_url',
-  bio: 'bio'
+  bio: 'bio',
+  google_id: 'google_id',
+  provider: 'provider'
 };
 
 exports.Prisma.SortOrder = {
@@ -153,7 +155,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../.env"
   },
   "relativePath": "../prisma",
@@ -172,13 +174,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Usuario {\n  id             Int       @id @default(autoincrement())\n  email          String    @unique\n  password_hash  String\n  nombre         String\n  apellido       String\n  activo         Boolean   @default(true)\n  fecha_registro DateTime  @default(now())\n  ultimo_acceso  DateTime?\n  avatar_url     String?   @db.VarChar(500)\n  bio            String?\n}\n",
-  "inlineSchemaHash": "af5517f8f5769b5efbbe4cff7a7561264109ed0a86073e0fab99745ca9c29025",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Usuario {\n  id             Int       @id @default(autoincrement())\n  email          String    @unique\n  password_hash  String?\n  nombre         String\n  apellido       String\n  activo         Boolean   @default(true)\n  fecha_registro DateTime  @default(now())\n  ultimo_acceso  DateTime?\n  avatar_url     String?   @db.VarChar(500)\n  bio            String?\n\n  google_id String? @unique\n  provider  String? @default(\"local\")\n}\n",
+  "inlineSchemaHash": "9ad965684dc96d573b6e6d7c5baff1c2c3f90028c730cd94c4845fe519376e95",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Usuario\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password_hash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"nombre\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"apellido\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"activo\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"fecha_registro\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"ultimo_acceso\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"avatar_url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bio\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Usuario\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password_hash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"nombre\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"apellido\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"activo\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"fecha_registro\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"ultimo_acceso\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"avatar_url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bio\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"google_id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
