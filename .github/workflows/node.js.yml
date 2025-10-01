@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [22.x]
 
     services:
       postgres:
@@ -33,11 +33,14 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: './back/package-lock.json'
     
     - name:  Install dependencies
       working-directory: ./back
@@ -62,7 +65,7 @@ jobs:
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/pyground_test
 
-    - name: Run unit tests
+    - name: Run tests
       working-directory: ./back
       run: npm test 
       env:
