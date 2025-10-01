@@ -7,6 +7,8 @@ import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
 import authRoutes from './routes/auth';
+import routes from './routes/api.routes';
+
 
 const app = express();
 
@@ -36,6 +38,7 @@ app.use(passport.session());
 
 import './config/passport';
 
+app.use('/api', routes);
 
 app.use('/api/auth', authRoutes);
 
