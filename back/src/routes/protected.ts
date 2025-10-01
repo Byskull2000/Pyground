@@ -3,7 +3,7 @@
 
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import { PrismaClient } from '../../generated';
+import { PrismaClient } from '../../generated/prisma';
 
 const router = express.Router();
 const prisma = new PrismaClient();

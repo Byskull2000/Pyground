@@ -2,7 +2,7 @@
 import express, { Request, Response } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { Usuario } from '../../generated';
+import { Usuario } from '../../generated/prisma';
 
 const router = express.Router();
 
@@ -114,7 +114,7 @@ router.get('/me', async (req: Request, res: Response) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
     
-    const { PrismaClient } = require('../../generated');
+    const { PrismaClient } = require('../../generated/prisma');
     const prisma = new PrismaClient();
     
     const usuario = await prisma.usuario.findUnique({

@@ -1,7 +1,8 @@
 // src/config/passport.ts
 import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile, VerifyCallback } from 'passport-google-oauth20';
-import { PrismaClient, Usuario } from '../../generated';
+import { PrismaClient } from '../../generated/prisma';
+
 
 const prisma = new PrismaClient();
 

@@ -1,5 +1,5 @@
 // src/types/index.ts
-import { Usuario } from '../../generated';
+import { Usuario } from '../../generated/prisma';
 
 // Tipo simplificado del usuario para middlewares
 export interface AuthUser {

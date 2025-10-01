@@ -1,5 +1,5 @@
 // src/types/express.d.ts
-import { Usuario } from '../../generated';
+import { Usuario } from '../../generated/prisma';
 
 export interface AuthUser {
   id: number;

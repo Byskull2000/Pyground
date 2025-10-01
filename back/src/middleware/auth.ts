@@ -1,7 +1,7 @@
 // src/middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '../../generated';
+import { PrismaClient } from '../../generated/prisma';
 
 const prisma = new PrismaClient();
 
