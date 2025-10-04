@@ -20,7 +20,17 @@ model Usuario {
   ultimo_acceso  DateTime?
   avatar_url     String?   @db.VarChar(500)
   bio            String?
-  
+
   google_id      String?   @unique
   provider       String?   @default("local") 
+}
+
+model Curso {
+  id             Int      @id @default(autoincrement())
+  nombre         String   @db.VarChar(100)
+  descripcion    String?  @db.Text
+  codigo_curso   String   @unique @db.VarChar(20)
+  activo         Boolean  @default(true)
+  fecha_creacion DateTime @default(now())
+  creado_por     String?  @db.VarChar(100)
 }
