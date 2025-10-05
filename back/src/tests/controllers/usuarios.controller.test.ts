@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as userController from '../../controllers/usuarios.controller';
 import * as userService from '../../services/usuarios.service';
 import { createMockRequest, createMockResponse } from '../setup';
+import { ApiResponse } from '../../utils/apiResponse';
 
 jest.mock('../../services/usuarios.service');
 
@@ -23,7 +24,9 @@ describe('Usuarios Controller', () => {
 
       await userController.getUsuarios(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(mockUsuarios);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, mockUsuarios)
+      );
       expect(userService.getUsuarios).toHaveBeenCalled();
     });
 
@@ -38,9 +41,9 @@ describe('Usuarios Controller', () => {
       await userController.getUsuarios(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Error al obtener usuarios'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Error al obtener usuarios')
+      );
     });
   });
 
@@ -55,7 +58,9 @@ describe('Usuarios Controller', () => {
 
       await userController.getUsuarioById(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(mockUsuario);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, mockUsuario)
+      );
       expect(userService.getUsuario).toHaveBeenCalledWith(1);
     });
 
@@ -68,9 +73,9 @@ describe('Usuarios Controller', () => {
       await userController.getUsuarioById(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Usuario no encontrado'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Usuario no encontrado')
+      );
     });
   });
 
@@ -87,7 +92,9 @@ describe('Usuarios Controller', () => {
       await userController.createUsuario(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(createdUser);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, createdUser)
+      );
     });
   });
 
@@ -103,7 +110,9 @@ describe('Usuarios Controller', () => {
 
       await userController.updateUsuario(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(updatedUser);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, updatedUser)
+      );
     });
   });
 
@@ -116,9 +125,9 @@ describe('Usuarios Controller', () => {
 
       await userController.deleteUsuario(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        message: 'Usuario eliminado correctamente'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, { message: 'Usuario eliminado correctamente' })
+      );
     });
   });
 });
