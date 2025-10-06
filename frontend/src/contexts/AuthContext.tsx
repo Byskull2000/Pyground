@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem('token');
-     
+
       if (!token) {
         setLoading(false);
         return;
@@ -77,6 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Login con credenciales (email y contraseña)
   const loginWithCredentials = async (email: string, password: string) => {
     try {
+      console.log('Attempting login with:', { email });
+
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -85,25 +87,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password })
       });
 
+      const data = await response.json();
+      console.log('Login response:', { status: response.status, data });
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al iniciar sesión');
+        throw new Error(data.error || `Error ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      
       // Guardar el token
       localStorage.setItem('token', data.token);
-      
-      // Establecer el usuario con la imagen de gatito.png si no tiene avatar
+
+      // Establecer el usuario
       const userData = {
         ...data.user,
         avatar_url: data.user.avatar_url || '/gatito.png',
         provider: data.user.provider || 'email'
       };
-      
+
       setUser(userData);
-      
+
       // Redireccionar al dashboard
       router.push('/dashboard');
     } catch (error) {
@@ -115,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       const token = localStorage.getItem('token');
-     
+
       if (token) {
         await fetch(`${API_URL}/api/auth/logout`, {
           method: 'POST',
