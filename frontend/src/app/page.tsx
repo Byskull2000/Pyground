@@ -41,7 +41,7 @@ export default function Home() {
       <FeaturesSection />
       <HowItWorksSection />
       <StartSection onGetStarted={handleGetStarted}/>
-
+      <Footer/>
     </div>
   );
 }
