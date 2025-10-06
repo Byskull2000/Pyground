@@ -4,6 +4,7 @@
 import FeaturesSection from '@/components/FeatureSection';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
+import HowItWorksSection from '@/components/HowItWorksSection';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,7 +36,8 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Header onGetStarted={handleGetStarted} />
       <HeroSection onGetStarted={handleGetStarted} />
-      <FeaturesSection/>
+      <FeaturesSection />
+      <HowItWorksSection />
     </div>
   );
 }
