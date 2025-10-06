@@ -7,7 +7,7 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { gsap } from 'gsap';
 
 function LoginContent() {
-  const { login, isAuthenticated, loading } = useAuth();
+  const { login, loginWithCredentials, isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
@@ -140,8 +140,8 @@ function LoginContent() {
     setIsSubmitting(true);
 
     try {
-
       if (isRegistering) {
+        // Registrar nuevo usuario
         const response = await fetch('http://localhost:5000/api/usuarios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -152,13 +152,17 @@ function LoginContent() {
             apellido: lastName
           })
         });
+        
         if (!response.ok) {
           const data = await response.json();
           throw new Error(data.error || 'Error al registrar el usuario');
         }
-        const data = await response.json();
-        console.log('Usuario registrado:', data);
+        
+        console.log('Usuario registrado exitosamente');
       }
+
+      // Iniciar sesión (tanto para registro como para login)
+      await loginWithCredentials(email, password);
 
       // Animación de éxito
       gsap.to(formRef.current, {
@@ -167,11 +171,6 @@ function LoginContent() {
         yoyo: true,
         repeat: 1
       });
-
-      // Redirigir al dashboard
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 500);
 
     } catch (err: any) {
       setFormError(err.message || 'Error al procesar la solicitud');
@@ -249,7 +248,6 @@ function LoginContent() {
         className="absolute top-1/3 right-1/4 w-80 h-80 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl"
       />
 
-      {/* Círculos decorativos adicionales */}
       <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
       <div className="absolute bottom-1/3 right-1/3 w-2 h-2 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
       <div className="absolute top-2/3 left-1/4 w-2 h-2 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
