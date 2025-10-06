@@ -6,8 +6,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
-import authRoutes from './routes/auth';
+//import authRoutes from './routes/auth';
+import authRoutes from './routes/auth.routes';
 import routes from './routes/api.routes';
+import protectedRoutes from './routes/protected';
 
 
 const app = express();
@@ -42,6 +44,8 @@ app.use('/api', routes);
 
 app.use('/api/auth', authRoutes);
 
+app.use('/api/protected', protectedRoutes);
+
 
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Server is running' });
@@ -61,4 +65,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`API: http://localhost:${PORT}/api`);
 });
+
+export default app;
