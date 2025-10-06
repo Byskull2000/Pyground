@@ -80,8 +80,8 @@ describe('Usuarios Controller', () => {
   });
 
   describe('createUsuario', () => {
-    it('debe crear un usuario con status 201', async () => {
-      const newUser = { nombre: 'Pedro', email: 'pedro@test.com' };
+    it('debe crear un usuario con status 201 (RE1)', async () => {
+      const newUser = { nombre: 'Pedro', apellido: 'Test', email: 'pedro@test.com', password: 'Password123' };
       const createdUser = { id: 1, ...newUser };
 
       (userService.createUsuario as jest.Mock).mockResolvedValue(createdUser);
@@ -96,6 +96,72 @@ describe('Usuarios Controller', () => {
         new ApiResponse(true, createdUser)
       );
     });
+
+    it('debe retornar 409 si el email ya existe (RE2)', async () => {
+      const newUser = { email: 'exist@test.com', password: 'Password123', nombre: 'Juan', apellido: 'Ricaldez' };
+      (userService.createUsuario as jest.Mock).mockRejectedValue({ status: 409, message: 'El email ya está registrado' });
+
+      const req = createMockRequest(newUser);
+      const res = createMockResponse();
+
+      await userController.createUsuario(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'El email ya está registrado'));
+    });
+    
+    it('debe retornar 400 si falta email (RE7)', async () => {
+      const newUser = { password: 'Password123' } as any;
+      (userService.createUsuario as jest.Mock).mockRejectedValue({ status: 400, message: 'El email es obligatorio' });
+
+      const req = createMockRequest(newUser);
+      const res = createMockResponse();
+
+      await userController.createUsuario(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'El email es obligatorio'));
+    });
+
+    it('debe retornar 400 si el email es inválido (RE4)', async () => {
+      const newUser = { email: 'usuario', password: 'Password123', nombre: 'Nombre', apellido: 'Apellido' };
+      (userService.createUsuario as jest.Mock).mockRejectedValue({ status: 400, message: 'Email inválido' });
+
+      const req = createMockRequest(newUser);
+      const res = createMockResponse();
+
+      await userController.createUsuario(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Email inválido'));
+    });
+
+    it('debe retornar 400 si la contraseña es demasiado corta (RE3/RE5)', async () => {
+      const newUser = { email: 'user@test.com', password: '12', nombre: 'Nombre', apellido: 'Apellido' };
+      (userService.createUsuario as jest.Mock).mockRejectedValue({ status: 400, message: 'La contraseña es demasiado corta' });
+
+      const req = createMockRequest(newUser);
+      const res = createMockResponse();
+
+      await userController.createUsuario(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'La contraseña es demasiado corta'));
+    });
+
+    it('debe retornar 400 si la contraseña es débil (RE6)', async () => {
+      const newUser = { email: 'user@test.com', password: 'abcdefg', nombre: 'Nombre', apellido: 'Apellido' };
+      (userService.createUsuario as jest.Mock).mockRejectedValue({ status: 400, message: 'La contraseña no cumple requisitos de seguridad' });
+
+      const req = createMockRequest(newUser);
+      const res = createMockResponse();
+
+      await userController.createUsuario(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'La contraseña no cumple requisitos de seguridad'));
+    });
+    
   });
 
   describe('updateUsuario', () => {
