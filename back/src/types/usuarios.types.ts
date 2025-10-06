@@ -1,6 +1,6 @@
 export interface UsuarioCreate {
   email: string;
-  password_hash?: string;
+  password?: string;
   nombre: string;
   apellido: string;
   activo?: boolean;
@@ -12,7 +12,7 @@ export interface UsuarioCreate {
 
 export interface UsuarioUpdate {
   email?: string;
-  password_hash?: string;
+  password?: string;
   nombre?: string;
   apellido?: string;
   activo?: boolean;
