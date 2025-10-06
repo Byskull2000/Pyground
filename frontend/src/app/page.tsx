@@ -1,6 +1,7 @@
 // app/page.tsx
 'use client';
 
+import FeaturesSection from '@/components/FeatureSection';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +35,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Header onGetStarted={handleGetStarted} />
       <HeroSection onGetStarted={handleGetStarted} />
+      <FeaturesSection/>
     </div>
   );
 }
