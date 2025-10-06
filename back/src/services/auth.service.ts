@@ -71,53 +71,6 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
-// Cambiar contraseña
-export const changePassword = async (
-  userId: number, 
-  currentPassword: string, 
-  newPassword: string
-) => {
-  // Buscar usuario
-  const usuario = await prisma.usuario.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      password_hash: true,
-      provider: true
-    }
-  });
-
-  if (!usuario) {
-    throw new Error('User not found');
-  }
-
-  // Verificar que sea usuario local
-  if (usuario.provider !== 'local' || !usuario.password_hash) {
-    throw new Error('Password change not available for OAuth users');
-  }
-
-  // Verificar contraseña actual
-  const isCurrentPasswordValid = await bcrypt.compare(
-    currentPassword, 
-    usuario.password_hash
-  );
-
-  if (!isCurrentPasswordValid) {
-    throw new Error('Invalid current password');
-  }
-
-  // Hashear nueva contraseña
-  const newPasswordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-
-  // Actualizar contraseña
-  await prisma.usuario.update({
-    where: { id: userId },
-    data: { password_hash: newPasswordHash }
-  });
-
-  return { message: 'Password changed successfully' };
-};
-
 // Verificar token
 export const verifyToken = (token: string) => {
   try {

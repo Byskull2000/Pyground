@@ -16,7 +16,7 @@ const router = express.Router();
 router.post('/login', authController.login);
 
 // Cambiar contraseña (requiere autenticación)
-router.put('/change-password', authenticateToken, authController.changePassword);
+//router.put('/change-password', authenticateToken, authController.changePassword);
 
 // ==================== AUTENTICACIÓN CON GOOGLE ====================
 

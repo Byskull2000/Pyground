@@ -48,7 +48,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const changePassword = async (req: Request, res: Response) => {
+/*export const changePassword = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json(new ApiResponse(false, null, 'No autorizado'));
@@ -81,4 +81,4 @@ export const changePassword = async (req: Request, res: Response) => {
     console.error('Error al cambiar contraseña:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al cambiar contraseña'));
   }
-};
+};*/
