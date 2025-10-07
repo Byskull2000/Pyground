@@ -43,7 +43,7 @@ export const login = async (req: Request, res: Response) => {
         .json(new ApiResponse(false, null, 'Cuenta inactiva. Contacte al administrador'));
     }
 
-    console.error('Error en login:', err);
+    //console.error('Error en login:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al iniciar sesión'));
   }
 };
