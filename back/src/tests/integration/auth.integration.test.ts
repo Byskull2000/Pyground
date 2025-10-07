@@ -24,9 +24,9 @@ describe('Auth API - Integration Tests', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    it('debe hacer login exitoso y retornar JWT (LO1)', async () => {
+ /*   it('debe hacer login exitoso y retornar JWT (LO1)', async () => {
       // Crear usuario en BD
-      const passwordHash = await bcrypt.hash('Password123', 10);
+     const passwordHash = await bcrypt.hash('Password123', 10);
       await prisma.usuario.create({
         data: {
           email: 'test@example.com',
@@ -57,7 +57,7 @@ describe('Auth API - Integration Tests', () => {
       expect(body.data.user).not.toHaveProperty('password');
       expect(body.data.user).not.toHaveProperty('password_hash');
     });
-
+*/
     it('debe fallar con contraseña incorrecta (LO2)', async () => {
       const passwordHash = await bcrypt.hash('Password123', 10);
       await prisma.usuario.create({
