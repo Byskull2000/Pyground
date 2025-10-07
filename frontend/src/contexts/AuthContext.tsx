@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       localStorage.removeItem('token');
       setUser(null);
-      router.push('/login');
+      router.push('/');
     }
   };
 
