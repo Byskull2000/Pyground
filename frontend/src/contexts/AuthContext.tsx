@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+
 interface User {
   id: number;
   email: string;
@@ -55,7 +56,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        const userData = {
+          ...data.user,
+          avatar_url: data.user.avatar_url || '/gatito.png',
+          provider: data.user.provider || 'email'
+        };
+        setUser(userData);
       } else {
         localStorage.removeItem('token');
         setUser(null);
@@ -94,14 +100,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(data.error || `Error ${response.status}: ${response.statusText}`);
       }
 
-      // Guardar el token
-      localStorage.setItem('token', data.token);
+      // La respuesta viene en data.data
+      const responseData = data.data || data;
+      
+      // Verificar que tenemos el token y el usuario
+      if (!responseData.token) {
+        throw new Error('No se recibió token del servidor');
+      }
 
-      // Establecer el usuario
+      if (!responseData.user) {
+        throw new Error('No se recibieron datos del usuario');
+      }
+
+      // Guardar el token
+      localStorage.setItem('token', responseData.token);
+
+      // Establecer el usuario con avatar por defecto si es null
       const userData = {
-        ...data.user,
-        avatar_url: data.user.avatar_url || '/gatito.png',
-        provider: data.user.provider || 'email'
+        ...responseData.user,
+        avatar_url: responseData.user.avatar_url || '/gatito.png',
+        provider: responseData.user.provider || 'email'
       };
 
       setUser(userData);
