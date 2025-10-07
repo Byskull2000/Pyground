@@ -1,20 +1,16 @@
-// src/types/express.d.ts
-import { Usuario } from '../../generated/prisma';
-
-export interface AuthUser {
-  id: number;
-  email: string;
-  nombre: string;
-  apellido: string;
-  provider?: string | null;
-}
+// back/src/types/express.d.ts
+// Extensión de tipos para Express Request
 
 declare global {
   namespace Express {
-    interface User extends Usuario {}
-    
     interface Request {
-      user?: Usuario | AuthUser;
+      user?: {
+        id: number;
+        email: string;
+        nombre: string;
+        apellido: string;
+        provider: string | null;
+      };
     }
   }
 }

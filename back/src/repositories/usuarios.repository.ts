@@ -47,7 +47,10 @@ export const getUsuarioByEmail = async (email: string) => {
       bio: true,
       provider: true,
       fecha_registro: true,
-      ultimo_acceso: true
+      ultimo_acceso: true,
+      password_hash: true,
+      activo: true
+
     }
   });
 };
