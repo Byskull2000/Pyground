@@ -4,6 +4,8 @@
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Image from 'next/image';
+import Link from 'next/link';
+import Header from '@/components/Header';
 
 function DashboardContent() {
   const { user, logout } = useAuth();
@@ -11,43 +13,7 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">Py</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              PyGround
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {user && (
-              <Image
-                src={user.avatar_url || '/gatito.png'}
-                alt={`${user.nombre} ${user.apellido}`}
-                width={40}
-                height={40}
-                className="rounded-full ring-2 ring-blue-100"
-              />
-            )}
-            <div className="hidden sm:block text-sm text-right">
-              <p className="font-semibold text-gray-900">
-                {user?.nombre} {user?.apellido}
-              </p>
-              <p className="text-gray-500 text-xs">{user?.email}</p>
-            </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg"
-            >
-              Cerrar Sesión
-            </button>
-          </div>
-        </nav>
-      </header>
-
+      <Header />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 mb-8 shadow-xl">
@@ -189,9 +155,9 @@ function DashboardContent() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Miembro desde</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {new Date(user.fecha_registro).toLocaleDateString('es-ES', { 
-                        month: 'short', 
-                        year: 'numeric' 
+                      {new Date(user.fecha_registro).toLocaleDateString('es-ES', {
+                        month: 'short',
+                        year: 'numeric'
                       })}
                     </span>
                   </div>
@@ -231,7 +197,7 @@ function DashboardContent() {
                       <span className="font-semibold text-gray-900">75%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{width: '75%'}}></div>
+                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '75%' }}></div>
                     </div>
                   </div>
                 </div>
@@ -253,7 +219,7 @@ function DashboardContent() {
                       <span className="font-semibold text-gray-900">20%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{width: '20%'}}></div>
+                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '20%' }}></div>
                     </div>
                   </div>
                 </div>
@@ -275,7 +241,7 @@ function DashboardContent() {
                       <span className="font-semibold text-gray-900">0%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{width: '0%'}}></div>
+                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '0%' }}></div>
                     </div>
                   </div>
                 </div>
