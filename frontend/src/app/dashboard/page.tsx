@@ -3,35 +3,35 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Image from 'next/image';
-import Link from 'next/link';
 import Header from '@/components/Header';
+import Image from 'next/image';
 
 function DashboardContent() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-black dark:to-gray-900 transition-colors duration-300">
       <Header />
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 mb-8 shadow-xl">
-          <div className="flex items-center gap-4">
+        <div className="relative overflow-hidden bg-white/10 dark:bg-white/5 backdrop-blur-md backdrop-saturate-150 rounded-2xl p-8 mb-8 shadow-2xl border border-white/20 dark:border-white/10 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+          <div className="relative flex items-center gap-4">
             {user && (
               <Image
                 src={user.avatar_url || '/gatito.png'}
                 alt={`${user.nombre} ${user.apellido}`}
                 width={80}
                 height={80}
-                className="rounded-full ring-4 ring-white/30"
+                className="rounded-full ring-4 ring-white/30 dark:ring-white/20 shadow-lg"
               />
             )}
-            <div className="text-white">
-              <h1 className="text-3xl font-bold mb-1">
+            <div className="text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold mb-1 drop-shadow-sm">
                 ¡Hola, {user?.nombre}! 👋
               </h1>
-              <p className="text-blue-100">
+              <p className="text-gray-700 dark:text-gray-300">
                 Bienvenido de vuelta a tu espacio de aprendizaje
               </p>
             </div>
@@ -40,38 +40,38 @@ function DashboardContent() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-blue-400/30">
                 <span className="text-2xl">📚</span>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Cursos Activos</p>
-                <p className="text-2xl font-bold text-gray-900">3</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Cursos Activos</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">3</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-indigo-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-indigo-400/30">
                 <span className="text-2xl">🔬</span>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Laboratorios Completados</p>
-                <p className="text-2xl font-bold text-gray-900">12</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Laboratorios Completados</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">12</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-green-400/30">
                 <span className="text-2xl">🏆</span>
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Progreso Total</p>
-                <p className="text-2xl font-bold text-gray-900">68%</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Progreso Total</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">68%</p>
               </div>
             </div>
           </div>
@@ -82,22 +82,22 @@ function DashboardContent() {
           {/* Left Column - User Info */}
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <span className="text-lg">👤</span>
                 Información del Usuario
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Nombre Completo</p>
-                  <p className="text-gray-900 font-medium">{user?.nombre} {user?.apellido}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Nombre Completo</p>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium">{user?.nombre} {user?.apellido}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Email</p>
-                  <p className="text-gray-900 font-medium text-sm break-all">{user?.email}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium text-sm break-all">{user?.email}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Proveedor</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Proveedor</p>
                   <div className="flex items-center gap-2">
                     {user?.provider === 'google' ? (
                       <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -119,42 +119,42 @@ function DashboardContent() {
                         />
                       </svg>
                     ) : (
-                      <span className="text-blue-600">📧</span>
+                      <span className="text-blue-600 dark:text-blue-400">📧</span>
                     )}
-                    <span className="text-gray-900 font-medium capitalize">
+                    <span className="text-gray-900 dark:text-gray-100 font-medium capitalize">
                       {user?.provider === 'local' ? 'Email' : user?.provider}
                     </span>
                   </div>
                 </div>
                 {user?.bio && (
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Bio</p>
-                    <p className="text-gray-700 text-sm">{user.bio}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Bio</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">{user.bio}</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Status Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <span className="text-lg">📊</span>
                 Estado de la Cuenta
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Estado</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Estado</span>
                   <div className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${user?.activo ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                    <span className={`text-sm font-medium ${user?.activo ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`text-sm font-medium ${user?.activo ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {user?.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </div>
                 </div>
                 {user?.fecha_registro && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Miembro desde</span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Miembro desde</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {new Date(user.fecha_registro).toLocaleDateString('es-ES', {
                         month: 'short',
                         year: 'numeric'
@@ -164,8 +164,8 @@ function DashboardContent() {
                 )}
                 {user?.ultimo_acceso && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Último acceso</span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Último acceso</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {new Date(user.ultimo_acceso).toLocaleDateString('es-ES')}
                     </span>
                   </div>
@@ -177,71 +177,71 @@ function DashboardContent() {
           {/* Right Column - Courses and Activity */}
           <div className="lg:col-span-2 space-y-6">
             {/* My Courses */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="font-bold text-gray-900 mb-4 text-lg">Mis Cursos</h3>
+            <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Mis Cursos</h3>
               <div className="space-y-4">
                 {/* Course 1 */}
-                <div className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+                <div className="border border-white/10 dark:border-gray-700/50 rounded-xl p-4 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:shadow-md transition-all cursor-pointer bg-white/5 dark:bg-white/5 backdrop-blur-sm hover:bg-white/10">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h4 className="font-semibold text-gray-900">Introducción a Python</h4>
-                      <p className="text-sm text-gray-600">Prof. Juan Pérez</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Introducción a Python</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Prof. Juan Pérez</p>
                     </div>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    <span className="px-3 py-1 bg-blue-500/20 dark:bg-blue-500/20 backdrop-blur-sm text-blue-300 dark:text-blue-300 rounded-full text-xs font-medium border border-blue-400/30">
                       En curso
                     </span>
                   </div>
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-600">Progreso</span>
-                      <span className="font-semibold text-gray-900">75%</span>
+                      <span className="text-gray-600 dark:text-gray-400">Progreso</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">75%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                    <div className="w-full bg-gray-700/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-full h-2 border border-gray-600/20">
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full shadow-lg shadow-blue-500/50" style={{ width: '75%' }}></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Course 2 */}
-                <div className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+                <div className="border border-white/10 dark:border-gray-700/50 rounded-xl p-4 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:shadow-md transition-all cursor-pointer bg-white/5 dark:bg-white/5 backdrop-blur-sm hover:bg-white/10">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h4 className="font-semibold text-gray-900">Estructuras de Datos</h4>
-                      <p className="text-sm text-gray-600">Prof. María García</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Estructuras de Datos</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Prof. María García</p>
                     </div>
-                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                    <span className="px-3 py-1 bg-green-500/20 dark:bg-green-500/20 backdrop-blur-sm text-green-300 dark:text-green-300 rounded-full text-xs font-medium border border-green-400/30">
                       Nuevo
                     </span>
                   </div>
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-600">Progreso</span>
-                      <span className="font-semibold text-gray-900">20%</span>
+                      <span className="text-gray-600 dark:text-gray-400">Progreso</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">20%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '20%' }}></div>
+                    <div className="w-full bg-gray-700/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-full h-2 border border-gray-600/20">
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full shadow-lg shadow-blue-500/50" style={{ width: '20%' }}></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Course 3 */}
-                <div className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+                <div className="border border-white/10 dark:border-gray-700/50 rounded-xl p-4 hover:border-blue-400/50 dark:hover:border-blue-500/50 hover:shadow-md transition-all cursor-pointer bg-white/5 dark:bg-white/5 backdrop-blur-sm hover:bg-white/10">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h4 className="font-semibold text-gray-900">Algoritmos Avanzados</h4>
-                      <p className="text-sm text-gray-600">Prof. Carlos Ruiz</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Algoritmos Avanzados</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Prof. Carlos Ruiz</p>
                     </div>
-                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                    <span className="px-3 py-1 bg-purple-500/20 dark:bg-purple-500/20 backdrop-blur-sm text-purple-300 dark:text-purple-300 rounded-full text-xs font-medium border border-purple-400/30">
                       Próximamente
                     </span>
                   </div>
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-600">Progreso</span>
-                      <span className="font-semibold text-gray-900">0%</span>
+                      <span className="text-gray-600 dark:text-gray-400">Progreso</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">0%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '0%' }}></div>
+                    <div className="w-full bg-gray-700/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-full h-2 border border-gray-600/20">
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full shadow-lg shadow-blue-500/50" style={{ width: '0%' }}></div>
                     </div>
                   </div>
                 </div>
@@ -249,36 +249,36 @@ function DashboardContent() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="font-bold text-gray-900 mb-4 text-lg">Actividad Reciente</h3>
+            <div className="bg-white/5 dark:bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10 dark:border-gray-700/50 transition-colors duration-300 hover:bg-white/10">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Actividad Reciente</h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-green-500/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-green-400/30">
                     <span className="text-sm">✅</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Laboratorio completado</p>
-                    <p className="text-xs text-gray-600">Listas y Tuplas - hace 2 horas</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Laboratorio completado</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Listas y Tuplas - hace 2 horas</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-blue-400/30">
                     <span className="text-sm">📝</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Checkpoint superado</p>
-                    <p className="text-xs text-gray-600">Funciones en Python - hace 5 horas</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Checkpoint superado</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Funciones en Python - hace 5 horas</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-purple-500/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
                     <span className="text-sm">🎯</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Nuevo tópico iniciado</p>
-                    <p className="text-xs text-gray-600">Diccionarios - hace 1 día</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Nuevo tópico iniciado</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Diccionarios - hace 1 día</p>
                   </div>
                 </div>
               </div>

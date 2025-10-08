@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+
   return (
-    <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+    <header className="border-b border-white/10 dark:border-gray-800/50 bg-white/10 dark:bg-black/20 backdrop-blur-xl sticky top-0 z-50 shadow-lg">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href={'/'} className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -19,8 +20,9 @@ export default function Header() {
             PyGround
           </span>
         </Link>
-        {
-          isAuthenticated ?
+
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
             <div className="flex items-center gap-4">
               {user && (
                 <Image
@@ -28,14 +30,14 @@ export default function Header() {
                   alt={`${user.nombre} ${user.apellido}`}
                   width={40}
                   height={40}
-                  className="rounded-full ring-2 ring-blue-100"
+                  className="rounded-full ring-2 ring-blue-400/30 dark:ring-blue-500/30"
                 />
               )}
               <div className="hidden sm:block text-sm text-right">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-gray-900 dark:text-gray-100">
                   {user?.nombre} {user?.apellido}
                 </p>
-                <p className="text-gray-500 text-xs">{user?.email}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs">{user?.email}</p>
               </div>
               <button
                 onClick={logout}
@@ -43,13 +45,17 @@ export default function Header() {
               >
                 Cerrar Sesión
               </button>
-            </div> : <button
+            </div>
+          ) : (
+            <button
               onClick={() => router.push('/login')}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg font-medium"
             >
               Iniciar Sesión
-            </button>}
-      </nav >
-    </header >
+            </button>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 }
