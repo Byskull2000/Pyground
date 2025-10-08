@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as cursoController from '../../controllers/cursos.controller';
 import * as cursoService from '../../services/cursos.service';
 import { createMockRequest, createMockResponse } from '../setup';
+import { ApiResponse } from '@/utils/apiResponse';
 
 jest.mock('../../services/cursos.service');
 
@@ -33,7 +34,6 @@ describe('Cursos Controller', () => {
         }
       ];
 
-
       (cursoService.getCursos as jest.Mock).mockResolvedValue(mockCursos);
 
       const req = createMockRequest();
@@ -41,7 +41,9 @@ describe('Cursos Controller', () => {
 
       await cursoController.getCursos(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(mockCursos);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, mockCursos)
+      );
       expect(cursoService.getCursos).toHaveBeenCalled();
     });
 
@@ -56,9 +58,9 @@ describe('Cursos Controller', () => {
       await cursoController.getCursos(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Error al obtener cursos'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Error al obtener cursos')
+      );
     });
   });
 
@@ -81,7 +83,9 @@ describe('Cursos Controller', () => {
 
       await cursoController.getCursoById(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(mockCurso);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, mockCurso)
+      );
       expect(cursoService.getCursoById).toHaveBeenCalledWith(1);
     });
 
@@ -94,9 +98,9 @@ describe('Cursos Controller', () => {
       await cursoController.getCursoById(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Curso no encontrado'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Curso no encontrado')
+      );
     });
   });
 });
