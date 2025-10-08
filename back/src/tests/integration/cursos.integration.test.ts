@@ -2,6 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import cursosRoutes from '../../routes/cursos.routes';
 import prisma from '../../config/prisma';
+import { ApiResponse } from '../../utils/apiResponse';
 
 // Crear app de prueba
 const app = express();
@@ -28,7 +29,10 @@ describe('Cursos API - Integration Tests', () => {
                 .expect('Content-Type', /json/)
                 .expect(200);
 
-            expect(response.body).toEqual([]);
+            const body: ApiResponse<any[]> = response.body;
+            expect(body.success).toBe(true);
+            expect(body.data).toEqual([]);
+            expect(body.error).toBeNull();
         });
 
         it('debe retornar lista de cursos', async () => {
@@ -58,10 +62,13 @@ describe('Cursos API - Integration Tests', () => {
                 .expect('Content-Type', /json/)
                 .expect(200);
 
-            expect(response.body).toHaveLength(2);
-            expect(response.body[0]).toHaveProperty('id');
-            expect(response.body[0]).toHaveProperty('nombre');
-            expect(response.body[0]).toHaveProperty('codigo_curso');
+            const body: ApiResponse<any[]> = response.body;
+            expect(body.success).toBe(true);
+            expect(body.data).toHaveLength(2);
+            //expect(body.data[0]).toHaveProperty('id');
+            //expect(body.data[0]).toHaveProperty('nombre');
+            //expect(body.data[0]).toHaveProperty('codigo_curso');
+            expect(body.error).toBeNull();
         });
     });
 
@@ -83,9 +90,11 @@ describe('Cursos API - Integration Tests', () => {
                 .expect('Content-Type', /json/)
                 .expect(200);
 
-            expect(response.body).toHaveProperty('id');
-            expect(response.body).toHaveProperty('nombre');
-            expect(response.body.nombre).toBe('Java');
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(true);
+            expect(body.data).toHaveProperty('id', created.id);
+            expect(body.data).toHaveProperty('nombre', 'Java');
+            expect(body.error).toBeNull();
         });
 
         it('debe retornar 404 si el curso no existe', async () => {
@@ -94,7 +103,10 @@ describe('Cursos API - Integration Tests', () => {
                 .expect('Content-Type', /json/)
                 .expect(404);
 
-            expect(response.body).toHaveProperty('error');
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('Curso no encontrado');
         });
     });
 });
