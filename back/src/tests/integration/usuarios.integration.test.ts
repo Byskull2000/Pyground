@@ -23,12 +23,12 @@ describe('Usuarios API - Integration Tests', () => {
     });
 
     describe('POST /api/usuarios', () => {
-        it('debe crear un nuevo usuario', async () => {
+        it('debe crear un nuevo usuario (RE1)', async () => {
             const newUser = {
                 email: 'test@example.com',
                 nombre: 'Test',
                 apellido: 'User',
-                password_hash: 'hashed_password'
+                password: 'Password123'
             };
 
             const response = await request(app)
@@ -48,7 +48,85 @@ describe('Usuarios API - Integration Tests', () => {
             expect(body.error).toBeNull();
         });
 
-        
+        it('debe retornar 409 si el email ya existe (RE2)', async () => {
+            await prisma.usuario.create({
+                data: { email: 'exist@test.com', nombre: 'Exist', apellido: 'User', password_hash: 'hash' }
+            });
+
+            const newUser = { email: 'exist@test.com', password: 'Password123', nombre: 'Juan', apellido: 'Ricaldez' };
+
+            const response = await request(app)
+                .post('/api/usuarios')
+                .send(newUser)
+                .expect('Content-Type', /json/)
+                .expect(409);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('El email ya está registrado');
+        });
+
+        it('debe retornar 400 si falta email (RE7)', async () => {
+            const newUser = { password: 'Password123' };
+
+            const response = await request(app)
+                .post('/api/usuarios')
+                .send(newUser)
+                .expect('Content-Type', /json/)
+                .expect(400);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('El email es obligatorio');
+        });
+
+        it('debe retornar 400 si el email es inválido (RE4)', async () => {
+            const newUser = { email: 'usuario', password: 'Password123', nombre: 'Nombre', apellido: 'Apellido' };
+
+            const response = await request(app)
+                .post('/api/usuarios')
+                .send(newUser)
+                .expect('Content-Type', /json/)
+                .expect(400);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('Email inválido');
+        });
+
+        it('debe retornar 400 si la contraseña es demasiado corta (RE3/RE5)', async () => {
+            const newUser = { email: 'user@test.com', password: '12', nombre: 'Nombre', apellido: 'Apellido' };
+
+            const response = await request(app)
+                .post('/api/usuarios')
+                .send(newUser)
+                .expect('Content-Type', /json/)
+                .expect(400);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('La contraseña es demasiado corta');
+        });
+
+        it('debe retornar 400 si la contraseña es débil (RE6)', async () => {
+            const newUser = { email: 'user@test.com', password: 'abcdefg', nombre: 'Nombre', apellido: 'Apellido' };
+
+            const response = await request(app)
+                .post('/api/usuarios')
+                .send(newUser)
+                .expect('Content-Type', /json/)
+                .expect(400);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('La contraseña no cumple requisitos de seguridad');
+        });
+        /*
         it('debe retornar 500 si falla la creación', async () => {
             const invalidUser = {
                 // email faltante
@@ -68,6 +146,7 @@ describe('Usuarios API - Integration Tests', () => {
             expect(body.data).toBeNull();
             expect(body.error).toBeDefined();
         });
+        */
     });
 
     describe('GET /api/usuarios', () => {

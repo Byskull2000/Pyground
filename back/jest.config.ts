@@ -3,10 +3,13 @@ import type { Config } from '@jest/types';
 const config: Config.InitialOptions = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  
+  // evita concurrencia en tests que usan la base de datos
+  maxWorkers: 1,
+  maxConcurrency: 1,
+  
   roots: ['<rootDir>/src'],
   testMatch: [
-    '**/tests/**/*.test.ts',
-    '**/tests/**/*.spec.ts',
     '**/tests/**/*.test.ts',
     '**/tests/**/*.spec.ts',
   ],
@@ -31,7 +34,6 @@ const config: Config.InitialOptions = {
     '!src/**/*.type.ts',
     '!src/server.ts',
     '!src/config/**',
-    '!src/**/tests/**',
     '!src/**/tests/**',
   ],
   coverageDirectory: 'coverage',

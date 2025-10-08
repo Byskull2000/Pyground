@@ -35,6 +35,26 @@ export const getUsuarioById = async (id: number) => {
   });
 };
 
+export const getUsuarioByEmail = async (email: string) => {
+  return prisma.usuario.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      email: true,
+      nombre: true,
+      apellido: true,
+      avatar_url: true,
+      bio: true,
+      provider: true,
+      fecha_registro: true,
+      ultimo_acceso: true,
+      password_hash: true,
+      activo: true
+
+    }
+  });
+};
+
 export const createUsuario = async (data: UsuarioCreate) => {
   return prisma.usuario.create({
     data,
