@@ -73,7 +73,7 @@ describe('Cursos API - Integration Tests', () => {
     });
 
     describe('GET /api/cursos/:id', () => {
-        it('debe retornar un curso por id', async () => {
+        it('debe retornar un curso por id (VC1)', async () => {
             const created = await prisma.curso.create({
                 data: {
                     nombre: 'Java',
@@ -97,7 +97,7 @@ describe('Cursos API - Integration Tests', () => {
             expect(body.error).toBeNull();
         });
 
-        it('debe retornar 404 si el curso no existe', async () => {
+        it('debe retornar 404 si el curso no existe (VC2)', async () => {
             const response = await request(app)
                 .get('/api/cursos/99999')
                 .expect('Content-Type', /json/)
@@ -107,6 +107,26 @@ describe('Cursos API - Integration Tests', () => {
             expect(body.success).toBe(false);
             expect(body.data).toBeNull();
             expect(body.error).toBe('Curso no encontrado');
+        });
+
+        it('VC5 - Error del servidor al obtener datos', async () => {
+            const originalFindUnique = prisma.curso.findUnique;
+            (prisma.curso.findUnique as any) = jest.fn(() => {
+                throw new Error('Error simulado en la base de datos');
+            });
+
+            const response = await request(app)
+                .get('/api/cursos/1')
+                //.set('Authorization', `Bearer ${tokenValido}`)
+                .expect('Content-Type', /json/)
+                .expect(500);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toMatch("Error al obtener curso");
+
+            prisma.curso.findUnique = originalFindUnique;
         });
     });
 });

@@ -50,11 +50,11 @@ describe('Cursos Service', () => {
   });
 
   describe('getCursoById', () => {
-    it('debe retornar un curso por id', async () => {
+    it('VC1 - debe retornar un curso existente por id', async () => {
       const mockCurso = {
         id: 1,
-        nombre: 'Matemáticas',
-        codigo_curso: 'MAT101',
+        nombre: 'Python',
+        codigo_curso: 'PYT001',
         descripcion: null,
         activo: true,
         fecha_creacion: new Date(),
@@ -69,12 +69,20 @@ describe('Cursos Service', () => {
       expect(cursoRepo.getCursoById).toHaveBeenCalledWith(1);
     });
 
-    it('debe retornar null si el curso no existe', async () => {
+    it('VC2 - debe retornar null si el curso no existe', async () => {
       (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(null);
 
       const result = await cursoService.getCursoById(999);
 
       expect(result).toBeNull();
+    });
+
+    it('VC5 - debe propagar error si falla el repositorio', async () => {
+      (cursoRepo.getCursoById as jest.Mock).mockRejectedValue(
+        new Error('Database connection failed')
+      );
+
+      await expect(cursoService.getCursoById(123)).rejects.toThrow('Database connection failed');
     });
   });
 });
