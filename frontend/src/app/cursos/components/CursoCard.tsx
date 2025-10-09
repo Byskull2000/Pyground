@@ -39,18 +39,7 @@ export function CursoCard(
                 </div>
             </div>
 
-            {/* Status Badge */}
-            <div className="pt-4 border-t border-white/10 dark:border-gray-700/50">
-                <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${curso.activo ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                    <span className={`text-xs font-semibold uppercase tracking-wider ${curso.activo
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-gray-600 dark:text-gray-400'
-                        }`}>
-                        {curso.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                </div>
-            </div>
+
         </div>
 
         {/* Action Button */}
