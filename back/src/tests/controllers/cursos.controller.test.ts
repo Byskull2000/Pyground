@@ -65,7 +65,7 @@ describe('Cursos Controller', () => {
   });
 
   describe('getCursoById', () => {
-    it('debe retornar un curso por id', async () => {
+    it('debe retornar un curso por id existente (VC1)', async () => {
       const mockCurso = {
         id: 1,
         nombre: 'JAVA',
@@ -89,7 +89,7 @@ describe('Cursos Controller', () => {
       expect(cursoService.getCursoById).toHaveBeenCalledWith(1);
     });
 
-    it('debe retornar 404 si el curso no existe', async () => {
+    it('debe retornar 404 si el curso no existe (VC2)', async () => {
       (cursoService.getCursoById as jest.Mock).mockResolvedValue(null);
 
       const req = createMockRequest({}, { id: '999' });
@@ -101,6 +101,18 @@ describe('Cursos Controller', () => {
       expect(res.json).toHaveBeenCalledWith(
         new ApiResponse(false, null, 'Curso no encontrado')
       );
+    });
+    
+    it('debe retornar 500 si hay error del servidor (VC5)', async () => {
+      (cursoService.getCursoById as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      const req = createMockRequest({}, { id: '1' });
+      const res = createMockResponse();
+
+      await cursoController.getCursoById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Error al obtener curso'));
     });
   });
 });
