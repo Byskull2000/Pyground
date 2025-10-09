@@ -20,7 +20,17 @@ export default function Header() {
             PyGround
           </span>
         </Link>
-
+        <div className='flex text-sm'>
+          {isAuthenticated && (
+            <Link 
+              href={'/dashboard'} 
+              className='relative px-4 py-2 font-medium text-gray-700 dark:text-gray-200 transition-all duration-300 group'
+            >
+              Dashboard
+              <span className='absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-300 group-hover:w-full'></span>
+            </Link>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
