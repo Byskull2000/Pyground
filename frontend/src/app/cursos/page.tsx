@@ -18,6 +18,8 @@ interface Curso {
 
 export default function CoursesPage() {
     return (
-        <CursosContent />
+        <ProtectedRoute>
+            <CursosContent />
+        </ProtectedRoute>
     );
 }
