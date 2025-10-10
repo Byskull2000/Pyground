@@ -196,4 +196,61 @@ describe('Usuarios Controller', () => {
       );
     });
   });
+
+  describe('assignRolUsuario', () => {
+    const userId = '1';
+
+    it('ROL1: asignación exitosa de rol existente', async () => {
+      const mockResult = { message: 'Rol asignado correctamente', user: { id: 1, rol: 'ACADEMICO' } };
+      (userService.assignRol as jest.Mock).mockResolvedValue(mockResult);
+
+      const req = createMockRequest({ rol: 'ACADEMICO' }, { id: userId });
+      const res = createMockResponse();
+
+      await userController.assignRolUsuario(req, res);
+
+      expect(userService.assignRol).toHaveBeenCalledWith(1, 'ACADEMICO');
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(true, mockResult, null));
+    });
+
+    it('ROL2: intentar asignar rol inexistente', async () => {
+      (userService.assignRol as jest.Mock).mockRejectedValue({ status: 400, message: 'Rol no válido' });
+
+      const req = createMockRequest({ rol: 'SUPERADMIN' }, { id: userId });
+      const res = createMockResponse();
+
+      await userController.assignRolUsuario(req, res);
+
+      expect(userService.assignRol).toHaveBeenCalledWith(1, 'SUPERADMIN');
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Rol no válido'));
+    });
+
+    it('ROL5: usuario no encontrado', async () => {
+      (userService.assignRol as jest.Mock).mockRejectedValue({ status: 404, message: 'Usuario no encontrado' });
+
+      const req = createMockRequest({ rol: 'ACADEMICO' }, { id: '999' });
+      const res = createMockResponse();
+
+      await userController.assignRolUsuario(req, res);
+
+      expect(userService.assignRol).toHaveBeenCalledWith(999, 'ACADEMICO');
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Usuario no encontrado'));
+    });
+
+    it('ROL6: error interno del servidor', async () => {
+      (userService.assignRol as jest.Mock).mockRejectedValue({ status: 500, message: 'Error al asignar rol' });
+
+      const req = createMockRequest({ rol: 'USUARIO' }, { id: userId });
+      const res = createMockResponse();
+
+      await userController.assignRolUsuario(req, res);
+
+      expect(userService.assignRol).toHaveBeenCalledWith(1, 'USUARIO');
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Error al asignar rol'));
+    });
+  });
+
 });
