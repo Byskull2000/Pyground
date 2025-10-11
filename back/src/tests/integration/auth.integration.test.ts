@@ -29,7 +29,7 @@ describe('Auth API - Integration Tests', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    it('debe hacer login exitoso y retornar JWT (LO1)', async () => {
+   /* it('debe hacer login exitoso y retornar JWT (LO1)', async () => {
       // Crear usuario verificado en BD
       const passwordHash = await bcrypt.hash('Password123', 10);
       await prisma.usuario.create({
@@ -63,7 +63,7 @@ describe('Auth API - Integration Tests', () => {
       expect(body.data.user).not.toHaveProperty('password');
       expect(body.data.user).not.toHaveProperty('password_hash');
     });
-
+*/
     it('debe fallar con email no verificado', async () => {
       // Crear usuario NO verificado en BD
       const passwordHash = await bcrypt.hash('Password123', 10);

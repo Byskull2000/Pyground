@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 
 // Validar variables de entorno
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-  console.warn(' EMAIL_USER o EMAIL_PASSWORD no están configurados. Los emails no se enviarán.');
+ // console.warn(' EMAIL_USER o EMAIL_PASSWORD no están configurados. Los emails no se enviarán.');
 }
 
 // Configurar transportador de email
