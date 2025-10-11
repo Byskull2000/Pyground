@@ -1,6 +1,7 @@
 import * as userRepo from '../repositories/usuarios.repository';
 import { UsuarioCreate, UsuarioUpdate } from '../types/usuarios.types';
 import bcrypt from 'bcrypt';
+import * as emailService from './email.service'; 
 
 export const getUsuarios = () => {
   return userRepo.getAllUsuarios();
@@ -24,17 +25,39 @@ export const createUsuario = async (data: UsuarioCreate) => {
 
   const saltRounds = 10;
   const password_hash = await bcrypt.hash(password, saltRounds);
+//corazon
+  const codigo_verificacion = emailService.generarCodigoVerificacion();
+  const codigo_expiracion = emailService.calcularExpiracion();
 
   const newUserData = {
     ...data,
     password_hash,
+    activo: false, 
+    email_verificado: false, 
+    codigo_verificacion, 
+    codigo_expiracion, 
   };
   delete (newUserData as any).password; 
 
   const newUser = await userRepo.createUsuario(newUserData);
 
-  return newUser;
-};
+
+//corazon
+ try {
+    await emailService.enviarEmailVerificacion(
+      newUser.email,
+      newUser.nombre,
+      codigo_verificacion
+    );
+  } catch (error) {
+    console.error('Error al enviar email de verificación:', error);
+  }
+
+  return {
+     ...newUser,
+    mensaje: 'Usuario registrado. Por favor verifica tu email con el código enviado.'
+   };
+  } 
 
 export const updateUsuario = (id: number, data: UsuarioUpdate) => {
   return userRepo.updateUsuario(id, data);

@@ -8,6 +8,7 @@ export interface UsuarioCreate {
   bio?: string;
   google_id?: string;
   provider?: string;
+  email_verificado?: boolean;
 }
 
 export interface UsuarioUpdate {
@@ -20,6 +21,7 @@ export interface UsuarioUpdate {
   bio?: string;
   google_id?: string;
   provider?: string;
+  email_verificado?: boolean;
 }
 
 // Datos de usuario para respuestas (sin información sensible)
@@ -33,4 +35,5 @@ export interface UserResponse {
   provider?: string | null;
   fecha_registro: Date;
   ultimo_acceso?: Date | null;
+  email_verificado?: boolean;
 }

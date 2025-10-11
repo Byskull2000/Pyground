@@ -36,6 +36,12 @@ export const login = async (req: Request, res: Response) => {
     if (err.message === 'User not found') {
       return res.status(404).json(new ApiResponse(false, null, 'Usuario no encontrado'));
     }
+//cora
+    if (err.message === 'Email not verified') {
+      return res
+        .status(403)
+        .json(new ApiResponse(false, null, 'Por favor verifica tu email antes de iniciar sesión'));
+    }
 
     if (err.message === 'Account inactive') {
       return res
@@ -45,6 +51,81 @@ export const login = async (req: Request, res: Response) => {
 
     console.error('Error en login:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al iniciar sesión'));
+  }
+};
+//cora
+export const verificarEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, codigo } = req.body;
+
+    if (!email || !codigo) {
+      return res
+        .status(400)
+        .json(new ApiResponse(false, null, 'Email y código son requeridos'));
+    }
+
+    const result = await authService.verificarEmail(email, codigo);
+    res.json(new ApiResponse(true, result, 'Email verificado exitosamente'));
+
+  } catch (err: any) {
+    if (err.message === 'User not found') {
+      return res.status(404).json(new ApiResponse(false, null, 'Usuario no encontrado'));
+    }
+
+    if (err.message === 'Email already verified') {
+      return res.status(400).json(new ApiResponse(false, null, 'El email ya está verificado'));
+    }
+
+    if (err.message === 'No verification code found') {
+      return res
+        .status(400)
+        .json(new ApiResponse(false, null, 'No se encontró código de verificación'));
+    }
+
+    if (err.message === 'Verification code expired') {
+      return res
+        .status(400)
+        .json(new ApiResponse(false, null, 'El código de verificación ha expirado'));
+    }
+
+    if (err.message === 'Invalid verification code') {
+      return res.status(400).json(new ApiResponse(false, null, 'Código de verificación inválido'));
+    }
+
+    console.error('Error al verificar email:', err);
+    res.status(500).json(new ApiResponse(false, null, 'Error al verificar email'));
+  }
+};
+
+// cora
+export const reenviarCodigo = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json(new ApiResponse(false, null, 'Email es requerido'));
+    }
+
+    const result = await authService.reenviarCodigoVerificacion(email);
+    res.json(new ApiResponse(true, result, 'Código reenviado exitosamente'));
+
+  } catch (err: any) {
+    if (err.message === 'User not found') {
+      return res.status(404).json(new ApiResponse(false, null, 'Usuario no encontrado'));
+    }
+
+    if (err.message === 'Email already verified') {
+      return res.status(400).json(new ApiResponse(false, null, 'Email ya verificado'));
+    }
+
+    if (err.message === 'Error al enviar email de verificación') {
+      return res
+        .status(500)
+        .json(new ApiResponse(false, null, 'Error al enviar el código'));
+    }
+
+    console.error('Error al reenviar código:', err);
+    res.status(500).json(new ApiResponse(false, null, 'Error al reenviar código'));
   }
 };
 

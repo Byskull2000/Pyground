@@ -16,13 +16,19 @@ model Usuario {
   nombre         String
   apellido       String
   activo         Boolean   @default(true)
+  // NUEVOS CAMPOS PARA VERIFICACIÓN
+  email_verificado      Boolean   @default(false)
+  codigo_verificacion   String?
+  codigo_expiracion     DateTime?
   fecha_registro DateTime  @default(now())
   ultimo_acceso  DateTime?
   avatar_url     String?   @db.VarChar(500)
   bio            String?
 
   google_id      String?   @unique
-  provider       String?   @default("local") 
+  provider       String?   @default("local")
+  
+  
 }
 
 model Curso {

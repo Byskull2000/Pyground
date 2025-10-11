@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma';
 import * as userRepo from '../repositories/usuarios.repository';
 import { RegisterData } from '../types/auth.types';
+import * as emailService from './email.service';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -30,14 +31,8 @@ export const loginUser = async (email: string, password: string) => {
 
   const usuario = await userRepo.getUsuarioByEmail(email);
   
-
   if (!usuario) {
     throw new Error('User not found');
-  }
-
-  // Verificar si el usuario está activo
-  if (!usuario.activo) {
-    throw new Error('Account inactive');
   }
 
   // Verificar si es usuario local (no OAuth)
@@ -47,6 +42,20 @@ export const loginUser = async (email: string, password: string) => {
 
   // Comparar contraseñas
   const isPasswordValid = await bcrypt.compare(password, usuario.password_hash);
+  
+  if (!isPasswordValid) {
+    throw new Error('Invalid credentials');
+  }
+
+  // Verificar si el email está verificado
+  if (!usuario.email_verificado) {
+    throw new Error('Email not verified');
+  }
+
+  // Verificar si el usuario está activo
+  if (!usuario.activo) {
+    throw new Error('Account inactive');
+  }
 
   if (!isPasswordValid) {
     throw new Error('Invalid credentials');
@@ -70,7 +79,91 @@ export const loginUser = async (email: string, password: string) => {
     user: userWithoutPassword
   };
 };
+//cora
+export const verificarEmail = async (email: string, codigo: string) => {
+  const usuario = await prisma.usuario.findUnique({
+    where: { email }
+  });
 
+  if (!usuario) {
+    throw new Error('User not found');
+  }
+
+  if (usuario.email_verificado) {
+    throw new Error('Email already verified');
+  }
+
+  if (!usuario.codigo_verificacion || !usuario.codigo_expiracion) {
+    throw new Error('No verification code found');
+  }
+
+  // Verificar si el código expiró
+  if (new Date() > usuario.codigo_expiracion) {
+    throw new Error('Verification code expired');
+  }
+
+  // Verificar si el código coincide
+  if (usuario.codigo_verificacion !== codigo) {
+    throw new Error('Invalid verification code');
+  }
+
+  // Activar usuario y marcar email como verificado
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: {
+      email_verificado: true,
+      activo: true,
+      codigo_verificacion: null,
+      codigo_expiracion: null
+    }
+  });
+
+  // Enviar email de bienvenida
+  try {
+    await emailService.enviarEmailBienvenida(usuario.email, usuario.nombre);
+  } catch (error) {
+    console.error('Error al enviar email de bienvenida:', error);
+  }
+
+  return { message: 'Email verificado exitosamente' };
+};
+
+// 🆕🆕🆕 AGREGAR ESTA FUNCIÓN COMPLETA
+export const reenviarCodigoVerificacion = async (email: string) => {
+  const usuario = await prisma.usuario.findUnique({
+    where: { email }
+  });
+
+  if (!usuario) {
+    throw new Error('User not found');
+  }
+
+  if (usuario.email_verificado) {
+    throw new Error('Email already verified');
+  }
+
+  // Generar nuevo código
+  const codigo_verificacion = emailService.generarCodigoVerificacion();
+  const codigo_expiracion = emailService.calcularExpiracion();
+
+  // Actualizar código en BD
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: {
+      codigo_verificacion,
+      codigo_expiracion
+    }
+  });
+
+  // Enviar email
+  await emailService.enviarEmailVerificacion(
+    usuario.email,
+    usuario.nombre,
+    codigo_verificacion
+  );
+
+  return { message: 'Código de verificación reenviado' };
+};
 // Cambiar contraseña
 export const changePassword = async (
   userId: number, 
