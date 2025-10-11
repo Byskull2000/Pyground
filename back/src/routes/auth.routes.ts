@@ -14,7 +14,9 @@ const router = express.Router();
 
 // Login de usuario
 router.post('/login', authController.login);
-
+//cora
+router.post('/verify-email', authController.verificarEmail);
+router.post('/resend-verification', authController.reenviarCodigo);
 // Cambiar contraseña (requiere autenticación)
 //router.put('/change-password', authenticateToken, authController.changePassword);
 

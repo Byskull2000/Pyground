@@ -1,3 +1,4 @@
+import { RolesEnum } from '../../generated/prisma';
 import prisma from '../config/prisma';
 import { UsuarioCreate, UsuarioUpdate } from '../types/usuarios.types';
 
@@ -13,7 +14,8 @@ export const getAllUsuarios = async () => {
       bio: true,
       provider: true,
       fecha_registro: true,
-      ultimo_acceso: true
+      ultimo_acceso: true,
+      rol: true
     }
   });
 };
@@ -30,7 +32,8 @@ export const getUsuarioById = async (id: number) => {
       bio: true,
       provider: true,
       fecha_registro: true,
-      ultimo_acceso: true
+      ultimo_acceso: true,
+      rol: true
     }
   });
 };
@@ -49,8 +52,8 @@ export const getUsuarioByEmail = async (email: string) => {
       fecha_registro: true,
       ultimo_acceso: true,
       password_hash: true,
-      activo: true
-
+      activo: true,
+      email_verificado: true
     }
   });
 };
@@ -67,7 +70,8 @@ export const createUsuario = async (data: UsuarioCreate) => {
       bio: true,
       provider: true,
       fecha_registro: true,
-      ultimo_acceso: true
+      ultimo_acceso: true,
+      rol: true
     }
   });
 };
@@ -85,7 +89,8 @@ export const updateUsuario = async (id: number, data: UsuarioUpdate) => {
       bio: true,
       provider: true,
       fecha_registro: true,
-      ultimo_acceso: true
+      ultimo_acceso: true,
+      rol: true
     }
   });
 };
@@ -102,7 +107,22 @@ export const deleteUsuario = async (id: number) => {
       bio: true,
       provider: true,
       fecha_registro: true,
-      ultimo_acceso: true
+      ultimo_acceso: true,
+      rol: true
+    }
+  });
+};
+
+export const updateRol = async (id: number, rol: RolesEnum) => {
+  return prisma.usuario.update({
+    where: { id },
+    data: { rol },
+    select: {
+      id: true,
+      email: true,
+      nombre: true,
+      apellido: true,
+      rol: true
     }
   });
 };

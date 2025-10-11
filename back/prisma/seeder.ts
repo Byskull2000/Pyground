@@ -1,34 +1,62 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient, RolesEnum } from "../generated/prisma";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // Usuario base admin.sys
-    const adminEmail = "admin.sys@example.com";
-    const existingAdmin = await prisma.usuario.findUnique({
-      where: { email: adminEmail },
-    });
+    // Usuarios base
+    const usuariosBase = [
+      {
+        email: "admin.sys@example.com",
+        nombre: "Admin",
+        apellido: "Sys",
+        password: "Admin123!",
+        rol: RolesEnum.ADMIN,
+        bio: "Usuario administrador del sistema",
+      },
+      {
+        email: "academico.sys@example.com",
+        nombre: "Academico",
+        apellido: "Sys",
+        password: "Academico123!",
+        rol: RolesEnum.ACADEMICO,
+        bio: "Usuario académico del sistema",
+      },
+      {
+        email: "usuario.sys@example.com",
+        nombre: "Usuario",
+        apellido: "Sys",
+        password: "Usuario123!",
+        rol: RolesEnum.USUARIO,
+        bio: "Usuario común del sistema",
+      },
+    ];
 
-    if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash("Admin123!", 10);
-
-      await prisma.usuario.create({
-        data: {
-          email: adminEmail,
-          password_hash: hashedPassword,
-          nombre: "Admin",
-          apellido: "Sys",
-          activo: true,
-          provider: "local",
-          bio: "Usuario administrador del sistema",
-        },
+    // Crear usuarios si no existen
+    for (const u of usuariosBase) {
+      const existingUser = await prisma.usuario.findUnique({
+        where: { email: u.email },
       });
 
-      console.log("Usuario admin.sys creado correctamente");
-    } else {
-      console.log("Usuario admin.sys ya existe");
+      if (!existingUser) {
+        const hashedPassword = await bcrypt.hash(u.password, 10);
+        await prisma.usuario.create({
+          data: {
+            email: u.email,
+            password_hash: hashedPassword,
+            nombre: u.nombre,
+            apellido: u.apellido,
+            activo: true,
+            provider: "local",
+            bio: u.bio,
+            rol: u.rol, 
+          },
+        });
+        console.log(`Usuario ${u.email} creado correctamente`);
+      } else {
+        console.log(`Usuario ${u.email} ya existe`);
+      }
     }
 
     // Curso base Python

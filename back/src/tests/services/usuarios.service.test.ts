@@ -48,7 +48,12 @@ describe('Usuarios Service', () => {
       const hashedPassword = 'hashedpassword';
       (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
-      const createdUser = { id: 1, ...newUser, password_hash: hashedPassword };
+      const createdUser = { 
+        id: 1, 
+        ...newUser, 
+        password_hash: hashedPassword,
+        mensaje: "Usuario registrado. Por favor verifica tu email con el código enviado."
+      };
       (userRepo.createUsuario as jest.Mock).mockResolvedValue(createdUser);
 
       const result = await userService.createUsuario(newUser);
@@ -143,6 +148,48 @@ describe('Usuarios Service', () => {
       await userService.deleteUsuario(1);
 
       expect(userRepo.deleteUsuario).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('assignRole', () => {
+    const userId = 1;
+    const validUser = { id: userId, nombre: 'user', roles: ['USUARIO'] };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('asignación exitosa de rol existente (ROL1)', async () => {
+      (userRepo.getUsuarioById as jest.Mock).mockResolvedValue(validUser);
+      (userRepo.updateRol as jest.Mock).mockResolvedValue({ ...validUser, roles: ['USUARIO', 'ACADEMICO'] });
+
+      const result = await userService.assignRol(userId, 'ACADEMICO');
+
+      expect(result).toEqual({
+        message: 'Rol asignado correctamente',
+        user: { ...validUser, roles: ['USUARIO', 'ACADEMICO'] }
+      });
+      expect(userRepo.updateRol).toHaveBeenCalledWith(userId, 'ACADEMICO');
+    });
+
+    it('ROL2: intentar asignar rol inexistente', async () => {
+      await expect(userService.assignRol(userId, 'SUPERADMIN' as any))
+        .rejects.toMatchObject({ status: 400, message: 'Rol no válido' });
+    });
+
+    it('ROL5: usuario no encontrado', async () => {
+      (userRepo.getUsuarioById as jest.Mock).mockResolvedValue(null);
+
+      await expect(userService.assignRol(999, 'ACADEMICO'))
+        .rejects.toMatchObject({ status: 404, message: 'Usuario no encontrado' });
+    });
+
+    it('ROL6: error interno del servidor', async () => {
+      (userRepo.getUsuarioById as jest.Mock).mockResolvedValue(validUser);
+      (userRepo.updateRol as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      await expect(userService.assignRol(userId, 'ACADEMICO'))
+        .rejects.toMatchObject({ status: 500, message: 'Error al asignar rol' });
     });
   });
 });
