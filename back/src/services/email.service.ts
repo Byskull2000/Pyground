@@ -68,7 +68,7 @@ export const enviarEmailBienvenida = async (
 ): Promise<void> => {
   try {
     const mailOptions = {
-      from: `"Tu App" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+      from: `"Pyground" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
       to: email,
       subject: '¡Cuenta verificada!',
       text: `¡Hola ${nombre}!
