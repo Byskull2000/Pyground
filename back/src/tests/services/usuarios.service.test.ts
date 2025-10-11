@@ -48,7 +48,12 @@ describe('Usuarios Service', () => {
       const hashedPassword = 'hashedpassword';
       (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
-      const createdUser = { id: 1, ...newUser, password_hash: hashedPassword };
+      const createdUser = { 
+        id: 1, 
+        ...newUser, 
+        password_hash: hashedPassword,
+        mensaje: "Usuario registrado. Por favor verifica tu email con el código enviado."
+      };
       (userRepo.createUsuario as jest.Mock).mockResolvedValue(createdUser);
 
       const result = await userService.createUsuario(newUser);
