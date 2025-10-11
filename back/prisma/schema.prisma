@@ -9,12 +9,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RolesEnum {
+  ADMIN
+  ACADEMICO
+  USUARIO
+}
+
 model Usuario {
   id             Int       @id @default(autoincrement())
   email          String    @unique
   password_hash  String?   
   nombre         String
   apellido       String
+  rol            RolesEnum  @default(USUARIO)
   activo         Boolean   @default(true)
   fecha_registro DateTime  @default(now())
   ultimo_acceso  DateTime?

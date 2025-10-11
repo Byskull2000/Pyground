@@ -1,5 +1,6 @@
 import request from 'supertest';
 import express from 'express';
+import * as usuariosService from '../../services/usuarios.service';
 import usuariosRoutes from '../../routes/usuarios.routes';
 import { ApiResponse } from '../../utils/apiResponse';
 import prisma from '../../config/prisma';
@@ -287,4 +288,96 @@ describe('Usuarios API - Integration Tests', () => {
             expect(deleted).toBeNull();
         });
     });
+
+    describe('PUT /api/usuarios/:id/rol', () => {
+        it('ROL1: asignación exitosa de rol existente', async () => {
+            const created = await prisma.usuario.create({
+                data: {
+                    email: 'rol1@test.com',
+                    nombre: 'Rol',
+                    apellido: 'Uno',
+                    password_hash: 'hash'
+                }
+            });
+
+            const response = await request(app)
+                .put(`/api/usuarios/${created.id}/rol`)
+                .send({ rol: 'ACADEMICO' })
+                //.set('Authorization', `Bearer ${token}`) // token omitido por ahora
+                .expect('Content-Type', /json/)
+                .expect(200);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(true);
+            expect(body.data).toHaveProperty('message', 'Rol asignado correctamente');
+            expect(body.data.user).toHaveProperty('rol', 'ACADEMICO');
+            expect(body.error).toBeNull();
+        });
+
+        it('ROL2: intentar asignar rol inexistente', async () => {
+            const created = await prisma.usuario.create({
+                data: {
+                    email: 'rol2@test.com',
+                    nombre: 'Rol',
+                    apellido: 'Dos',
+                    password_hash: 'hash'
+                }
+            });
+
+            const response = await request(app)
+                .put(`/api/usuarios/${created.id}/rol`)
+                .send({ rol: 'SUPERADMIN' })
+                //.set('Authorization', `Bearer ${token}`)
+                .expect('Content-Type', /json/)
+                .expect(400);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('Rol no válido');
+        });
+
+        it('ROL5: usuario no encontrado', async () => {
+            const response = await request(app)
+                .put('/api/usuarios/99999/rol')
+                .send({ rol: 'USUARIO' })
+                //.set('Authorization', `Bearer ${token}`) 
+                .expect('Content-Type', /json/)
+                .expect(404);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBe('Usuario no encontrado');
+        });
+
+        it('ROL6: error interno del servidor', async () => {
+            const created = await prisma.usuario.create({
+                data: {
+                    email: 'error500@test.com',
+                    nombre: 'Error',
+                    apellido: 'Server',
+                    password_hash: 'hash'
+                }
+            });
+
+            jest.spyOn(usuariosService, 'assignRol').mockImplementation(() => {
+                throw new Error('Simulated internal server error');
+            });
+
+
+            const response = await request(app)
+                .put(`/api/usuarios/${created.id}/rol`)
+                .send({ rol: 'ADMIN' }) 
+                //.set('Authorization', `Bearer ${token}`) 
+                .expect('Content-Type', /json/)
+                .expect(500);
+
+            const body: ApiResponse<any> = response.body;
+            expect(body.success).toBe(false);
+            expect(body.data).toBeNull();
+            expect(body.error).toBeDefined();
+        });
+    });
+
 });

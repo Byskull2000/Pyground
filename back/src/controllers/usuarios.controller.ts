@@ -56,3 +56,17 @@ export const deleteUsuario = async (req: Request, res: Response) => {
       .json(new ApiResponse(false, null, err.message || 'Error al eliminar usuario'));
   }
 };
+
+export const assignRolUsuario = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const { rol } = req.body;
+
+  try {
+    const result = await userService.assignRol(id, rol);
+    res.json(new ApiResponse(true, result, null));
+  } catch (err: any) {
+    res
+      .status(err.status || 500)
+      .json(new ApiResponse(false, null, err.message || 'Error al asignar rol'));
+  }
+};
