@@ -79,7 +79,7 @@ export const loginUser = async (email: string, password: string) => {
     user: userWithoutPassword
   };
 };
-//cora
+
 export const verificarEmail = async (email: string, codigo: string) => {
   const usuario = await prisma.usuario.findUnique({
     where: { email }
@@ -128,7 +128,7 @@ export const verificarEmail = async (email: string, codigo: string) => {
   return { message: 'Email verificado exitosamente' };
 };
 
-// 🆕🆕🆕 AGREGAR ESTA FUNCIÓN COMPLETA
+
 export const reenviarCodigoVerificacion = async (email: string) => {
   const usuario = await prisma.usuario.findUnique({
     where: { email }

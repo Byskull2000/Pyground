@@ -1,6 +1,9 @@
+// back/src/controllers/auth.controller.ts
 import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
+import * as emailService from '../services/email.service';
 import { ApiResponse } from '../utils/apiResponse';
+import prisma from '../config/prisma';
 
 // Extender el tipo Request para incluir user
 declare global {
@@ -36,7 +39,7 @@ export const login = async (req: Request, res: Response) => {
     if (err.message === 'User not found') {
       return res.status(404).json(new ApiResponse(false, null, 'Usuario no encontrado'));
     }
-//cora
+
     if (err.message === 'Email not verified') {
       return res
         .status(403)
@@ -49,11 +52,10 @@ export const login = async (req: Request, res: Response) => {
         .json(new ApiResponse(false, null, 'Cuenta inactiva. Contacte al administrador'));
     }
 
-    //console.error('Error en login:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al iniciar sesión'));
   }
 };
-//cora
+
 export const verificarEmail = async (req: Request, res: Response) => {
   try {
     const { email, codigo } = req.body;
@@ -97,7 +99,6 @@ export const verificarEmail = async (req: Request, res: Response) => {
   }
 };
 
-// cora
 export const reenviarCodigo = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
@@ -126,6 +127,71 @@ export const reenviarCodigo = async (req: Request, res: Response) => {
 
     console.error('Error al reenviar código:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al reenviar código'));
+  }
+};
+
+//Enviar email de verificación directamente
+export const enviarEmailVerificacion = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json(new ApiResponse(false, null, 'Email es requerido'));
+    }
+
+    // Buscar usuario
+    const usuario = await prisma.usuario.findUnique({
+      where: { email }
+    });
+
+    if (!usuario) {
+      return res.status(404).json(new ApiResponse(false, null, 'Usuario no encontrado'));
+    }
+
+    if (usuario.email_verificado) {
+      return res.status(400).json(new ApiResponse(false, null, 'El email ya está verificado'));
+    }
+
+    // Generar nuevo código si no existe o está expirado
+    let codigoActual = usuario.codigo_verificacion;
+    let expiracionActual = usuario.codigo_expiracion;
+
+    if (!codigoActual || !expiracionActual || new Date() > expiracionActual) {
+      codigoActual = emailService.generarCodigoVerificacion();
+      expiracionActual = emailService.calcularExpiracion();
+
+      // Actualizar código en BD
+      await prisma.usuario.update({
+        where: { id: usuario.id },
+        data: {
+          codigo_verificacion: codigoActual,
+          codigo_expiracion: expiracionActual
+        }
+      });
+    }
+
+    // Enviar email
+    await emailService.enviarEmailVerificacion(
+      usuario.email,
+      usuario.nombre,
+      codigoActual
+    );
+
+    res.json(new ApiResponse(true, 
+      { message: 'Email de verificación enviado' }, 
+      'Email enviado exitosamente'
+    ));
+
+  } catch (err: any) {
+    console.error('Error al enviar email de verificación:', err);
+    
+    if (err.message === 'Error al enviar email de verificación') {
+      return res
+        .status(500)
+        .json(new ApiResponse(false, null, 'Error al enviar el email. Intenta nuevamente.'));
+    }
+
+    res.status(500).json(new ApiResponse(false, null, 'Error al enviar email de verificación'));
   }
 };
 

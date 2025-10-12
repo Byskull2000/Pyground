@@ -17,6 +17,7 @@ router.post('/login', authController.login);
 //cora
 router.post('/verify-email', authController.verificarEmail);
 router.post('/resend-verification', authController.reenviarCodigo);
+router.post('/send-verification-email', authController.enviarEmailVerificacion);
 // Cambiar contraseña (requiere autenticación)
 //router.put('/change-password', authenticateToken, authController.changePassword);
 

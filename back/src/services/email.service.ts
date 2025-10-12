@@ -1,3 +1,4 @@
+//back/src/services/email.service.ts
 import nodemailer from 'nodemailer';
 
 // Validar variables de entorno
