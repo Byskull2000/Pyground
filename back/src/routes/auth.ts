@@ -12,6 +12,7 @@ interface JWTPayload {
   email: string;
   nombre: string;
   apellido: string;
+  rol: string; // ⭐ AGREGAR
 }
 
 // Generar JWT
@@ -21,7 +22,8 @@ const generateToken = (user: Usuario): string => {
       id: user.id, 
       email: user.email,
       nombre: user.nombre,
-      apellido: user.apellido
+      apellido: user.apellido,
+      rol: user.rol 
     } as JWTPayload,
     process.env.JWT_SECRET!,
     { expiresIn: '7d' }
@@ -59,7 +61,8 @@ router.get('/google/callback',
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         avatar_url: usuario.avatar_url,
-        provider: usuario.provider
+        provider: usuario.provider,
+        rol: usuario.rol 
       };
 
       // Redirigir al frontend con el token y datos del usuario
@@ -128,6 +131,7 @@ router.get('/me', async (req: Request, res: Response) => {
         bio: true,
         provider: true,
         activo: true,
+        rol: true,
         fecha_registro: true,
         ultimo_acceso: true
       }

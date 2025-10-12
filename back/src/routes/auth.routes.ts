@@ -30,7 +30,8 @@ const generateToken = (user: Usuario): string => {
       id: user.id, 
       email: user.email,
       nombre: user.nombre,
-      apellido: user.apellido
+      apellido: user.apellido,
+      rol: user.rol
     },
     process.env.JWT_SECRET!,
     { expiresIn: '7d' }
@@ -65,7 +66,8 @@ router.get('/google/callback',
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         avatar_url: usuario.avatar_url,
-        provider: usuario.provider
+        provider: usuario.provider,
+        rol: usuario.rol
       };
 
       const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;

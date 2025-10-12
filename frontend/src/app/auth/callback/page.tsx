@@ -14,23 +14,33 @@ function CallbackContent() {
 
     if (token && userStr) {
       try {
+        console.log('🔑 Token recibido del backend:', token); 
+        console.log('👤 Datos de usuario codificados:', userStr); 
+
         const user = JSON.parse(decodeURIComponent(userStr));
-        
-        // Guardar token en localStorage
+        console.log('✅ Usuario decodificado:', user); 
+
         localStorage.setItem('token', token);
-        
-        // Guardar datos del usuario (opcional)
+
         localStorage.setItem('user', JSON.stringify(user));
-        
-        // Redirigir al dashboard
-        router.push('/dashboard');
+
+        if (user.rol === 'ADMIN') {
+          console.log('🔐 Usuario es ADMIN, redirigiendo a /admin');
+          // Usar window.location para forzar recarga completa del AuthContext
+          window.location.href = '/admin';
+        } else {
+          console.log('👤 Usuario normal, redirigiendo a /dashboard');
+          window.location.href = '/dashboard';
+        }
       } catch (error) {
         console.error('Error parsing user data:', error);
         router.push('/login?error=invalid_data');
       }
     } else {
+      console.error('❌ Faltan credenciales en la URL');
       router.push('/login?error=missing_credentials');
     }
+
   }, [searchParams, router]);
 
   return (
@@ -55,22 +65,22 @@ function CallbackContent() {
           <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-pulse">
             <span className="text-white font-bold text-3xl">Py</span>
           </div>
-          
+
           <div className="mb-6">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           </div>
-          
+
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Completando autenticación
           </h2>
           <p className="text-gray-600">
             Estamos configurando tu cuenta, espera un momento...
           </p>
-          
+
           <div className="mt-8 flex items-center justify-center gap-2">
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
       </div>
