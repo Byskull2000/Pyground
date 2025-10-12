@@ -14,6 +14,7 @@ async function main() {
         password: "Admin123!",
         rol: RolesEnum.ADMIN,
         bio: "Usuario administrador del sistema",
+        email_verificado: true,
       },
       {
         email: "academico.sys@example.com",
@@ -22,6 +23,7 @@ async function main() {
         password: "Academico123!",
         rol: RolesEnum.ACADEMICO,
         bio: "Usuario académico del sistema",
+        email_verificado: true,
       },
       {
         email: "usuario.sys@example.com",
@@ -30,6 +32,7 @@ async function main() {
         password: "Usuario123!",
         rol: RolesEnum.USUARIO,
         bio: "Usuario común del sistema",
+        email_verificado: true,
       },
     ];
 
