@@ -86,7 +86,7 @@ export default function AdminPage() {
       description: 'Ver y gestionar administradores',
       icon: Shield,
       color: 'from-purple-600 to-pink-600',
-      route: '/admin/usuarios?filter=admin',
+      route: '/admin/administradores',
       stat: `${stats.admins} admins`,
     },
     {

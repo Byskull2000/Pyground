@@ -68,16 +68,19 @@ export default function AdminUsuariosPage() {
 
             if (response.ok) {
                 const result = await response.json();
-                const usuariosData = result.data || [];
-                setUsuarios(usuariosData);
-                setFilteredUsuarios(usuariosData);
+                const usuariosData: Usuario[] = result.data || [];
+                const administradores = usuariosData.filter((u: Usuario) => u.rol.toLowerCase() === 'admin');
+                setUsuarios(administradores);
+                setFilteredUsuarios(administradores);
             }
+
         } catch (error) {
             console.error('Error fetching usuarios:', error);
         } finally {
             setLoadingUsuarios(false);
         }
     };
+
 
     if (loading || loadingUsuarios) {
         return (
