@@ -1,8 +1,7 @@
 // src/contexts/AuthContext.tsx
 'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-
 
 interface User {
   id: number;
@@ -13,7 +12,7 @@ interface User {
   provider?: string;
   bio?: string;
   activo?: boolean;
-  rol?: string; 
+  rol?: 'ADMIN' | 'USUARIO' | 'ACADEMICO';
   fecha_registro?: Date;
   ultimo_acceso?: Date;
 }
@@ -34,10 +33,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const checkAuthRef = useRef(false);
 
   // Verificar token al cargar
   useEffect(() => {
     console.log('🔄 AuthContext: useEffect ejecutándose');
+
+    // Evitar que checkAuth se ejecute múltiples veces
+    if (checkAuthRef.current) {
+      console.log('⚠️ AuthContext: checkAuth ya se está ejecutando, saliendo...');
+      return;
+    }
+
+    checkAuthRef.current = true;
     checkAuth();
   }, []);
 
@@ -86,13 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (userResponse.ok) {
         const userData = await userResponse.json();
         console.log('✅ AuthContext: Datos completos recibidos:', userData.data);
-        
+
         const fullUserData = {
           ...userData.data,
           avatar_url: userData.data.avatar_url || '/gatito.png',
           provider: userData.data.provider || 'email',
         };
-        
+
         console.log('👤 AuthContext: Usuario procesado con rol:', fullUserData.rol);
         setUser(fullUserData);
       } else {
@@ -138,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // La respuesta viene en data.data
       const responseData = data.data || data;
-      
+
       // Verificar que tenemos el token y el usuario
       if (!responseData.token) {
         throw new Error('No se recibió token del servidor');
@@ -149,16 +157,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       localStorage.setItem('token', responseData.token);
+
       const userData = {
         ...responseData.user,
         avatar_url: responseData.user.avatar_url || '/gatito.png',
         provider: responseData.user.provider || 'email',
-        rol: responseData.user.rol || 'USER' 
+        rol: responseData.user.rol || 'USER'
       };
 
-      console.log('✅ AuthContext: Setting user with rol:', userData.rol); 
+      console.log('✅ AuthContext: Setting user with rol:', userData.rol);
 
       setUser(userData);
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Redireccionar según el rol
       if (userData.rol === 'ADMIN') {
@@ -192,6 +202,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       localStorage.removeItem('token');
       setUser(null);
+      checkAuthRef.current = false;
       console.log('✅ AuthContext: Logout completado');
       router.push('/');
     }
