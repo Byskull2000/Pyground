@@ -54,6 +54,7 @@ async function main() {
             provider: "local",
             bio: u.bio,
             rol: u.rol, 
+            email_verificado: u.email_verificado
           },
         });
         console.log(`Usuario ${u.email} creado correctamente`);
