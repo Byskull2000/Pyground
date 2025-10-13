@@ -1,5 +1,5 @@
 import prisma from '../config/prisma';
-import { Unidad } from '@prisma/client';
+import { Unidad, UnidadPlantilla } from '@prisma/client';
 import { UnidadCreate, UnidadUpdate } from '../types/unidades.types';
 
 
@@ -39,5 +39,26 @@ export const deleteUnidad = async (id: number) => {
     data: { 
       activo: false 
     }
+  });
+};
+
+
+export const cloneFromPlantillas = async (unidadesPlantilla: UnidadPlantilla[], id_edicion: number, creado_por: string) => {
+  if (!unidadesPlantilla || unidadesPlantilla.length === 0) return [];
+
+  const data = unidadesPlantilla.map((u) => ({
+    id_edicion,
+    id_unidad_plantilla: u.id,
+    titulo: u.titulo,
+    descripcion: u.descripcion,
+    orden: u.orden,
+    icono: u.icono,
+    color: u.color,
+    activo: true,
+    fecha_creacion: new Date()
+  }));
+
+  return prisma.unidad.createMany({
+    data,
   });
 };

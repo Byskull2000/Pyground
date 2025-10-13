@@ -116,5 +116,41 @@ describe('Ediciones Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'La fecha de apertura no puede ser mayor a la fecha de cierre'));
     });
+    
+    it('ED11: Creación de edición con unidades clonadas desde plantilla', async () => {
+      const newEdicion = {
+        id_curso: 1,
+        nombre_edicion: 'Curso 2025-I',
+        descripcion: 'Curso con unidades replicadas',
+        fecha_apertura: '2025-01-01T00:00:00.000Z',
+        fecha_cierre: '2025-12-31T00:00:00.000Z',
+        creado_por: 'admin@correo.com'
+      };
+
+      const createdEdicion = { 
+        id: 10, 
+        ...newEdicion, 
+        activo: true, 
+        fecha_creacion: new Date(),
+        mensaje_extra: '(3 unidades creadas desde la plantilla)'
+      };
+
+      (edicionService.createEdicion as jest.Mock).mockResolvedValue(createdEdicion);
+
+      const req = createMockRequest(newEdicion);
+      const res = createMockResponse();
+
+      await edicionController.createEdicion(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(new ApiResponse(true, createdEdicion));
+
+      expect(edicionService.createEdicion).toHaveBeenCalledWith({
+        ...newEdicion,
+        fecha_apertura: "2025-01-01T00:00:00.000Z",
+        fecha_cierre: "2025-12-31T00:00:00.000Z"
+      });
+      expect(createdEdicion.mensaje_extra).toBe('(3 unidades creadas desde la plantilla)');
+    });
   });
 });

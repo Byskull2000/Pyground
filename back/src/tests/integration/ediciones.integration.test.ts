@@ -18,6 +18,8 @@ describe('Ediciones API - Integration Tests', () => {
   });
 
   beforeEach(async () => {
+    await prisma.unidad.deleteMany({});
+    await prisma.unidadPlantilla.deleteMany({});
     await prisma.edicion.deleteMany({});
     await prisma.curso.deleteMany({});
   });
@@ -161,5 +163,59 @@ describe('Ediciones API - Integration Tests', () => {
       expect(body.data).toBeNull();
       expect(body.error).toMatch(/La fecha de apertura no puede ser mayor a la fecha de cierre/);
     });
+
+    it('ED11: creación de edición con unidades clonadas desde plantilla', async () => {
+    const curso = await prisma.curso.create({
+      data: {
+        nombre: 'Curso',
+        codigo_curso: 'CURSO',
+        descripcion: 'Curso base con unidades plantilla'
+      }
+    });
+
+    await prisma.unidadPlantilla.createMany({
+      data: [
+        { id_curso: curso.id, titulo: 'Unidad 1', descripcion: 'Introducción', orden: 1, version: 1 },
+        { id_curso: curso.id, titulo: 'Unidad 2', descripcion: 'Avanzado', orden: 2, version: 1 },
+        { id_curso: curso.id, titulo: 'Unidad 3', descripcion: 'Práctica final', orden: 3, version: 1 }
+      ]
+    });
+
+    const newEdicion = {
+      id_curso: curso.id,
+      nombre_edicion: 'Edición 2025-I',
+      descripcion: 'Edición con unidades clonadas desde plantilla',
+      fecha_apertura: '2025-01-01T00:00:00.000Z',
+      fecha_cierre: '2025-12-31T00:00:00.000Z',
+      creado_por: 'admin@correo.com'
+    };
+
+    const response = await request(app)
+      .post('/api/ediciones')
+      .send(newEdicion)
+      .expect('Content-Type', /json/)
+      .expect(201);
+
+    const body: ApiResponse<any> = response.body;
+    expect(body.success).toBe(true);
+    expect(body.data).toHaveProperty('id');
+    expect(body.data.nombre_edicion).toBe('Edición 2025-I');
+    expect(body.error).toBeNull();
+
+    const unidadesClonadas = await prisma.unidad.findMany({
+      where: { id_edicion: body.data.id }
+    });
+
+    expect(unidadesClonadas.length).toBe(3);
+    expect(unidadesClonadas.map(u => u.titulo)).toEqual(
+      expect.arrayContaining(['Unidad 1', 'Unidad 2', 'Unidad 3'])
+    );
+
+    if (body.data.mensaje_extra) {
+      expect(body.data.mensaje_extra).toMatch(/\d+ unidades creadas desde la plantilla/);
+    }
+  });
+
+
   });
 });
