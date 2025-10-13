@@ -8,7 +8,7 @@ async function main() {
     // Usuarios base
     const usuariosBase = [
       {
-        email: "admin.sys@example.com",
+        email: "admin.sys@mail.com",
         nombre: "Admin",
         apellido: "Sys",
         password: "Admin123!",
@@ -17,7 +17,7 @@ async function main() {
         email_verificado: true,
       },
       {
-        email: "academico.sys@example.com",
+        email: "academico.sys@mail.com",
         nombre: "Academico",
         apellido: "Sys",
         password: "Academico123!",
@@ -26,7 +26,7 @@ async function main() {
         email_verificado: true,
       },
       {
-        email: "usuario.sys@example.com",
+        email: "usuario.sys@mail.com",
         nombre: "Usuario",
         apellido: "Sys",
         password: "Usuario123!",
@@ -70,6 +70,7 @@ async function main() {
     if (!existingCurso) {
       await prisma.curso.create({
         data: {
+          id: 100,
           nombre: "Python",
           descripcion: "Curso introductorio de Python",
           codigo_curso: "PY001",

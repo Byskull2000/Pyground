@@ -19,6 +19,7 @@ describe('Cursos API - Integration Tests', () => {
     });
 
     beforeEach(async () => {
+        await prisma.edicion.deleteMany({});
         await prisma.curso.deleteMany({});
     });
 

@@ -39,11 +39,60 @@ model Usuario {
 }
 
 model Curso {
-  id             Int      @id @default(autoincrement())
-  nombre         String   @db.VarChar(100)
-  descripcion    String?  @db.Text
-  codigo_curso   String   @unique @db.VarChar(20)
-  activo         Boolean  @default(true)
-  fecha_creacion DateTime @default(now())
-  creado_por     String?  @db.VarChar(100)
+  id                Int      @id @default(autoincrement())
+  nombre            String   @db.VarChar(100)
+  descripcion       String?  @db.Text
+  codigo_curso      String   @unique @db.VarChar(20)
+  activo            Boolean  @default(true)
+  fecha_creacion    DateTime @default(now())
+  creado_por        String?  @db.VarChar(100)
+  UnidadPlantilla   UnidadPlantilla[]
+  Edicion           Edicion[]
+}
+
+model Edicion {
+  id                  Int       @id @default(autoincrement())
+  curso               Curso     @relation(fields: [id_curso], references: [id])
+  id_curso            Int
+  nombre_edicion      String    @db.VarChar(200)
+  descripcion         String?   @db.Text
+  fecha_apertura      DateTime
+  fecha_cierre        DateTime?
+  activo              Boolean   @default(true)
+  fecha_creacion      DateTime  @default(now())
+  creado_por          String    @db.VarChar(100)
+  unidades            Unidad[]  
+}
+
+model UnidadPlantilla {
+  id              Int       @id @default(autoincrement())
+  curso           Curso     @relation(fields: [id_curso], references: [id])
+  id_curso        Int
+  titulo          String    @db.VarChar(200)
+  descripcion     String?   @db.Text
+  orden           Int
+  version         Int
+  icono           String?   @db.VarChar(100)
+  color           String?   @db.VarChar(20)
+  fecha_creacion  DateTime  @default(now())
+  activo          Boolean   @default(true)
+  //unidades      Unidad[]  
+}
+
+model Unidad {
+  id                  Int             @id @default(autoincrement())
+  edicion             Edicion         @relation(fields: [id_edicion], references: [id])
+  id_edicion          Int
+  id_unidad_plantilla Int?
+  titulo              String          @db.VarChar(200)
+  descripcion         String?         @db.Text
+  orden               Int
+  icono               String?         @db.VarChar(100)
+  color               String?         @db.VarChar(20)
+  publicado           Boolean         @default(false)
+  fecha_creacion      DateTime        @default(now())
+  fecha_actualizacion DateTime?
+  activo              Boolean         @default(true)
+  //topicos            Topico[]        // relación con tópicos
+  //ejercicios         Ejercicio[]     // relación con ejercicios
 }
