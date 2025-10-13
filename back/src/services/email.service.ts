@@ -36,6 +36,8 @@ export const enviarEmailVerificacion = async (
   codigo: string
 ): Promise<void> => {
   try {
+    const enlaceVerificacion = `http://localhost:3000/verificacion?email=${encodeURIComponent(email)}`;
+
     const mailOptions = {
       from: `"Pyground" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
       to: email,
@@ -47,6 +49,8 @@ Gracias por registrarte en nuestra plataforma.
 Tu código de verificación es: ${codigo}
 
 Este código expirará en 15 minutos.
+También puedes verificar tu cuenta haciendo clic en el siguiente enlace:
+${enlaceVerificacion}
 
 Si no solicitaste este registro, puedes ignorar este mensaje.
 
