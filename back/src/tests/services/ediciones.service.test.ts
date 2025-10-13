@@ -1,10 +1,15 @@
 import * as edicionService from '../../services/ediciones.service';
 import * as edicionRepo from '../../repositories/ediciones.repository';
+import * as unidadPlantillaRepo from '../../repositories/unidades.plantilla.repository';
+import * as unidadRepo from '../../repositories/unidades.repository';
 import * as cursoRepo from '../../repositories/cursos.repository';
 import { EdicionCreate } from '../../types/ediciones.types';
 
 jest.mock('../../repositories/ediciones.repository');
 jest.mock('../../repositories/cursos.repository');
+jest.mock('../../repositories/unidades.repository');
+jest.mock('../../repositories/unidades.plantilla.repository');
+
 
 describe('Ediciones Service', () => {
   beforeEach(() => {
@@ -22,17 +27,26 @@ describe('Ediciones Service', () => {
         creado_por: 'admin@correo.com'
       };
 
-      const createdEdicion = { id: 1, ...newEdicion, activo: true, fecha_creacion: new Date() };
-
+      const createdEdicion = {
+        id: 1,
+        ...newEdicion,
+        activo: true,
+        fecha_creacion: new Date(),
+        curso: { id: 1, nombre: 'Curso 1' },
+        unidades: []
+      };
       (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1' });
 
       (edicionRepo.getEdicionesByCursoAndNombre as jest.Mock).mockResolvedValue([]);
       (edicionRepo.createEdicion as jest.Mock).mockResolvedValue(createdEdicion);
+      (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue([]);
+      (edicionRepo.getEdicionById as jest.Mock).mockResolvedValue(createdEdicion);
 
       const result = await edicionService.createEdicion(newEdicion);
 
       expect(result).toEqual(createdEdicion);
       expect(edicionRepo.createEdicion).toHaveBeenCalledWith(newEdicion);
+      expect(edicionRepo.getEdicionById).toHaveBeenCalledWith(createdEdicion.id);
     });
 
     it('ED2: Faltan campos obligatorios', async () => {
@@ -99,6 +113,50 @@ describe('Ediciones Service', () => {
       await expect(edicionService.createEdicion(newEdicion))
         .rejects.toMatchObject({ status: 400, message: 'La fecha de apertura no puede ser mayor a la fecha de cierre' });
     });
+
+    it('ED11: Creación de unidades desde la plantilla del curso al crear una edicion', async () => {
+      const newEdicion: EdicionCreate = {
+        id_curso: 1,
+        nombre_edicion: 'Curso 2025-I',
+        descripcion: 'Curso del primer semestre del 2025',
+        fecha_apertura: new Date('2025-01-01'),
+        fecha_cierre: new Date('2025-12-31'),
+        creado_por: 'admin@correo.com'
+      };
+
+      const EdicionBase = { id: 10, ...newEdicion, activo: true, fecha_creacion: new Date() };
+
+      const unidadesPlantilla = [
+        { id: 101, titulo: 'Unidad 1', descripcion: 'Descripcion 1', orden: 1, icono: 'icono 1', color: 'red' },
+        { id: 102, titulo: 'Unidad 2', descripcion: 'Descripcion 2', orden: 2, icono: 'icono 2', color: 'green' },
+        { id: 103, titulo: 'Unidad 3', descripcion: 'Descripcion 3', orden: 3, icono: 'icono 3', color: 'blue' },
+      ];
+
+      const createdEdicion = {
+        ...EdicionBase,
+        curso: { id: 1, nombre: 'Curso 1' },
+        unidades: [
+          { id: 201, id_edicion: 10, titulo: 'Unidad 1', orden: 1 },
+          { id: 202, id_edicion: 10, titulo: 'Unidad 2', orden: 2 },
+          { id: 203, id_edicion: 10, titulo: 'Unidad 3', orden: 3 },
+        ]
+      };
+
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1' });
+      (edicionRepo.getEdicionesByCursoAndNombre as jest.Mock).mockResolvedValue([]);
+      (edicionRepo.createEdicion as jest.Mock).mockResolvedValue(createdEdicion);
+      (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue(unidadesPlantilla);
+      (unidadRepo.cloneFromPlantillas as jest.Mock).mockResolvedValue(true);
+      (edicionRepo.getEdicionById as jest.Mock).mockResolvedValue(createdEdicion);
+
+      const result = await edicionService.createEdicion(newEdicion);
+
+      expect(result).toEqual(createdEdicion);
+      expect(edicionRepo.createEdicion).toHaveBeenCalledWith(newEdicion);
+      expect(unidadPlantillaRepo.getUnidadesPlantillaByCurso).toHaveBeenCalledWith(1);
+      expect(unidadRepo.cloneFromPlantillas).toHaveBeenCalledWith(unidadesPlantilla, createdEdicion.id, newEdicion.creado_por);
+      expect(edicionRepo.getEdicionById).toHaveBeenCalledWith(EdicionBase.id);
+    });
   });
 
   describe('getEdicionesByCurso', () => {
@@ -131,4 +189,6 @@ describe('Ediciones Service', () => {
       await expect(edicionService.getEdicionesByCurso(1)).rejects.toThrow('DB error');
     });
   });
+
+  
 });

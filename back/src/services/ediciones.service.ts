@@ -1,5 +1,7 @@
 import * as edicionRepo from '../repositories/ediciones.repository';
 import * as cursoRepo from '../repositories/cursos.repository';
+import * as unidadPlantillaRepo from '../repositories/unidades.plantilla.repository';
+import * as unidadRepo from '../repositories/unidades.repository';
 import { EdicionCreate, EdicionUpdate } from '../types/ediciones.types';
 
 export const getEdicionesByCurso = (id_curso:number) => {
@@ -36,7 +38,18 @@ export const createEdicion = async (data: EdicionCreate) => {
   if (existente.length > 0) 
     throw Object.assign(new Error('Ya existe una edición con ese nombre para este curso'), { status: 409 });
 
-  return edicionRepo.createEdicion(data);
+  const nuevaEdicion:any = await edicionRepo.createEdicion(data);
+
+  // Crear unidades (y cotenidos) de acuerdo a las unidades plantilla del curso
+  const unidadesPlantilla = await unidadPlantillaRepo.getUnidadesPlantillaByCurso(data.id_curso);
+
+  if (unidadesPlantilla != null && unidadesPlantilla.length > 0) {
+    await unidadRepo.cloneFromPlantillas(unidadesPlantilla, nuevaEdicion.id, data.creado_por);
+  }
+
+  let edicionCreada = await edicionRepo.getEdicionById(nuevaEdicion.id);
+
+  return edicionCreada;
 };
 
 
@@ -53,3 +66,4 @@ export const deleteEdicion = async (id: number) => {
 
   return edicionRepo.deleteEdicion(id);
 };
+
