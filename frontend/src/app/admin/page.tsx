@@ -23,8 +23,7 @@ export default function AdminPage() {
         return;
       }
 
-      const esAdmin = user?.rol === 'admin' || user?.rol === 'ADMIN';
-      
+      const esAdmin = user?.rol === 'ADMIN';
       if (!esAdmin) {
         router.push('/dashboard');
         return;
@@ -37,7 +36,7 @@ export default function AdminPage() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch(`${API_URL}/api/usuarios`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -47,7 +46,7 @@ export default function AdminPage() {
       if (response.ok) {
         const result = await response.json();
         const usuarios = result.data || [];
-        
+
         setStats({
           totalUsuarios: usuarios.length,
           usuariosActivos: usuarios.filter((u: any) => u.activo).length,
@@ -121,7 +120,7 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="p-6">
             <h2 className="text-xl font-semibold text-white mb-4">
               Tu Información
@@ -152,10 +151,10 @@ export default function AdminPage() {
                 <p className="mt-1 text-sm text-white">
                   {user?.fecha_registro
                     ? new Date(user.fecha_registro).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
                     : 'No disponible'}
                 </p>
               </div>
