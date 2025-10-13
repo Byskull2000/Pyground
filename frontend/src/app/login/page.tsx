@@ -11,6 +11,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
+  const verified = searchParams.get('verified');
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
@@ -19,6 +20,7 @@ function LoginContent() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [formError, setFormError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -35,6 +37,13 @@ function LoginContent() {
       router.push('/dashboard');
     }
   }, [isAuthenticated, loading, router]);
+
+  useEffect(() => {
+    if (verified) {
+      setSuccessMessage('✓ Email verificado correctamente. Ahora puedes iniciar sesión.');
+      setTimeout(() => setSuccessMessage(''), 5000);
+    }
+  }, [verified]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -100,6 +109,7 @@ function LoginContent() {
       .call(() => {
         setIsRegistering(!isRegistering);
         setFormError('');
+        setSuccessMessage('');
       })
       .to(formRef.current, {
         scale: 1,
@@ -112,6 +122,7 @@ function LoginContent() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
+    setSuccessMessage('');
 
     if (!email || !password) {
       setFormError('Por favor completa todos los campos');
@@ -153,42 +164,70 @@ function LoginContent() {
           })
         });
         
+        const data = await response.json();
+
         if (!response.ok) {
-          const data = await response.json();
           throw new Error(data.error || 'Error al registrar el usuario');
         }
-        
-        console.log('Usuario registrado exitosamente');
-      }
 
-      // Iniciar sesión (tanto para registro como para login)
-      await loginWithCredentials(email, password);
-
-      // Animación de éxito
-      gsap.to(formRef.current, {
-        scale: 1.05,
-        duration: 0.2,
-        yoyo: true,
-        repeat: 1
-      });
-
-    } catch (err: any) {
-      setFormError(err.message || 'Error al procesar la solicitud');
-
-      // Animación de error
-      gsap.fromTo(formRef.current,
-        { x: -10 },
-        {
-          x: 10,
-          duration: 0.1,
-          repeat: 3,
+        // Animación de éxito
+        gsap.to(formRef.current, {
+          scale: 1.05,
+          duration: 0.2,
           yoyo: true,
-          ease: 'power1.inOut',
-          onComplete: () => {
-            gsap.set(formRef.current, { x: 0 });
+          repeat: 1
+        });
+
+        // Redirigir a verificación de email
+        setTimeout(() => {
+          router.push(`/verificacion?email=${encodeURIComponent(email)}`);
+        }, 500);
+      } else {
+        // Login
+        await loginWithCredentials(email, password);
+
+        // Animación de éxito
+        gsap.to(formRef.current, {
+          scale: 1.05,
+          duration: 0.2,
+          yoyo: true,
+          repeat: 1
+        });
+      }
+    } catch (err: any) {
+      const errorMessage = err.message || 'Error al procesar la solicitud';
+      
+      // Si el email ya está registrado, redirigir a verificación
+      if (errorMessage.includes('email ya está registrado') || errorMessage.includes('already exists')) {
+        // Animación de éxito
+        gsap.to(formRef.current, {
+          scale: 1.05,
+          duration: 0.2,
+          yoyo: true,
+          repeat: 1
+        });
+
+        setTimeout(() => {
+          router.push(`/verificacion?email=${encodeURIComponent(email)}`);
+        }, 500);
+      } else {
+        setFormError(errorMessage);
+
+        // Animación de error
+        gsap.fromTo(formRef.current,
+          { x: -10 },
+          {
+            x: 10,
+            duration: 0.1,
+            repeat: 3,
+            yoyo: true,
+            ease: 'power1.inOut',
+            onComplete: () => {
+              gsap.set(formRef.current, { x: 0 });
+            }
           }
-        }
-      );
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -269,6 +308,17 @@ function LoginContent() {
               : 'Inicia sesión para continuar'}
           </p>
         </div>
+
+        {successMessage && (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <p className="text-sm text-green-700 font-medium">{successMessage}</p>
+            </div>
+          </div>
+        )}
 
         {(error || formError) && (
           <div className="bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 rounded-xl p-4 shadow-sm">
