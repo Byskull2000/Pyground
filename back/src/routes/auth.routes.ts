@@ -1,6 +1,5 @@
 // back/src/routes/auth.routes.ts
 import express from 'express';
-import { Router } from 'express';
 import passport from 'passport';
 import * as authController from '../controllers/auth.controller';
 import { authenticateToken } from '../middleware/auth';
@@ -100,7 +99,7 @@ router.get('/verify', async (req, res) => {
       valid: true, 
       user: decoded 
     });
-  } catch (error) {
+  } catch {
     res.status(401).json({ 
       valid: false, 
       error: 'Invalid token' 

@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import * as edicionController from '../../controllers/ediciones.controller';
 import * as edicionService from '../../services/ediciones.service';
 import { createMockRequest, createMockResponse } from '../setup';
@@ -36,7 +35,7 @@ describe('Ediciones Controller', () => {
     });
 
     it('ED2: Faltan campos obligatorios', async () => {
-      const newEdicion = { id_curso: 1 } as any; // falta nombre_edicion y fechas
+      const newEdicion = { id_curso: 1 }; 
       (edicionService.createEdicion as jest.Mock).mockRejectedValue({ status: 400, message: 'Faltan campos obligatorios' });
 
       const req = createMockRequest(newEdicion);

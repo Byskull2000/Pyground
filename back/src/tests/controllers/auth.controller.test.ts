@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import * as authController from '../../controllers/auth.controller';
 import * as authService from '../../services/auth.service';
 import { createMockRequest, createMockResponse } from '../setup';

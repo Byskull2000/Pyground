@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import * as userController from '../../controllers/usuarios.controller';
 import * as userService from '../../services/usuarios.service';
 import { createMockRequest, createMockResponse } from '../setup';
@@ -111,7 +110,7 @@ describe('Usuarios Controller', () => {
     });
     
     it('debe retornar 400 si falta email (RE7)', async () => {
-      const newUser = { password: 'Password123' } as any;
+      const newUser = { password: 'Password123' };
       (userService.createUsuario as jest.Mock).mockRejectedValue({ status: 400, message: 'El email es obligatorio' });
 
       const req = createMockRequest(newUser);

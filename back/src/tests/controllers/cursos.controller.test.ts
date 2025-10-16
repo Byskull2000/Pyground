@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import * as cursoController from '../../controllers/cursos.controller';
 import * as cursoService from '../../services/cursos.service';
 import { createMockRequest, createMockResponse } from '../setup';

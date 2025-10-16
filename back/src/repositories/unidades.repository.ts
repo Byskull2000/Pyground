@@ -1,5 +1,5 @@
 import prisma from '../config/prisma';
-import { Unidad, UnidadPlantilla } from '@prisma/client';
+import {UnidadPlantilla } from '@prisma/client';
 import { UnidadCreate, UnidadUpdate } from '../types/unidades.types';
 
 
@@ -43,7 +43,7 @@ export const deleteUnidad = async (id: number) => {
 };
 
 
-export const cloneFromPlantillas = async (unidadesPlantilla: UnidadPlantilla[], id_edicion: number, creado_por: string) => {
+export const cloneFromPlantillas = async (unidadesPlantilla: UnidadPlantilla[], id_edicion: number) => {
   if (!unidadesPlantilla || unidadesPlantilla.length === 0) return [];
 
   const data = unidadesPlantilla.map((u) => ({

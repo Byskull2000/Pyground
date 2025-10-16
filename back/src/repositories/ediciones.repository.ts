@@ -1,5 +1,4 @@
 import prisma from '../config/prisma';
-import { Edicion } from '@prisma/client';
 import { EdicionCreate, EdicionUpdate } from '../types/ediciones.types';
 
 

@@ -95,7 +95,7 @@ router.get('/verify', async (req: Request, res: Response) => {
       valid: true, 
       user: decoded 
     });
-  } catch (error) {
+  } catch {
     res.status(401).json({ 
       valid: false, 
       error: 'Invalid token' 

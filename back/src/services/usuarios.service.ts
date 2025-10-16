@@ -27,24 +27,21 @@ export const createUsuario = async (data: UsuarioCreate) => {
 
   const saltRounds = 10;
   const password_hash = await bcrypt.hash(password, saltRounds);
-//corazon
   const codigo_verificacion = emailService.generarCodigoVerificacion();
   const codigo_expiracion = emailService.calcularExpiracion();
 
   const newUserData = {
-    ...data,
+    email: data.email,
+    nombre: data.nombre,
+    apellido: data.apellido,
     password_hash,
     activo: false, 
     email_verificado: false, 
     codigo_verificacion, 
     codigo_expiracion, 
   };
-  delete (newUserData as any).password; 
 
   const newUser = await userRepo.createUsuario(newUserData);
-
-
-//corazon
  try {
     await emailService.enviarEmailVerificacion(
       newUser.email,
@@ -74,7 +71,7 @@ export const assignRol = async (id: number, rol: string) => {
 
   try {
     rolEnum = stringToRolEnum(rol);
-  } catch (err) {
+  } catch {
     throw { status: 400, message: 'Rol no válido' }; 
   }
 
@@ -86,7 +83,7 @@ export const assignRol = async (id: number, rol: string) => {
   try {
     const updatedUser = await userRepo.updateRol(id, rolEnum);
     return { message: 'Rol asignado correctamente', user: updatedUser };
-  } catch (err) {
+  } catch {
     throw { status: 500, message: 'Error al asignar rol' };
   }
 };

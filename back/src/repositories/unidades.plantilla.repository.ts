@@ -1,5 +1,4 @@
 import prisma from '../config/prisma';
-import { UnidadPlantilla } from '@prisma/client';
 import { UnidadPlantillaCreate, UnidadPlantillaUpdate } from '../types/unidades.plantilla.types';
 
 

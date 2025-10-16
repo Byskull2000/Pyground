@@ -79,9 +79,9 @@ describe('Usuarios Service', () => {
     });
 
     it('debe fallar si falta email (RE7)', async () => {
-      const newUser: UsuarioCreate = { password: 'Password123' } as any;
+      const newUser = { password: 'Password123' } as Partial<UsuarioCreate>;
 
-      await expect(userService.createUsuario(newUser))
+      await expect(userService.createUsuario(newUser as UsuarioCreate))
         .rejects.toMatchObject({ status: 400, message: 'El email es obligatorio' });
     });
 
@@ -173,7 +173,7 @@ describe('Usuarios Service', () => {
     });
 
     it('ROL2: intentar asignar rol inexistente', async () => {
-      await expect(userService.assignRol(userId, 'SUPERADMIN' as any))
+      await expect(userService.assignRol(userId, 'SUPERADMIN'))
         .rejects.toMatchObject({ status: 400, message: 'Rol no válido' });
     });
 

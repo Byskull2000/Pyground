@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma';
 import * as userRepo from '../repositories/usuarios.repository';
-import { RegisterData } from '../types/auth.types';
 import * as emailService from './email.service';
 
 const SALT_ROUNDS = 10;
@@ -215,11 +214,11 @@ export const changePassword = async (
 export const verifyToken = (token: string) => {
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch {
     throw new Error('Invalid token');
   }
 };
 
-export function validateUser(arg0: number) {
+export function validateUser() {
     throw new Error('Function not implemented.');
 }

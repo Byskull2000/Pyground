@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
@@ -52,7 +52,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
   res.status(500).json({ 
     error: 'Something went wrong!',

@@ -50,9 +50,12 @@ describe('Ediciones Service', () => {
     });
 
     it('ED2: Faltan campos obligatorios', async () => {
-      const newEdicion = { fecha_apertura: new Date(), fecha_cierre: new Date() } as any;
+      const newEdicion: Partial<EdicionCreate> = {
+        fecha_apertura: new Date(),
+        fecha_cierre: new Date()
+      };
 
-      await expect(edicionService.createEdicion(newEdicion))
+      await expect(edicionService.createEdicion(newEdicion as EdicionCreate))
         .rejects.toMatchObject({ status: 400, message: 'El nombre de la edición es obligatorio' });
     });
 
@@ -75,7 +78,7 @@ describe('Ediciones Service', () => {
       const newEdicion: EdicionCreate = {
         id_curso: 1,
         nombre_edicion: 'Edición Inválida',
-        fecha_apertura: 'texto inválido' as any,
+        fecha_apertura: 'texto inválido' as unknown as Date,
         fecha_cierre: new Date('2025-12-31'),
         creado_por: 'admin@correo.com'
       };
@@ -154,7 +157,7 @@ describe('Ediciones Service', () => {
       expect(result).toEqual(createdEdicion);
       expect(edicionRepo.createEdicion).toHaveBeenCalledWith(newEdicion);
       expect(unidadPlantillaRepo.getUnidadesPlantillaByCurso).toHaveBeenCalledWith(1);
-      expect(unidadRepo.cloneFromPlantillas).toHaveBeenCalledWith(unidadesPlantilla, createdEdicion.id, newEdicion.creado_por);
+      expect(unidadRepo.cloneFromPlantillas).toHaveBeenCalledWith(unidadesPlantilla, createdEdicion.id);
       expect(edicionRepo.getEdicionById).toHaveBeenCalledWith(EdicionBase.id);
     });
   });

@@ -38,16 +38,16 @@ export const createEdicion = async (data: EdicionCreate) => {
   if (existente.length > 0) 
     throw Object.assign(new Error('Ya existe una edición con ese nombre para este curso'), { status: 409 });
 
-  const nuevaEdicion:any = await edicionRepo.createEdicion(data);
+  const nuevaEdicion = await edicionRepo.createEdicion(data);
 
   // Crear unidades (y cotenidos) de acuerdo a las unidades plantilla del curso
   const unidadesPlantilla = await unidadPlantillaRepo.getUnidadesPlantillaByCurso(data.id_curso);
 
   if (unidadesPlantilla != null && unidadesPlantilla.length > 0) {
-    await unidadRepo.cloneFromPlantillas(unidadesPlantilla, nuevaEdicion.id, data.creado_por);
+    await unidadRepo.cloneFromPlantillas(unidadesPlantilla, nuevaEdicion.id);
   }
 
-  let edicionCreada = await edicionRepo.getEdicionById(nuevaEdicion.id);
+  const edicionCreada = await edicionRepo.getEdicionById(nuevaEdicion.id);
 
   return edicionCreada;
 };
