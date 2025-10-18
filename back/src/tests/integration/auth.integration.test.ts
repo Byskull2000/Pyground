@@ -24,6 +24,7 @@ describe('Auth API - Integration Tests', () => {
   });
 
   beforeEach(async () => {
+    await prisma.inscripcion.deleteMany({});
     await prisma.usuario.deleteMany({});
     jest.clearAllMocks();
   });
