@@ -313,6 +313,23 @@ async function main() {
       }
     }
 
+    // Crear cargos base si no existen
+    const cargosBase = ["Docente", "Editor", "Estudiante"];
+
+    for (const nombreCargo of cargosBase) {
+      const existingCargo = await prisma.cargo.findUnique({
+        where: { nombre: nombreCargo },
+      });
+
+      if (!existingCargo) {
+        await prisma.cargo.create({
+          data: { nombre: nombreCargo },
+        });
+        console.log(`Cargo ${nombreCargo} creado correctamente`);
+      } else {
+        console.log(`Cargo ${nombreCargo} ya existe`);
+      }
+    }
 
 
     const admin = await prisma.usuario.findUnique({
@@ -342,7 +359,7 @@ async function main() {
         });
         console.log("Admin inscrito como docente en la edición base");
       } else {
-        console.log("ℹAdmin ya inscrito en la edición base");
+        console.log("Admin ya inscrito en la edición base");
       }
     }
 
