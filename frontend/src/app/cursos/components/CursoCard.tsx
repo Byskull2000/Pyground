@@ -1,13 +1,10 @@
 import { BookOpen, ChevronRight, Users } from "lucide-react";
 import type { Curso } from "../interfaces/Curso";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function CursoCard({ curso }: { curso: Curso }) {
     const router = useRouter();
-
-    const handleRedirect = () => {
-        router.push(`/cursos/${curso.id}`);
-    };
 
     return (
         <div
@@ -53,13 +50,14 @@ export function CursoCard({ curso }: { curso: Curso }) {
 
             {/* Botón de acción */}
             <div className="p-6 pt-0">
-                <button
-                    onClick={handleRedirect}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg group/btn"
-                >
-                    Explorar Curso
-                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                </button>
+                <Link href={'/ediciones'}>
+                    <button
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg group/btn"
+                    >
+                        Explorar Ediciones del Curso
+                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </button>
+                </Link>
             </div>
         </div>
     );
