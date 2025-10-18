@@ -35,7 +35,7 @@ describe('Ediciones Service', () => {
         curso: { id: 1, nombre: 'Curso 1' },
         unidades: []
       };
-      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1' });
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1', estado_publicado: true });
 
       (edicionRepo.getEdicionesByCursoAndNombre as jest.Mock).mockResolvedValue([]);
       (edicionRepo.createEdicion as jest.Mock).mockResolvedValue(createdEdicion);
@@ -96,7 +96,7 @@ describe('Ediciones Service', () => {
         creado_por: 'admin@correo.com'
       };
 
-      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1' });
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1', estado_publicado: true });
 
       (edicionRepo.getEdicionesByCursoAndNombre as jest.Mock).mockResolvedValue([{ id: 99, ...newEdicion }]);
 
@@ -145,7 +145,7 @@ describe('Ediciones Service', () => {
         ]
       };
 
-      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1' });
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso 1', estado_publicado: true });
       (edicionRepo.getEdicionesByCursoAndNombre as jest.Mock).mockResolvedValue([]);
       (edicionRepo.createEdicion as jest.Mock).mockResolvedValue(createdEdicion);
       (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue(unidadesPlantilla);

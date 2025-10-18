@@ -30,7 +30,7 @@ describe('Ediciones API - Integration Tests', () => {
   describe('POST /api/ediciones', () => {
     it('ED1: creación exitosa de una edición', async () => {
       const curso = await prisma.curso.create({
-        data: { nombre: 'Curso Prueba', codigo_curso: "PRUEBA", descripcion: 'Demo' }
+        data: { nombre: 'Curso Prueba', codigo_curso: "PRUEBA", descripcion: 'Demo', estado_publicado: true }
       });
 
       await prisma.edicion.deleteMany({});
@@ -92,7 +92,7 @@ describe('Ediciones API - Integration Tests', () => {
 
     it('ED4: fecha de apertura inválida', async () => {
       const curso = await prisma.curso.create({
-        data: { nombre: 'Curso Prueba', codigo_curso: "PRUEBA", descripcion: 'Demo' }
+        data: { nombre: 'Curso Prueba', codigo_curso: "PRUEBA", descripcion: 'Demo', estado_publicado: true }
       });
 
       const response = await request(app)
@@ -113,7 +113,7 @@ describe('Ediciones API - Integration Tests', () => {
 
     it('ED5: duplicado de edición dentro del mismo curso', async () => {
       const curso = await prisma.curso.create({
-        data: { nombre: 'Curso Duplicado', codigo_curso: "DUPLICADO", descripcion: 'Test duplicado' }
+        data: { nombre: 'Curso Duplicado', codigo_curso: "DUPLICADO", descripcion: 'Test duplicado', estado_publicado:true }
       });
 
       await prisma.edicion.create({
@@ -172,7 +172,8 @@ describe('Ediciones API - Integration Tests', () => {
       data: {
         nombre: 'Curso',
         codigo_curso: 'CURSO',
-        descripcion: 'Curso base con unidades plantilla'
+        descripcion: 'Curso base con unidades plantilla',
+        estado_publicado: true
       }
     });
 

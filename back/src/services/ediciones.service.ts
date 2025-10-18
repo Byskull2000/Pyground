@@ -34,6 +34,9 @@ export const createEdicion = async (data: EdicionCreate) => {
   if (!curso) 
     throw Object.assign(new Error('Curso no encontrado'), { status: 404 });
 
+  if (!curso.estado_publicado)
+        throw Object.assign(new Error('Curso no publicado'), { status: 404 });
+  
   const existente = await edicionRepo.getEdicionesByCursoAndNombre(data.id_curso, data.nombre_edicion);
   if (existente.length > 0) 
     throw Object.assign(new Error('Ya existe una edición con ese nombre para este curso'), { status: 409 });
