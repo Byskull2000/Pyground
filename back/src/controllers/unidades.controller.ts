@@ -7,11 +7,11 @@ export const getUnidadesByEdicion = async (req: Request, res: Response) => {
     const id_edicion = parseInt(req.params.id_edicion);
     const unidades = await unidadService.getUnidadesByEdicion(id_edicion);
     return res.json(new ApiResponse(true, unidades));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al obtener unidades')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al obtener unidades';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -20,11 +20,11 @@ export const getUnidad = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const unidad = await unidadService.getUnidad(id);
     return res.json(new ApiResponse(true, unidad));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al obtener unidad')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al obtener unidad';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -33,11 +33,11 @@ export const createUnidad = async (req: Request, res: Response) => {
     const data = req.body;
     const newUnidad = await unidadService.createUnidad(data);
     return res.status(201).json(new ApiResponse(true, newUnidad));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al crear unidad')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al crear unidad';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -47,11 +47,11 @@ export const updateUnidad = async (req: Request, res: Response) => {
     const data = req.body;
     const updatedUnidad = await unidadService.updateUnidad(id, data);
     return res.json(new ApiResponse(true, updatedUnidad));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al actualizar unidad')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al actualizar unidad';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -60,10 +60,10 @@ export const deleteUnidad = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     await unidadService.deleteUnidad(id);
     return res.json(new ApiResponse(true, { message: 'Unidad eliminada correctamente' }));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al eliminar unidad')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al eliminar unidad';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };

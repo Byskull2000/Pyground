@@ -7,11 +7,11 @@ export const getUnidadesPlantilla = async (req: Request, res: Response) => {
     const id_curso = parseInt(req.params.id_curso);
     const unidades = await unidadPlantillaService.getUnidadesPlantilla(id_curso);
     return res.json(new ApiResponse(true, unidades));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al obtener unidades plantilla')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al obtener unidades plantilla';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -20,11 +20,11 @@ export const getUnidadPlantilla = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const unidad = await unidadPlantillaService.getUnidadPlantilla(id);
     return res.json(new ApiResponse(true, unidad));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al obtener unidad plantilla')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al obtener unidad plantilla';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -33,11 +33,11 @@ export const createUnidadPlantilla = async (req: Request, res: Response) => {
     const data = req.body;
     const newUnidad = await unidadPlantillaService.createUnidadPlantilla(data);
     return res.status(201).json(new ApiResponse(true, newUnidad));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al crear unidad plantilla')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al crear unidad plantilla';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -47,11 +47,11 @@ export const updateUnidadPlantilla = async (req: Request, res: Response) => {
     const data = req.body;
     const updatedUnidad = await unidadPlantillaService.updateUnidadPlantilla(id, data);
     return res.json(new ApiResponse(true, updatedUnidad));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al actualizar unidad plantilla')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al actualizar unidad plantilla';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
 
@@ -60,10 +60,10 @@ export const deleteUnidadPlantilla = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     await unidadPlantillaService.deleteUnidadPlantilla(id);
     return res.json(new ApiResponse(true, { message: 'Unidad plantilla eliminada correctamente' }));
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return res.status(err.status || 500).json(
-      new ApiResponse(false, null, err.message || 'Error al eliminar unidad plantilla')
-    );
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al eliminar unidad plantilla';
+    return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
