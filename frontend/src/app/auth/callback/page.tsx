@@ -14,24 +14,22 @@ function CallbackContent() {
 
     if (token && userStr) {
       try {
-        console.log('🔑 Token recibido del backend:', token); 
-        console.log('👤 Datos de usuario codificados:', userStr); 
+        console.log('🔑 Token recibido del backend:', token);
+        console.log('👤 Datos de usuario codificados:', userStr);
 
         const user = JSON.parse(decodeURIComponent(userStr));
-        console.log('✅ Usuario decodificado:', user); 
+        console.log('✅ Usuario decodificado:', user);
 
         localStorage.setItem('token', token);
-
         localStorage.setItem('user', JSON.stringify(user));
 
-        if (user.rol === 'ADMIN') {
-          console.log('🔐 Usuario es ADMIN, redirigiendo a /admin');
-          // Usar window.location para forzar recarga completa del AuthContext
-          window.location.href = '/admin';
-        } else {
-          console.log('👤 Usuario normal, redirigiendo a /dashboard');
-          window.location.href = '/dashboard';
-        }
+        setTimeout(() => {
+          if (user.rol === 'ADMIN') {
+            router.replace('/admin');
+          } else {
+            router.replace('/dashboard');
+          }
+        }, 200);
       } catch (error) {
         console.error('Error parsing user data:', error);
         router.push('/login?error=invalid_data');
