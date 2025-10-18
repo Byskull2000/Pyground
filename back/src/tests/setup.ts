@@ -17,6 +17,7 @@ afterAll(async () => {
 
 afterEach(async () => {
   // Limpiar datos después de cada test - Ajustado a tu schema
+  await prisma.inscripcion.deleteMany({});
   await prisma.usuario.deleteMany({});
 });
 

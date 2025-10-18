@@ -8,6 +8,7 @@ async function main() {
     // Usuarios base
     const usuariosBase = [
       {
+        id: 10,
         email: "admin.sys@mail.com",
         nombre: "Admin",
         apellido: "Sys",
@@ -17,6 +18,7 @@ async function main() {
         email_verificado: true,
       },
       {
+        id: 20,
         email: "academico.sys@mail.com",
         nombre: "Academico",
         apellido: "Sys",
@@ -26,6 +28,7 @@ async function main() {
         email_verificado: true,
       },
       {
+        id: 30,
         email: "usuario.sys@mail.com",
         nombre: "Usuario",
         apellido: "Sys",
@@ -46,6 +49,7 @@ async function main() {
         const hashedPassword = await bcrypt.hash(u.password, 10);
         await prisma.usuario.create({
           data: {
+            id: u.id,
             email: u.email,
             password_hash: hashedPassword,
             nombre: u.nombre,
@@ -76,6 +80,7 @@ async function main() {
           descripcion: "Curso introductorio de Python",
           codigo_curso: "PY001",
           creado_por: "admin.sys@mail.com",
+          estado_publicado: true
         },
       });
       console.log("Curso de Python creado correctamente");
@@ -92,6 +97,7 @@ async function main() {
       await prisma.unidadPlantilla.createMany({
         data: [
           {
+            id: 1,
             id_curso: curso.id,
             titulo: "Introducción a Python",
             descripcion: "Fundamentos básicos del lenguaje",
@@ -101,6 +107,7 @@ async function main() {
             color: "#4B8BBE",
           },
           {
+            id: 2,
             id_curso: curso.id,
             titulo: "Estructuras de Datos",
             descripcion: "Listas, pilas, tuplas y diccionarios",
@@ -110,6 +117,7 @@ async function main() {
             color: "#FFD43B",
           },
           {
+            id: 3,
             id_curso: curso.id,
             titulo: "Estandares de codigo",
             descripcion: "Estudio de estandares y buenas practicas de programacion",
@@ -265,7 +273,7 @@ async function main() {
             orden: plantilla.orden,
             icono: plantilla.icono,
             color: plantilla.color,
-            estado_publicado: false,
+            estado_publicado: true,
             activo: true,
           },
         });
@@ -314,22 +322,27 @@ async function main() {
     }
 
     // Crear cargos base si no existen
-    const cargosBase = ["Docente", "Editor", "Estudiante"];
+    const cargosBase = [
+      { id: 1, nombre: "Docente" },
+      { id: 2, nombre: "Editor" },
+      { id: 3, nombre: "Estudiante" },
+    ];
 
-    for (const nombreCargo of cargosBase) {
+    for (const cargo of cargosBase) {
       const existingCargo = await prisma.cargo.findUnique({
-        where: { nombre: nombreCargo },
+        where: { id: cargo.id },
       });
 
       if (!existingCargo) {
         await prisma.cargo.create({
-          data: { nombre: nombreCargo },
+          data: cargo,
         });
-        console.log(`Cargo ${nombreCargo} creado correctamente`);
+        console.log(`Cargo ${cargo.nombre} creado correctamente con ID ${cargo.id}`);
       } else {
-        console.log(`Cargo ${nombreCargo} ya existe`);
+        console.log(`Cargo ${cargo.nombre} ya existe con ID ${cargo.id}`);
       }
     }
+
 
 
     const admin = await prisma.usuario.findUnique({
