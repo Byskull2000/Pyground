@@ -36,6 +36,8 @@ model Usuario {
   provider       String?   @default("local")
   
   
+
+  Inscripcion Inscripcion[]
 }
 
 model Curso {
@@ -48,6 +50,7 @@ model Curso {
   creado_por        String?  @db.VarChar(100)
   UnidadPlantilla   UnidadPlantilla[]
   Edicion           Edicion[]
+  estado_publicado  Boolean  @default(false)
 }
 
 model Edicion {
@@ -62,6 +65,9 @@ model Edicion {
   fecha_creacion      DateTime  @default(now())
   creado_por          String    @db.VarChar(100)
   unidades            Unidad[]  
+  estado_publicado    Boolean  @default(false)
+
+  Inscripcion Inscripcion[]
 }
 
 model UnidadPlantilla {
@@ -77,6 +83,7 @@ model UnidadPlantilla {
   fecha_creacion  DateTime  @default(now())
   activo          Boolean   @default(true)
   //unidades      Unidad[]  
+  TopicoPlantilla TopicoPlantilla[]
 }
 
 model Unidad {
@@ -89,10 +96,77 @@ model Unidad {
   orden               Int
   icono               String?         @db.VarChar(100)
   color               String?         @db.VarChar(20)
-  publicado           Boolean         @default(false)
+  estado_publicado    Boolean         @default(false)
   fecha_creacion      DateTime        @default(now())
   fecha_actualizacion DateTime?
   activo              Boolean         @default(true)
   //topicos            Topico[]        // relación con tópicos
   //ejercicios         Ejercicio[]     // relación con ejercicios
+
+  Topico Topico[]
+}
+
+model TopicoPlantilla {
+  id                   Int       @id @default(autoincrement())
+  unidadPlantilla      UnidadPlantilla @relation(fields: [id_unidad_plantilla], references: [id])
+  id_unidad_plantilla  Int
+  titulo               String    @db.VarChar(200)
+  descripcion          String?   @db.Text
+  duracion_estimada    Int
+  orden                Int
+  version              Int
+  publicado            Boolean   @default(false)
+  objetivos_aprendizaje String?  @db.Text
+  fecha_creacion       DateTime  @default(now())
+  activo               Boolean   @default(true)
+
+  prerequisitos        TopicoPlantilla[]  @relation("TopicoPlantillaPrerequisitos")
+  requeridos_por       TopicoPlantilla[]  @relation("TopicoPlantillaPrerequisitos")
+
+
+  // a futuro
+  // contenidosPlantilla ContenidoPlantilla[] y demas cosas que sean necesarias
+}
+
+model Topico {
+  id                   Int       @id @default(autoincrement())
+  unidad               Unidad    @relation(fields: [id_unidad], references: [id])
+  id_unidad            Int
+  id_topico_plantilla  Int?      
+  titulo               String    @db.VarChar(200)
+  descripcion          String?   @db.Text
+  duracion_estimada    Int
+  orden                Int
+  publicado            Boolean   @default(false)
+  objetivos_aprendizaje String?  @db.Text
+  fecha_creacion       DateTime  @default(now())
+  fecha_actualizacion  DateTime?
+  activo               Boolean   @default(true)
+
+  prerequisitos        Topico[]  @relation("TopicoPrerequisitos")
+  requeridos_por       Topico[]  @relation("TopicoPrerequisitos")
+
+  // a futuro: contenidos específicos de la edición
+  // contenidos Contenido[]
+}
+
+model Cargo {
+  id          Int              @id @default(autoincrement())
+  nombre      String           @unique @db.VarChar(100)
+  inscripciones Inscripcion[]  // relación inversa
+}
+
+model Inscripcion {
+  id               Int       @id @default(autoincrement())
+  usuario          Usuario   @relation(fields: [usuario_id], references: [id])
+  usuario_id       Int
+  edicion          Edicion   @relation(fields: [edicion_id], references: [id])
+  edicion_id       Int
+  cargo            Cargo     @relation(fields: [cargo_id], references: [id])
+  cargo_id         Int
+  fecha_inscripcion DateTime  @default(now())
+  fecha_terminacion DateTime?
+  activo            Boolean   @default(true)
+
+  @@unique([usuario_id, edicion_id])
 }
