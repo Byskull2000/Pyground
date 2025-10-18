@@ -20,6 +20,7 @@ describe('Usuarios API - Integration Tests', () => {
     });
 
     beforeEach(async () => {
+        await prisma.inscripcion.deleteMany({});
         await prisma.usuario.deleteMany({});
     });
 
