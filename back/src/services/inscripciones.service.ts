@@ -3,8 +3,6 @@ import * as usuarioRepo from '../repositories/usuarios.repository';
 import * as edicionRepo from '../repositories/ediciones.repository';
 import * as cargoRepo from '../repositories/cargos.repository';
 import { InscripcionCreate, InscripcionUpdate } from '../types/inscripciones.types';
-import e from 'express';
-
 
 export const getInscripcionesByEdicion = (id_edicion: number) => {
   return inscripcionRepo.getInscripcionesByEdicion(id_edicion);

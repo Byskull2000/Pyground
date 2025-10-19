@@ -18,7 +18,6 @@ describe('Inscripciones API - Integration Tests', () => {
   });
 
   beforeEach(async () => {
-  // Hijos primero
     await prisma.inscripcion.deleteMany({});
     await prisma.topico.deleteMany({});
     await prisma.unidad.deleteMany({});
@@ -29,7 +28,7 @@ describe('Inscripciones API - Integration Tests', () => {
     await prisma.curso.deleteMany({});
     await prisma.usuario.deleteMany({});
     await prisma.cargo.deleteMany({});
-    });
+  });
 
 
 

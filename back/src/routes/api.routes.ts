@@ -3,6 +3,7 @@ import usuariosRouter from "./usuarios.routes";
 import cursosRouter from "./cursos.routes";
 import edicionesRouter from "./ediciones.routes";
 import inscripcionesRouter from "./inscripciones.routes";
+import unidadesPlantillaRouter from "./unidades.plantilla.routes";
 
 const apiRouter = Router();
 
@@ -17,5 +18,8 @@ apiRouter.use('/ediciones', edicionesRouter)
 
 // Rutas de inscripciones
 apiRouter.use('/inscripciones', inscripcionesRouter)
+
+// Rutas de inscripciones
+apiRouter.use('/unidades-plantilla', unidadesPlantillaRouter)
 
 export default apiRouter
