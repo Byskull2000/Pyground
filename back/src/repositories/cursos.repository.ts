@@ -10,4 +10,30 @@ export const getCursoById = async (id: number) => {
   });
 };
 
+export const publicateCurso = async (id: number) => {
+  return prisma.curso.update({
+    where: { id },
+    data: { 
+      estado_publicado: true,
+      activo: true 
+    }, 
+  });
+};
 
+export const deactivateCurso = async (id: number) => {
+  return prisma.curso.update({
+    where: { id },
+    data: { 
+      estado_publicado: false
+    }, 
+  });
+};
+
+export const deleteCurso = async (id: number) => {
+  return prisma.curso.update({
+    where: { id },
+    data: { 
+      activo: false 
+    }, 
+  });
+};

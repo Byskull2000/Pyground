@@ -1,8 +1,10 @@
 import * as cursoService from '../../services/cursos.service';
 import * as cursoRepo from '../../repositories/cursos.repository';
+import * as unidadPlantillaRepo from '../../repositories/unidades.plantilla.repository';
 
 // Mock del repositorio
 jest.mock('../../repositories/cursos.repository');
+jest.mock('../../repositories/unidades.plantilla.repository');
 
 describe('Cursos Service', () => {
   beforeEach(() => {
@@ -84,5 +86,65 @@ describe('Cursos Service', () => {
 
       await expect(cursoService.getCursoById(123)).rejects.toThrow('Database connection failed');
     });
+  });
+
+  describe('publicateCurso', () => {
+    it('PC1 - debe publicar un curso existente con unidades listas', async () => {
+      const mockCurso = { id: 1, nombre: 'Python' };
+      const mockUnidades = [{ id: 10, nombre: 'Unidad 1' }];
+      const mockPublicado = { id: 1, nombre: 'Python', publicado: true };
+
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(mockCurso);
+      (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue(mockUnidades);
+      (cursoRepo.publicateCurso as jest.Mock).mockResolvedValue(mockPublicado);
+
+      const result = await cursoService.publicateCurso(1);
+
+      expect(result).toEqual(mockPublicado);
+      expect(cursoRepo.getCursoById).toHaveBeenCalledWith(1);
+      expect(unidadPlantillaRepo.getUnidadesPlantillaByCurso).toHaveBeenCalledWith(1);
+      expect(cursoRepo.publicateCurso).toHaveBeenCalledWith(1);
+    });
+
+    it('PC2 - debe lanzar error si el curso no existe', async () => {
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(null);
+
+      await expect(cursoService.publicateCurso(999))
+        .rejects.toThrow('Curso no encontrado');
+    });
+
+    it('PC3 - debe lanzar error si no hay unidades listas', async () => {
+      const mockCurso = { id: 1, nombre: 'Python' };
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(mockCurso);
+      (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue([]);
+
+      await expect(cursoService.publicateCurso(1))
+        .rejects.toMatchObject({ status: 404, message: 'Este curso no tiene unidades listas' });
+    });
+
+  });
+
+  describe('deactivateCurso', () => {
+    it('DC1 - debe desactivar un curso existente', async () => {
+      const mockCurso = { id: 2, nombre: 'Java' };
+      const mockArchivado = { id: 2, nombre: 'Java', activo: false };
+
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(mockCurso);
+      (cursoRepo.deactivateCurso as jest.Mock).mockResolvedValue(mockArchivado);
+
+      const result = await cursoService.deactivateCurso(2);
+
+      expect(result).toEqual(mockArchivado);
+      expect(cursoRepo.getCursoById).toHaveBeenCalledWith(2);
+      expect(cursoRepo.deactivateCurso).toHaveBeenCalledWith(2);
+    });
+
+    it('DC2 - debe lanzar error si el curso no existe', async () => {
+      (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(null);
+
+      await expect(cursoService.deactivateCurso(999))
+        .rejects.toThrow('Curso no encontrado');
+    });
+
   });
 });

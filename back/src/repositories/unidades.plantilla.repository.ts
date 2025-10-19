@@ -10,6 +10,16 @@ export const getUnidadesPlantillaByCurso = async (id: number) => {
   });
 };
 
+export const getUnidadesPlantillaPublicadasByCurso = async (id: number) => {
+  return prisma.unidadPlantilla.findMany({
+    where : {
+      id_curso: id,
+      activo: true, 
+      
+    }
+  });
+};
+
 export const getUnidadPlantillaById = async (id: number) => {
   return prisma.unidadPlantilla.findUnique({
     where: { id },
