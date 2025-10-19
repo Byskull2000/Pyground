@@ -48,10 +48,11 @@ export const createInscripcion = async (data: InscripcionCreate) => {
 
   const edicion = await edicionRepo.getEdicionById(data.edicion_id);
   if (!edicion || !edicion.activo ) throw { status: 404, message: 'Edición no encontrada o inactiva' };
-  if (!edicion.estado_publicado ) throw { status: 409, message: 'La edición no esta abierta a inscripciones' };
 
   const cargo = await cargoRepo.getCargoById(data.cargo_id);
   if (!cargo) throw { status: 404, message: 'Cargo no encontrado' };
+
+  if (!edicion.estado_publicado && cargo.nombre.toLowerCase() === "estudiante" ) throw { status: 409, message: 'La edición no esta abierta a inscripciones' };
 
   const existentes = await inscripcionRepo.getInscripcionesByEdicion(data.edicion_id);
   const duplicada = existentes.find(i => i.usuario_id === data.usuario_id);

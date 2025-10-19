@@ -5,6 +5,7 @@ export interface EdicionCreate {
   fecha_apertura: Date;
   fecha_cierre: Date;
   creado_por: string;
+  id_creador?: number;
 }
 
 export interface EdicionUpdate {
@@ -14,4 +15,5 @@ export interface EdicionUpdate {
   fecha_cierre?: Date;
   activo?: boolean;
   creado_por?: string;
+  estado_publicado?: boolean;
 }

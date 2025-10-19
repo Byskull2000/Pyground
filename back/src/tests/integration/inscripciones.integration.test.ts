@@ -104,7 +104,7 @@ describe('Inscripciones API - Integration Tests', () => {
 
     it('IS9: edición no publicada', async () => {
       const usuario = await prisma.usuario.create({ data: { nombre: 'Usuario', apellido: 'Test', email: 'test@correo.com' } });
-      const cargo = await prisma.cargo.create({ data: { nombre: 'Participante' } });
+      const cargo = await prisma.cargo.create({ data: { nombre: 'Estudiante' } });
       const curso = await prisma.curso.create({ data: { nombre: 'Curso', codigo_curso: 'CURSO', descripcion: 'Demo' } });
       const edicion = await prisma.edicion.create({ data: { id_curso: curso.id, nombre_edicion: 'Edición', activo: true, estado_publicado: false, creado_por: 'admin@correo.com', fecha_apertura: new Date('2025-01-10') } });
 

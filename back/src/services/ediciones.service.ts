@@ -1,7 +1,12 @@
 import * as edicionRepo from '../repositories/ediciones.repository';
 import * as cursoRepo from '../repositories/cursos.repository';
 import * as unidadPlantillaRepo from '../repositories/unidades.plantilla.repository';
+//import * as topicoPlantillaRepo from '../repositories/topicos.plantilla.repository';
+//import * as topicoRepo from '../repositories/topicos.repository';
 import * as unidadRepo from '../repositories/unidades.repository';
+import * as inscripcionRepo from '../repositories/inscripciones.repository';
+import * as usuarioRepo from '../repositories/usuarios.repository';
+
 import { EdicionCreate, EdicionUpdate } from '../types/ediciones.types';
 
 export const getEdicionesByCurso = (id_curso:number) => {
@@ -48,6 +53,19 @@ export const createEdicion = async (data: EdicionCreate) => {
 
   if (unidadesPlantilla != null && unidadesPlantilla.length > 0) {
     await unidadRepo.cloneFromPlantillas(unidadesPlantilla, nuevaEdicion.id);
+  }
+/*
+  const topicosPlantilla = await topicoPlantillaRepo.getTopicosPlantillaByCurso(data.id_curso);
+
+  if (topicosPlantilla != null && topicosPlantilla.length > 0) {
+    await topicoRepo.cloneFromPlantillas(topicosPlantilla, nuevaEdicion.id);
+  }*/
+
+  if (data.id_creador != null && data.id_creador > 0){
+    const usuarioValido = await usuarioRepo.getUsuarioById(data.id_creador)
+    if(usuarioValido != null){
+      await inscripcionRepo.createDocenteEdicion(nuevaEdicion.id, usuarioValido.id);
+    }
   }
 
   const edicionCreada = await edicionRepo.getEdicionById(nuevaEdicion.id);

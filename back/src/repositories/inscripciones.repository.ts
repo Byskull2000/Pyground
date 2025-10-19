@@ -79,3 +79,23 @@ export const deleteInscripcion = async (id: number) => {
     data: { activo: false },
   });
 };
+
+export const createDocenteEdicion = async (id_edicion: number, id_usuario: number) => {
+  const cargoDocente = await prisma.cargo.findUnique({
+    where: { nombre: "Docente" },
+  });
+
+  if (!cargoDocente) {
+    throw new Error('El cargo "Docente" no existe en la base de datos.');
+  }
+
+  return prisma.inscripcion.create({
+    data: {
+      usuario_id: id_usuario,
+      edicion_id: id_edicion,
+      cargo_id: cargoDocente.id,
+      fecha_inscripcion: new Date(),
+      activo: true,
+    }
+  });
+};

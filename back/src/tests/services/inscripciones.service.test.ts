@@ -78,7 +78,7 @@ describe('Inscripciones Service', () => {
     it('IS5: Creación exitosa de una inscripción', async () => {
       const mockUsuario = { id: 1, nombre: 'Usuario Test' };
       const mockEdicion = { id: 1, activo: true, estado_publicado: true };
-      const mockCargo = { id: 1, nombre: 'Participante' };
+      const mockCargo = { id: 1, nombre: 'Estudiante' };
       const mockNueva = { id: 10, ...baseData };
 
       (usuarioRepo.getUsuarioById as jest.Mock).mockResolvedValue(mockUsuario);
@@ -119,6 +119,8 @@ describe('Inscripciones Service', () => {
     it('IS9: Edición no publicada', async () => {
       (usuarioRepo.getUsuarioById as jest.Mock).mockResolvedValue({ id: 1 });
       (edicionRepo.getEdicionById as jest.Mock).mockResolvedValue({ id: 1, activo: true, estado_publicado: false });
+      (cargoRepo.getCargoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Estudiante' });
+
 
       await expect(inscripcionService.createInscripcion(baseData))
         .rejects.toMatchObject({ status: 409, message: 'La edición no esta abierta a inscripciones' });

@@ -32,13 +32,30 @@ export const getEdicionById = async (id: number) => {
 };
 
 export const createEdicion = async (data: EdicionCreate) => {
+  const {
+    id_curso,
+    nombre_edicion,
+    descripcion,
+    fecha_apertura,
+    fecha_cierre,
+    creado_por,
+  } = data;
+
   return prisma.edicion.create({
-    data,
+    data: {
+      id_curso,
+      nombre_edicion,
+      descripcion,
+      fecha_apertura,
+      fecha_cierre,
+      creado_por
+    },
     include: {
-      unidades: true
-    }
+      unidades: true,
+    },
   });
 };
+
 
 export const updateEdicion = async (id: number, data: EdicionUpdate) => {
   return prisma.edicion.update({
