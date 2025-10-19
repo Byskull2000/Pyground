@@ -28,4 +28,28 @@ export const getCursoById = async (req: Request, res: Response) => {
   }
 };
 
+export const publicateCurso = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    await cursoService.publicateCurso(id);
+    return res.json(new ApiResponse(true, { message: 'Curso publicado correctamente' }));
+  } catch (err: unknown) {
+    console.error(err);
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al publicar el curso';
+    return res.status(status).json(new ApiResponse(false, null, message));
+  }
+};
 
+export const deactivateCurso = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    await cursoService.deactivateCurso(id);
+    return res.json(new ApiResponse(true, { message: 'Curso archivado' }));
+  } catch (err: unknown) {
+    console.error(err);
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al archivar curso';
+    return res.status(status).json(new ApiResponse(false, null, message));
+  }
+};
