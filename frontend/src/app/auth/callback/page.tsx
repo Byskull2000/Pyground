@@ -1,4 +1,3 @@
-// app/auth/callback/page.tsx
 'use client';
 
 import { useEffect, Suspense } from 'react';
@@ -26,6 +25,8 @@ function CallbackContent() {
         setTimeout(() => {
           if (user.rol === 'ADMIN') {
             router.replace('/admin');
+          } else if (user.rol === 'ACADEMICO') {
+            router.replace('/academico');
           } else {
             router.replace('/dashboard');
           }
@@ -43,7 +44,6 @@ function CallbackContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -57,7 +57,6 @@ function CallbackContent() {
         </nav>
       </header>
 
-      {/* Loading Content */}
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4">
         <div className="text-center max-w-md">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-pulse">

@@ -34,7 +34,6 @@ export default function MisEdicionesPage() {
     const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [togglingEstado, setTogglingEstado] = useState<number | null>(null);
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -78,46 +77,6 @@ export default function MisEdicionesPage() {
         }
     };
 
-    const handleToggleEstado = async (edicionId: number, edicionActual: boolean) => {
-        setTogglingEstado(edicionId);
-        try {
-            const token = localStorage.getItem('token');
-
-            const response = await fetch(`${API_URL}/api/ediciones/${edicionId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    estado_publicado: !edicionActual
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al cambiar estado');
-            }
-
-            // Actualizar estado local
-            setInscripciones(inscripciones.map(i =>
-                i.edicion_id === edicionId
-                    ? {
-                        ...i,
-                        edicion: {
-                            ...i.edicion,
-                            estado_publicado: !edicionActual
-                        }
-                    }
-                    : i
-            ));
-        } catch (err) {
-            setError('Error al cambiar estado de la edición');
-            console.error('Error:', err);
-        } finally {
-            setTogglingEstado(null);
-        }
-    };
-
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
             year: 'numeric',
@@ -136,6 +95,10 @@ export default function MisEdicionesPage() {
         if (cargoId === 1) return 'Docente';
         if (cargoId === 2) return 'Editor';
         return 'Unknown';
+    };
+
+    const handleCardClick = (edicionId: number) => {
+        router.push(`/mis-ediciones/${edicionId}`);
     };
 
     if (authLoading || loading) {
@@ -160,7 +123,6 @@ export default function MisEdicionesPage() {
         );
     }
 
-    const userRole = user.rol?.toUpperCase();
     return (
         <>
             <Header />
@@ -171,18 +133,18 @@ export default function MisEdicionesPage() {
                             <h1 className="text-3xl font-bold text-white mb-2">
                                 Mis Ediciones
                             </h1>
-
+                            <p className="text-gray-400">
+                                Gestiona tus ediciones asignadas
+                            </p>
                         </div>
 
-                        {(
-                            <Link
-                                href={'/ediciones/crear'}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-md hover:shadow-lg"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Crear Edición
-                            </Link>
-                        )}
+                        <Link
+                            href={'/ediciones/crear'}
+                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:opacity-90 transition-all shadow-md hover:shadow-lg"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Crear Edición
+                        </Link>
                     </div>
 
                     {error && (
@@ -197,7 +159,8 @@ export default function MisEdicionesPage() {
                             {inscripciones.map((inscripcion) => (
                                 <div
                                     key={inscripcion.id}
-                                    className="group bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg border border-white/10 overflow-hidden hover:border-blue-400/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
+                                    onClick={() => handleCardClick(inscripcion.edicion.id)}
+                                    className="group bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg border border-white/10 overflow-hidden hover:border-blue-400/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
                                 >
                                     {/* Header */}
                                     <div className={`h-24 bg-gradient-to-br ${getCargoColor(inscripcion.cargo_id)}/20 border-b border-white/10 flex items-center justify-between px-6`}>
@@ -265,47 +228,11 @@ export default function MisEdicionesPage() {
                                             )}
                                         </div>
 
-                                        {/* Botones */}
-                                        <div className="flex flex-col gap-2 pt-4 border-t border-white/10">
-                                            {/* Toggle Estado */}
-                                            <button
-                                                onClick={() => handleToggleEstado(inscripcion.edicion.id, inscripcion.edicion.estado_publicado)}
-                                                disabled={togglingEstado === inscripcion.edicion.id}
-                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/30 transition-colors disabled:opacity-50"
-                                            >
-                                                {togglingEstado === inscripcion.edicion.id ? (
-                                                    <Loader className="w-4 h-4 animate-spin" />
-                                                ) : inscripcion.edicion.estado_publicado ? (
-                                                    <EyeOff className="w-4 h-4" />
-                                                ) : (
-                                                    <Eye className="w-4 h-4" />
-                                                )}
-                                                {inscripcion.edicion.estado_publicado ? 'Despublicar' : 'Publicar'}
-                                            </button>
-
-                                            {/* Editar */}
-                                            <button
-                                                onClick={() => router.push(`/ediciones/${inscripcion.edicion.id}/editar`)}
-                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition-colors"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                                Editar
-                                            </button>
-
-                                            {/* Acción según rol */}
-                                            {inscripcion.cargo_id === 2 && (
-                                                <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg hover:bg-purple-500/30 transition-colors">
-                                                    <Edit2 className="w-4 h-4" />
-                                                    Editar Contenido
-                                                </button>
-                                            )}
-
-                                            {inscripcion.cargo_id === 1 && (
-                                                <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-500/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-500/30 transition-colors">
-                                                    <CheckCircle className="w-4 h-4" />
-                                                    Revisar Contenido
-                                                </button>
-                                            )}
+                                        {/* Indicador de clic */}
+                                        <div className="pt-4 border-t border-white/10">
+                                            <p className="text-xs text-center text-gray-500 group-hover:text-blue-400 transition-colors">
+                                                Clic para ver detalles →
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -318,7 +245,9 @@ export default function MisEdicionesPage() {
                                 <p className="text-gray-400 text-lg mb-2">
                                     No tienes ediciones asignadas
                                 </p>
-
+                                <p className="text-gray-500 text-sm">
+                                    Las ediciones donde seas docente o editor aparecerán aquí
+                                </p>
                             </div>
                         </div>
                     )}
