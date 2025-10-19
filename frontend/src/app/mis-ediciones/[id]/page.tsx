@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import EdicionInfoPanel from './components/EdicionInfoPanel';
 import EdicionActionsPanel from './components/EdicionActionsPanel';
 import InscritosPanel from './components/InscritosPanel';
+import UnidadesPanel from './components/UnidadesPanel';
 import { AlertCircle, Loader } from 'lucide-react';
 
 interface Edicion {
@@ -42,6 +43,16 @@ interface Inscripcion {
     };
 }
 
+interface Unidad {
+    id: number;
+    id_curso: number;
+    titulo: string;
+    descripcion: string;
+    orden: number;
+    icono: string;
+    color: string;
+}
+
 export default function EdicionDetailPage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
@@ -50,6 +61,7 @@ export default function EdicionDetailPage() {
 
     const [edicion, setEdicion] = useState<Edicion | null>(null);
     const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
+    const [unidades, setUnidades] = useState<Unidad[]>([]);
     const [userRole, setUserRole] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -66,7 +78,6 @@ export default function EdicionDetailPage() {
         try {
             const token = localStorage.getItem('token');
             
-            // Fetch edición details
             const edicionResponse = await fetch(`${API_URL}/api/ediciones/${edicionId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -78,7 +89,6 @@ export default function EdicionDetailPage() {
             const edicionData = await edicionResponse.json();
             setEdicion(edicionData.data);
 
-            // Fetch inscripciones
             const inscripcionesResponse = await fetch(`${API_URL}/api/inscripciones/edicion/${edicionId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -90,11 +100,19 @@ export default function EdicionDetailPage() {
             const inscripcionesData = await inscripcionesResponse.json();
             setInscripciones(inscripcionesData.data || []);
 
-            // Determinar rol del usuario en esta edición
             const userInscripcion = inscripcionesData.data?.find(
                 (i: Inscripcion) => i.usuario_id === user?.id
             );
             setUserRole(userInscripcion?.cargo_id || null);
+
+            const unidadesResponse = await fetch(`${API_URL}/api/unidades-plantilla/curso/${edicionData.data.id_curso}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (unidadesResponse.ok) {
+                const unidadesData = await unidadesResponse.json();
+                setUnidades(unidadesData.data || []);
+            }
 
             setError('');
         } catch (err) {
@@ -163,15 +181,19 @@ export default function EdicionDetailPage() {
                     )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Panel Principal - Info de la Edición */}
                         <div className="lg:col-span-2 space-y-6">
-                            <EdicionInfoPanel edicion={edicion} />
+                            <EdicionInfoPanel edicion={edicion!} />
                             
-                            {/* Panel de Inscritos */}
+                            <UnidadesPanel 
+                                unidades={unidades} 
+                                edicionId={edicion!.id}
+                                cursoId={edicion!.id_curso}
+                                onNavigate={(path: string) => router.push(path)}
+                            />
+                            
                             <InscritosPanel inscripciones={inscripciones} />
                         </div>
 
-                        {/* Panel Lateral - Acciones */}
                         <div className="lg:col-span-1">
                             <EdicionActionsPanel 
                                 edicion={edicion}
