@@ -29,6 +29,28 @@ export const getInscripcionById = async (id: number) => {
   });
 };
 
+export const getInscripcionesByUsuario = async (id: number) => {
+  return prisma.inscripcion.findMany({
+    where: { usuario_id : id },
+    include: {
+      edicion: true,
+      usuario: true,
+      cargo: true,
+    },
+  });
+};
+
+export const getInscripcionStatus = async (usuario_id: number, edicion_id: number) => {
+  return prisma.inscripcion.findFirst({
+    where: { usuario_id, edicion_id },
+    include: {
+      edicion: true,
+      usuario: true,
+      cargo: true,
+    },
+  });
+};
+
 export const createInscripcion = async (data: InscripcionCreate) => {
   return prisma.inscripcion.create({
     data: {

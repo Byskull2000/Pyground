@@ -3,6 +3,7 @@ import * as usuarioRepo from '../repositories/usuarios.repository';
 import * as edicionRepo from '../repositories/ediciones.repository';
 import * as cargoRepo from '../repositories/cargos.repository';
 import { InscripcionCreate, InscripcionUpdate } from '../types/inscripciones.types';
+import e from 'express';
 
 
 export const getInscripcionesByEdicion = (id_edicion: number) => {
@@ -16,6 +17,26 @@ export const getInscripcion = async (id: number) => {
   return inscripcion;
 };
 
+export const getInscripcionesByUsuario = async (id: number) => {
+  const usuarioValido = await usuarioRepo.getUsuarioById(id);
+  if (!usuarioValido) throw { status: 404, message: 'El usuario no pudo ser encontrado' };
+
+  const inscripciones = await inscripcionRepo.getInscripcionesByUsuario(id);
+  if (!inscripciones) throw { status: 404, message: 'Inscripciones no encontradas para el usuario' };
+  return inscripciones;
+};
+
+export const getInscripcionStatus = async (usuario_id: number, edicion_id: number) => {
+  const usuarioValido = await usuarioRepo.getUsuarioById(usuario_id);
+  if (!usuarioValido) throw { status: 404, message: 'El usuario no pudo ser encontrado' };
+
+  const edicionValida = await edicionRepo.getEdicionById(edicion_id);
+  if (!edicionValida) throw { status: 404, message: 'El curso no fue encontrado' };
+
+  const inscripcion = await inscripcionRepo.getInscripcionStatus(usuario_id, edicion_id);
+  if (!inscripcion) throw { status: 404, message: 'El usuario no esta inscrito a este curso' };
+  return inscripcion;
+};
 
 export const createInscripcion = async (data: InscripcionCreate) => {
   if (!data.usuario_id) throw { status: 400, message: 'El usuario es obligatorio' };
