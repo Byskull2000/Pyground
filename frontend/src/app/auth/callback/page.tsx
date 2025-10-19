@@ -26,7 +26,7 @@ function CallbackContent() {
           if (user.rol === 'ADMIN') {
             router.replace('/admin');
           } else if (user.rol === 'ACADEMICO') {
-            router.replace('/academico');
+            router.replace('/mis-ediciones');
           } else {
             router.replace('/dashboard');
           }
