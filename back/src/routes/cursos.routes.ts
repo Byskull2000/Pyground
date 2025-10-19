@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/', cursoController.getCursos);
 router.get('/:id', cursoController.getCursoById);
-router.get('/publicar/:id', cursoController.publicateCurso);
-router.get('/desactivar/:id', cursoController.deactivateCurso);
+router.put('/publicar/:id', cursoController.publicateCurso);
+router.put('/desactivar/:id', cursoController.deactivateCurso);
 
 
 export default router;

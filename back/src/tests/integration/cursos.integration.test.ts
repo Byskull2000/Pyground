@@ -136,8 +136,8 @@ describe('Cursos API - Integration Tests', () => {
         });
     });
 
-    // --- GET /api/cursos/publicar/:id ---
-    describe('GET /api/cursos/publicar/:id', () => {
+    // --- PUT /api/cursos/publicar/:id ---
+    describe('PUT /api/cursos/publicar/:id', () => {
         it('PC1 - debe publicar un curso correctamente', async () => {
         const curso = await prisma.curso.create({
             data: {
@@ -161,7 +161,7 @@ describe('Cursos API - Integration Tests', () => {
         });
 
         const response = await request(app)
-            .get(`/api/cursos/publicar/${curso.id}`)
+            .put(`/api/cursos/publicar/${curso.id}`)
             .expect('Content-Type', /json/)
             .expect(200);
 
@@ -172,7 +172,7 @@ describe('Cursos API - Integration Tests', () => {
 
         it('PC2 - debe retornar 404 si el curso no existe', async () => {
         const response = await request(app)
-            .get('/api/cursos/publicar/9999')
+            .put('/api/cursos/publicar/9999')
             .expect('Content-Type', /json/)
             .expect(404);
 
@@ -182,8 +182,8 @@ describe('Cursos API - Integration Tests', () => {
         });
     });
 
-    // --- GET /api/cursos/desactivar/:id ---
-    describe('GET /api/cursos/desactivar/:id', () => {
+    // --- PUT /api/cursos/desactivar/:id ---
+    describe('PUT /api/cursos/desactivar/:id', () => {
         it('DC1 - debe archivar un curso correctamente', async () => {
         const curso = await prisma.curso.create({
             data: {
@@ -197,7 +197,7 @@ describe('Cursos API - Integration Tests', () => {
         });
 
         const response = await request(app)
-            .get(`/api/cursos/desactivar/${curso.id}`)
+            .put(`/api/cursos/desactivar/${curso.id}`)
             .expect('Content-Type', /json/)
             .expect(200);
 
@@ -208,7 +208,7 @@ describe('Cursos API - Integration Tests', () => {
 
         it('DC2 - debe retornar 404 si el curso no existe', async () => {
         const response = await request(app)
-            .get('/api/cursos/desactivar/9999')
+            .put('/api/cursos/desactivar/9999')
             .expect('Content-Type', /json/)
             .expect(404);
 
