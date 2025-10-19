@@ -3,7 +3,7 @@ import React from 'react'
 
 const page = () => {
     return (
-        <EditarEdicionPage modo="admin" />
+        <EditarEdicionPage modo="academico" />
     )
 }
 
