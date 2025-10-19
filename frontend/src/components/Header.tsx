@@ -21,32 +21,43 @@ export default function Header() {
   const navigationLinks = [
     ...(isAuthenticated
       ? [
-          {
-            label: 'Dashboard',
-            href: user?.rol === 'ADMIN' ? '/admin' : '/dashboard',
-          },
-        ]
+        {
+          label: 'Dashboard',
+          href: user?.rol === 'ADMIN' ? '/admin' : '/dashboard',
+        },
+      ]
       : []),
     ...(isAuthenticated && user?.rol === 'USUARIO'
       ? [
-          {
-            label: 'Cursos',
-            href: '/cursos',
-          },
-        ]
+        {
+          label: 'Cursos',
+          href: '/cursos',
+        },
+      ]
       : []),
     ...(isAuthenticated && user?.rol === 'ADMIN'
       ? [
-          {
-            label: 'Usuarios',
-            href: '/admin/usuarios',
-          },
-          {
-            label: 'Administradores',
-            href: '/admin/administradores',
-          },
-        ]
+        {
+          label: 'Usuarios',
+          href: '/admin/usuarios',
+        },
+        {
+          label: 'Administradores',
+          href: '/admin/administradores',
+        },
+        {
+          label: 'Cursos',
+          href: '/admin/cursos',
+        },
+      ]
       : []),
+
+    ...(isAuthenticated && user?.rol === 'ACADEMICO' ? [
+      {
+        label: 'Mis Ediciones',
+        href: '/mis-ediciones',
+      },
+    ] : [])
   ];
 
   return (
