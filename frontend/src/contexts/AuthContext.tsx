@@ -2,23 +2,12 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Usuario } from '@/interfaces/Usuario';
 
-interface User {
-  id: number;
-  email: string;
-  nombre: string;
-  apellido: string;
-  avatar_url?: string;
-  provider?: string;
-  bio?: string;
-  activo?: boolean;
-  rol?: 'ADMIN' | 'USUARIO' | 'ACADEMICO';
-  fecha_registro?: Date;
-  ultimo_acceso?: Date;
-}
+
 
 interface AuthContextType {
-  user: User | null;
+  user: Usuario | null;
   loading: boolean;
   login: () => void;
   loginWithCredentials: (email: string, password: string) => Promise<void>;
@@ -29,7 +18,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';

@@ -244,6 +244,13 @@ export default function EdicionesPage() {
 
                                     <div className="flex gap-2 pt-4 border-t border-white/10">
                                         <button
+                                            onClick={() => router.push(`/admin/ediciones/${edicion.id}/inscripcion`)}
+                                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg hover:bg-purple-500/30 transition-colors"
+                                        >
+                                            <Users className="w-4 h-4" />
+                                            Inscribir
+                                        </button>
+                                        <button
                                             onClick={() => router.push(`/admin/ediciones/${edicion.id}/editar`)}
                                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition-colors"
                                         >
