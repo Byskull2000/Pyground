@@ -13,12 +13,12 @@
     "test:verbose": "jest --verbose",
     "test:unit": "jest --testPathPattern=unit",
     "test:integration": "jest --testPathPattern=integration",
-    "lint": "eslint src --ext .ts --ignore-pattern src/tests/**",
+    "lint": "eslint .",
     "lint:fix": "eslint src --ext .ts --fix",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "keywords": [
     "express",
