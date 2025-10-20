@@ -135,4 +135,87 @@ describe('Cursos API - Integration Tests', () => {
             prisma.curso.findUnique = originalFindUnique;
         });
     });
+
+    // --- PUT /api/cursos/publicar/:id ---
+    describe('PUT /api/cursos/publicar/:id', () => {
+        it('PC1 - debe publicar un curso correctamente', async () => {
+        const curso = await prisma.curso.create({
+            data: {
+            nombre: 'C++',
+            codigo_curso: 'CPP001',
+            descripcion: 'Curso de C++',
+            activo: true,
+            fecha_creacion: new Date(),
+            creado_por: 'Admin'
+            }
+        });
+
+        await prisma.unidadPlantilla.create({
+            data: {
+            titulo: 'Unidad 1',
+            descripcion: 'Intro',
+            id_curso: curso.id,
+            orden: 1,
+            version: 1
+            }
+        });
+
+        const response = await request(app)
+            .put(`/api/cursos/publicar/${curso.id}`)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+        const body: ApiResponse<any> = response.body;
+        expect(body.success).toBe(true);
+        expect(body.data).toHaveProperty('message', 'Curso publicado correctamente');
+        });
+
+        it('PC2 - debe retornar 404 si el curso no existe', async () => {
+        const response = await request(app)
+            .put('/api/cursos/publicar/9999')
+            .expect('Content-Type', /json/)
+            .expect(404);
+
+        const body: ApiResponse<any> = response.body;
+        expect(body.success).toBe(false);
+        expect(body.error).toMatch(/Curso no encontrado|no tiene unidades listas/);
+        });
+    });
+
+    // --- PUT /api/cursos/desactivar/:id ---
+    describe('PUT /api/cursos/desactivar/:id', () => {
+        it('DC1 - debe archivar un curso correctamente', async () => {
+        const curso = await prisma.curso.create({
+            data: {
+            nombre: 'Go',
+            codigo_curso: 'GO001',
+            descripcion: 'Curso de Go',
+            activo: true,
+            fecha_creacion: new Date(),
+            creado_por: 'Admin'
+            }
+        });
+
+        const response = await request(app)
+            .put(`/api/cursos/desactivar/${curso.id}`)
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+        const body: ApiResponse<any> = response.body;
+        expect(body.success).toBe(true);
+        expect(body.data).toHaveProperty('message', 'Curso archivado');
+        });
+
+        it('DC2 - debe retornar 404 si el curso no existe', async () => {
+        const response = await request(app)
+            .put('/api/cursos/desactivar/9999')
+            .expect('Content-Type', /json/)
+            .expect(404);
+
+        const body: ApiResponse<any> = response.body;
+        expect(body.success).toBe(false);
+        expect(body.data).toBeNull();
+        expect(body.error).toMatch(/Curso no encontrado/);
+        });
+    });
 });

@@ -163,7 +163,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (userData.rol === 'ADMIN') {
         console.log('🔐 AuthContext: Usuario es ADMIN, redirigiendo a /admin');
         router.push('/admin');
-      } else {
+      }else if (userData.rol === 'ACADEMIC') {
+        console.log('👩‍🏫 AuthContext: Usuario es ACADEMIC, redirigiendo a /mis-ediciones');
+        router.push('/mis-ediciones');
+      } 
+      else {
         console.log('👤 AuthContext: Usuario normal, redirigiendo a /dashboard');
         router.push('/dashboard');
       }

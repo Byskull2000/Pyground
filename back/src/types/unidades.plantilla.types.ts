@@ -3,7 +3,7 @@ export interface UnidadPlantillaCreate {
   titulo: string;
   descripcion?: string;
   orden: number;
-  version: number;
+  version?: number;
   icono?: string;
   color?: string;
   activo?: boolean; 

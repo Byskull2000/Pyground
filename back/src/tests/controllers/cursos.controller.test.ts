@@ -114,4 +114,103 @@ describe('Cursos Controller', () => {
       expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Error al obtener curso'));
     });
   });
+
+
+  describe('publicateCurso', () => {
+    it('PC1 - debe publicar un curso correctamente', async () => {
+      (cursoService.publicateCurso as jest.Mock).mockResolvedValue({});
+
+      const req = createMockRequest({}, { id: '1' });
+      const res = createMockResponse();
+
+      await cursoController.publicateCurso(req, res);
+
+      expect(cursoService.publicateCurso).toHaveBeenCalledWith(1);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, { message: 'Curso publicado correctamente' })
+      );
+    });
+
+    it('PC2 - debe retornar 404 si el curso no existe', async () => {
+      (cursoService.publicateCurso as jest.Mock).mockRejectedValue({
+        status: 404,
+        message: 'Curso no encontrado',
+      });
+
+      const req = createMockRequest({}, { id: '999' });
+      const res = createMockResponse();
+
+      await cursoController.publicateCurso(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Curso no encontrado')
+      );
+    });
+
+    it('PC3 - debe retornar 500 si ocurre un error inesperado', async () => {
+      (cursoService.publicateCurso as jest.Mock).mockRejectedValue(
+        new Error('Error inesperado')
+      );
+
+      const req = createMockRequest({}, { id: '1' });
+      const res = createMockResponse();
+
+      await cursoController.publicateCurso(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Error inesperado')
+      );
+    });
+  });
+
+  describe('deactivateCurso', () => {
+    it('DC1 - debe archivar un curso correctamente', async () => {
+      (cursoService.deactivateCurso as jest.Mock).mockResolvedValue({});
+
+      const req = createMockRequest({}, { id: '2' });
+      const res = createMockResponse();
+
+      await cursoController.deactivateCurso(req, res);
+
+      expect(cursoService.deactivateCurso).toHaveBeenCalledWith(2);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, { message: 'Curso archivado' })
+      );
+    });
+
+    it('DC2 - debe retornar 404 si el curso no existe', async () => {
+      (cursoService.deactivateCurso as jest.Mock).mockRejectedValue({
+        status: 404,
+        message: 'Curso no encontrado',
+      });
+
+      const req = createMockRequest({}, { id: '999' });
+      const res = createMockResponse();
+
+      await cursoController.deactivateCurso(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Curso no encontrado')
+      );
+    });
+
+    it('DC3 - debe retornar 500 si ocurre un error inesperado', async () => {
+      (cursoService.deactivateCurso as jest.Mock).mockRejectedValue(
+        new Error('Error inesperado')
+      );
+
+      const req = createMockRequest({}, { id: '3' });
+      const res = createMockResponse();
+
+      await cursoController.deactivateCurso(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Error inesperado')
+      );
+    });
+  });
 });
