@@ -1,3 +1,4 @@
+// back/src/tests/integration/auth.integration.test.ts
 import request from 'supertest';
 import express from 'express';
 import authRoutes from '../../routes/auth.routes';

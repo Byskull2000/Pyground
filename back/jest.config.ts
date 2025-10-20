@@ -54,8 +54,7 @@ const config: Config.InitialOptions = {
   restoreMocks: true,
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@prisma/client$': '<rootDir>/../generated/prisma'
+    '^@/(.*)$': '<rootDir>/src/$1'
   }
 };
 

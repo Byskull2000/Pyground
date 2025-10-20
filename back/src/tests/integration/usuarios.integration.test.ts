@@ -4,6 +4,7 @@ import * as usuariosService from '../../services/usuarios.service';
 import usuariosRoutes from '../../routes/usuarios.routes';
 import { ApiResponse } from '../../utils/apiResponse';
 import prisma from '../../config/prisma';
+import { createAdminUserAndToken, createUserAndToken } from '../helpers/auth.helper';
 
 // Crear app de prueba
 const app = express();
@@ -152,19 +153,28 @@ describe('Usuarios API - Integration Tests', () => {
     });
 
     describe('GET /api/usuarios', () => {
-        it('debe retornar lista vacía si no hay usuarios', async () => {
+        it('debe retornar solo el admin si no hay otros usuarios', async () => {
+            const { admin, token } = await createAdminUserAndToken();
+
             const response = await request(app)
                 .get('/api/usuarios')
+                .set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(200);
 
             const body: ApiResponse<any[]> = response.body;
             expect(body.success).toBe(true);
-            expect(body.data).toEqual([]);
+            expect(body.data).not.toBeNull();
+            expect(Array.isArray(body.data)).toBe(true);
+            expect(body.data?.length).toBe(1); // Solo el admin
+            expect(body.data?.[0].id).toBe(admin.id);
             expect(body.error).toBeNull();
         });
 
         it('debe retornar lista de usuarios', async () => {
+            const { admin, token } = await createAdminUserAndToken();
+
+            // Crear algunos usuarios de prueba
             await prisma.usuario.createMany({
                 data: [
                     {
@@ -184,44 +194,55 @@ describe('Usuarios API - Integration Tests', () => {
 
             const response = await request(app)
                 .get('/api/usuarios')
+                .set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(200);
 
             const body: ApiResponse<any[]> = response.body;
             expect(body.success).toBe(true);
-            //expect(body.data).toHaveLength(2);
-            //expect(body.data[0]).not.toHaveProperty('password');
+            expect(Array.isArray(body.data)).toBe(true);
+            expect(body.data?.length).toBeGreaterThanOrEqual(3); // admin + 2 test users
             expect(body.error).toBeNull();
         });
     });
 
     describe('GET /api/usuarios/:id', () => {
         it('debe retornar un usuario por id', async () => {
-            const created = await prisma.usuario.create({
+            // Crear un usuario admin para las pruebas
+            const { admin: adminUser, token: adminToken } = await createAdminUserAndToken();
+
+            // Crear un usuario normal para obtener
+            const testUser = await prisma.usuario.create({
                 data: {
-                    email: 'find@test.com',
-                    nombre: 'Find',
-                    apellido: 'Me',
-                    password_hash: 'hash'
+                    email: 'test@example.com',
+                    nombre: 'Test',
+                    apellido: 'User',
+                    password_hash: 'hash123',
+                    rol: 'USUARIO'
                 }
             });
 
             const response = await request(app)
-                .get(`/api/usuarios/${created.id}`)
+                .get(`/api/usuarios/${testUser.id}`)
+                .set('Authorization', `Bearer ${adminToken}`)
                 .expect('Content-Type', /json/)
                 .expect(200);
 
             const body: ApiResponse<any> = response.body;
             expect(body.success).toBe(true);
-            expect(body.data.id).toBe(created.id);
-            expect(body.data.email).toBe('find@test.com');
+            expect(body.data?.id).toBe(testUser.id);
+            expect(body.data?.email).toBe(testUser.email);
             expect(body.data).not.toHaveProperty('password');
             expect(body.error).toBeNull();
         });
 
         it('debe retornar 404 si el usuario no existe', async () => {
+            // Crear un usuario admin para las pruebas
+            const { admin: adminUser, token: adminToken } = await createAdminUserAndToken();
+
             const response = await request(app)
                 .get('/api/usuarios/99999')
+                .set('Authorization', `Bearer ${adminToken}`)
                 .expect('Content-Type', /json/)
                 .expect(404);
 
@@ -234,14 +255,8 @@ describe('Usuarios API - Integration Tests', () => {
 
     describe('PUT /api/usuarios/:id', () => {
         it('debe actualizar un usuario', async () => {
-            const created = await prisma.usuario.create({
-                data: {
-                    email: 'update@test.com',
-                    nombre: 'Original',
-                    apellido: 'Name',
-                    password_hash: 'hash'
-                }
-            });
+            // Crear un usuario para actualizar
+            const { admin: adminUser, token: adminToken } = await createAdminUserAndToken();
 
             const updateData = {
                 nombre: 'Updated',
@@ -249,32 +264,38 @@ describe('Usuarios API - Integration Tests', () => {
             };
 
             const response = await request(app)
-                .put(`/api/usuarios/${created.id}`)
+                .put(`/api/usuarios/${adminUser.id}`)
+                .set('Authorization', `Bearer ${adminToken}`)
                 .send(updateData)
                 .expect('Content-Type', /json/)
                 .expect(200);
 
             const body: ApiResponse<any> = response.body;
             expect(body.success).toBe(true);
-            expect(body.data.nombre).toBe('Updated');
-            expect(body.data.bio).toBe('Nueva biografía');
+            expect(body.data?.nombre).toBe('Updated');
+            expect(body.data?.bio).toBe('Nueva biografía');
             expect(body.error).toBeNull();
+
+            // Verificar en la base de datos
+            const updatedUser = await prisma.usuario.findUnique({
+                where: { id: adminUser.id }
+            });
+            expect(updatedUser?.nombre).toBe('Updated');
+            expect(updatedUser?.bio).toBe('Nueva biografía');
         });
     });
 
     describe('DELETE /api/usuarios/:id', () => {
         it('debe eliminar un usuario', async () => {
-            const created = await prisma.usuario.create({
-                data: {
-                    email: 'delete@test.com',
-                    nombre: 'Delete',
-                    apellido: 'Me',
-                    password_hash: 'hash'
-                }
-            });
+            // Crear un admin para eliminar usuarios
+            const { token: adminToken } = await createAdminUserAndToken();
+
+            // Crear un usuario para eliminar
+            const { user } = await createUserAndToken();
 
             const response = await request(app)
-                .delete(`/api/usuarios/${created.id}`)
+                .delete(`/api/usuarios/${user.id}`)
+                .set('Authorization', `Bearer ${adminToken}`)
                 .expect('Content-Type', /json/)
                 .expect(200);
 
@@ -284,7 +305,7 @@ describe('Usuarios API - Integration Tests', () => {
             expect(body.error).toBeNull();
 
             const deleted = await prisma.usuario.findUnique({
-                where: { id: created.id }
+                where: { id: user.id }
             });
             expect(deleted).toBeNull();
         });
@@ -292,19 +313,16 @@ describe('Usuarios API - Integration Tests', () => {
 
     describe('PUT /api/usuarios/:id/rol', () => {
         it('ROL1: asignación exitosa de rol existente', async () => {
-            const created = await prisma.usuario.create({
-                data: {
-                    email: 'rol1@test.com',
-                    nombre: 'Rol',
-                    apellido: 'Uno',
-                    password_hash: 'hash'
-                }
-            });
+            // Crear un admin para asignar roles
+            const { token: adminToken } = await createAdminUserAndToken();
+
+            // Crear un usuario para asignar rol
+            const { user } = await createUserAndToken();
 
             const response = await request(app)
-                .put(`/api/usuarios/${created.id}/rol`)
+                .put(`/api/usuarios/${user.id}/rol`)
+                .set('Authorization', `Bearer ${adminToken}`)
                 .send({ rol: 'ACADEMICO' })
-                //.set('Authorization', `Bearer ${token}`) // token omitido por ahora
                 .expect('Content-Type', /json/)
                 .expect(200);
 
@@ -316,19 +334,16 @@ describe('Usuarios API - Integration Tests', () => {
         });
 
         it('ROL2: intentar asignar rol inexistente', async () => {
-            const created = await prisma.usuario.create({
-                data: {
-                    email: 'rol2@test.com',
-                    nombre: 'Rol',
-                    apellido: 'Dos',
-                    password_hash: 'hash'
-                }
-            });
+            // Crear un admin para asignar roles
+            const { token: adminToken } = await createAdminUserAndToken();
+
+            // Crear un usuario para asignar rol
+            const { user } = await createUserAndToken();
 
             const response = await request(app)
-                .put(`/api/usuarios/${created.id}/rol`)
+                .put(`/api/usuarios/${user.id}/rol`)
+                .set('Authorization', `Bearer ${adminToken}`)
                 .send({ rol: 'SUPERADMIN' })
-                //.set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(400);
 
@@ -339,10 +354,13 @@ describe('Usuarios API - Integration Tests', () => {
         });
 
         it('ROL5: usuario no encontrado', async () => {
+            // Crear un admin para asignar roles
+            const { token: adminToken } = await createAdminUserAndToken();
+
             const response = await request(app)
                 .put('/api/usuarios/99999/rol')
+                .set('Authorization', `Bearer ${adminToken}`)
                 .send({ rol: 'USUARIO' })
-                //.set('Authorization', `Bearer ${token}`) 
                 .expect('Content-Type', /json/)
                 .expect(404);
 
@@ -353,24 +371,20 @@ describe('Usuarios API - Integration Tests', () => {
         });
 
         it('ROL6: error interno del servidor', async () => {
-            const created = await prisma.usuario.create({
-                data: {
-                    email: 'error500@test.com',
-                    nombre: 'Error',
-                    apellido: 'Server',
-                    password_hash: 'hash'
-                }
-            });
+            // Crear un admin para asignar roles
+            const { token: adminToken } = await createAdminUserAndToken();
+
+            // Crear un usuario para asignar rol
+            const { user } = await createUserAndToken();
 
             jest.spyOn(usuariosService, 'assignRol').mockImplementation(() => {
                 throw new Error('Simulated internal server error');
             });
 
-
             const response = await request(app)
-                .put(`/api/usuarios/${created.id}/rol`)
-                .send({ rol: 'ADMIN' }) 
-                //.set('Authorization', `Bearer ${token}`) 
+                .put(`/api/usuarios/${user.id}/rol`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ rol: 'ADMIN' })
                 .expect('Content-Type', /json/)
                 .expect(500);
 

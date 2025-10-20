@@ -1,3 +1,4 @@
+// back/src/tests/services/auth.service.test.ts
 import { Request, Response } from 'express';
 import * as authController from '../../controllers/auth.controller';
 import * as authService from '../../services/auth.service';

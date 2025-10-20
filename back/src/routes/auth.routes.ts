@@ -2,7 +2,7 @@
 import express from 'express';
 import passport from 'passport';
 import * as authController from '../controllers/auth.controller';
-import { authenticateToken } from '../middleware/auth';
+import { authRequired } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
 import { Usuario } from '../../generated/prisma';
 
@@ -108,7 +108,7 @@ router.get('/verify', async (req, res) => {
 });
 
 // Obtener información del usuario autenticado
-router.get('/me', authenticateToken, async (req, res) => {
+router.get('/me', authRequired, async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ 

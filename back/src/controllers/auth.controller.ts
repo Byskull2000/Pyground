@@ -202,38 +202,3 @@ export const enviarEmailVerificacion = async (req: Request, res: Response) => {
     res.status(500).json(new ApiResponse(false, null, 'Error al enviar email de verificación'));
   }
 };
-
-/*export const changePassword = async (req: Request, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json(new ApiResponse(false, null, 'No autorizado'));
-    }
-
-    const { currentPassword, newPassword } = req.body;
-
-    // Validación de campos requeridos
-    if (!currentPassword || !newPassword) {
-      return res
-        .status(400)
-        .json(new ApiResponse(false, null, 'Contraseña actual y nueva contraseña son requeridas'));
-    }
-
-    // Validación de longitud de contraseña
-    if (newPassword.length < 6) {
-      return res
-        .status(400)
-        .json(new ApiResponse(false, null, 'La nueva contraseña debe tener al menos 6 caracteres'));
-    }
-
-    await authService.changePassword(req.user.id, currentPassword, newPassword);
-    res.json(new ApiResponse(true, { message: 'Contraseña actualizada correctamente' }));
-
-  } catch (err: any) {
-    if (err.message === 'Invalid current password') {
-      return res.status(401).json(new ApiResponse(false, null, 'Contraseña actual incorrecta'));
-    }
-
-    //console.error('Error al cambiar contraseña:', err);
-    res.status(500).json(new ApiResponse(false, null, 'Error al cambiar contraseña'));
-  }
-};*/

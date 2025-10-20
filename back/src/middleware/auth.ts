@@ -13,7 +13,7 @@ interface JWTPayload {
 }
 
 // Middleware para proteger rutas
-export const authenticateToken = async (
+export const authRequired = async (
   req: Request, 
   res: Response, 
   next: NextFunction
@@ -51,7 +51,8 @@ export const authenticateToken = async (
       email: usuario.email,
       nombre: usuario.nombre,
       apellido: usuario.apellido,
-      provider: usuario.provider
+      provider: usuario.provider,
+      rol: usuario.rol
     };
 
     next();
@@ -103,7 +104,8 @@ export const optionalAuth = async (
         email: usuario.email,
         nombre: usuario.nombre,
         apellido: usuario.apellido,
-        provider: usuario.provider
+        provider: usuario.provider,
+        rol: usuario.rol
       };
     }
 

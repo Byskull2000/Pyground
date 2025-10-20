@@ -1,3 +1,4 @@
+// back/src/tests/controllers/auth.controller.test.ts
 import * as authController from '../../controllers/auth.controller';
 import * as authService from '../../services/auth.service';
 import { createMockRequest, createMockResponse } from '../setup';

@@ -2,14 +2,14 @@
 // Ejemplo de cómo usar el middleware de autenticación en tus rutas
 
 import express, { Request, Response } from 'express';
-import { authenticateToken } from '../middleware/auth';
+import { authRequired } from '../middleware/auth';
 import { PrismaClient } from '../../generated/prisma';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // Ejemplo: Ruta protegida para actualizar perfil
-router.put('/profile', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+router.put('/profile', authRequired, async (req: Request, res: Response): Promise<void> => {
   try {
     const { nombre, apellido, bio } = req.body;
     
@@ -48,7 +48,7 @@ router.put('/profile', authenticateToken, async (req: Request, res: Response): P
 });
 
 // Ejemplo: Obtener datos del usuario autenticado
-router.get('/dashboard', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+router.get('/dashboard', authRequired, async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });

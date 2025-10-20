@@ -3,6 +3,7 @@ import express from 'express';
 import prisma from '../../config/prisma';
 import inscripcionesRoutes from '../../routes/inscripciones.routes';
 import { ApiResponse } from '../../utils/apiResponse';
+import { createAdminUserAndToken, createUserAndToken } from '../helpers/auth.helper';
 
 const app = express();
 app.use(express.json());
@@ -36,6 +37,7 @@ describe('Inscripciones API - Integration Tests', () => {
   // CREAR INSCRIPCIÓN
   describe('POST /api/inscripciones', () => {
     it('IS5: creación exitosa de una inscripción', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
       const usuario = await prisma.usuario.create({ data: { nombre: 'Usuario', apellido: 'Test',  email: 'test@correo.com' } });
       const cargo = await prisma.cargo.create({ data: { nombre: 'Participante' } });
       const curso = await prisma.curso.create({ data: { nombre: 'Curso Prueba', codigo_curso: 'PRUEBA', descripcion: 'Demo' } });
@@ -45,6 +47,7 @@ describe('Inscripciones API - Integration Tests', () => {
 
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send(newInscripcion)
         .expect('Content-Type', /json/)
         .expect(201);
@@ -57,8 +60,11 @@ describe('Inscripciones API - Integration Tests', () => {
     });
 
     it('IS6: faltan campos obligatorios', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
+
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ edicion_id: 1, cargo_id: 1 })
         .expect('Content-Type', /json/)
         .expect(400);
@@ -70,12 +76,14 @@ describe('Inscripciones API - Integration Tests', () => {
     });
 
     it('IS7: usuario no encontrado', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
       const curso = await prisma.curso.create({ data: { nombre: 'Curso Prueba', codigo_curso: 'PRUEBA', descripcion: 'Demo' } });
       const cargo = await prisma.cargo.create({ data: { nombre: 'Participante' } });
       const edicion = await prisma.edicion.create({ data: { id_curso: curso.id, nombre_edicion: 'Edición 2025', activo: true, estado_publicado: true, creado_por: 'admin@correo.com', fecha_apertura: new Date('2025-01-10') } });
 
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ usuario_id: 9999, edicion_id: edicion.id, cargo_id: cargo.id })
         .expect('Content-Type', /json/)
         .expect(404);
@@ -87,11 +95,13 @@ describe('Inscripciones API - Integration Tests', () => {
     });
 
     it('IS8: edición no encontrada o inactiva', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
       const usuario = await prisma.usuario.create({ data: { nombre: 'Usuario', apellido: 'Test', email: 'test@correo.com' } });
       const cargo = await prisma.cargo.create({ data: { nombre: 'Participante' } });
 
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ usuario_id: usuario.id, edicion_id: 9999, cargo_id: cargo.id })
         .expect('Content-Type', /json/)
         .expect(404);
@@ -103,6 +113,7 @@ describe('Inscripciones API - Integration Tests', () => {
     });
 
     it('IS9: edición no publicada', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
       const usuario = await prisma.usuario.create({ data: { nombre: 'Usuario', apellido: 'Test', email: 'test@correo.com' } });
       const cargo = await prisma.cargo.create({ data: { nombre: 'Estudiante' } });
       const curso = await prisma.curso.create({ data: { nombre: 'Curso', codigo_curso: 'CURSO', descripcion: 'Demo' } });
@@ -110,6 +121,7 @@ describe('Inscripciones API - Integration Tests', () => {
 
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ usuario_id: usuario.id, edicion_id: edicion.id, cargo_id: cargo.id })
         .expect('Content-Type', /json/)
         .expect(409);
@@ -121,12 +133,14 @@ describe('Inscripciones API - Integration Tests', () => {
     });
 
     it('IS10: cargo no encontrado', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
       const usuario = await prisma.usuario.create({ data: { nombre: 'Usuario', apellido: 'Test', email: 'test@correo.com' } });
       const curso = await prisma.curso.create({ data: { nombre: 'Curso', codigo_curso: 'CURSO', descripcion: 'Demo' } });
       const edicion = await prisma.edicion.create({ data: { id_curso: curso.id, nombre_edicion: 'Edición', activo: true, estado_publicado: true, creado_por: 'admin@correo.com', fecha_apertura: new Date('2025-01-10') } });
 
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ usuario_id: usuario.id, edicion_id: edicion.id, cargo_id: 9999 })
         .expect('Content-Type', /json/)
         .expect(404);
@@ -138,6 +152,7 @@ describe('Inscripciones API - Integration Tests', () => {
     });
 
     it('IS11: usuario ya inscrito en la edición', async () => {
+      const { token: adminToken } = await createAdminUserAndToken();
       const usuario = await prisma.usuario.create({ data: { nombre: 'Usuario', apellido: 'Test', email: 'test@correo.com' } });
       const cargo = await prisma.cargo.create({ data: { nombre: 'Participante' } });
       const curso = await prisma.curso.create({ data: { nombre: 'Curso', codigo_curso: 'CURSO', descripcion: 'Demo' } });
@@ -147,6 +162,7 @@ describe('Inscripciones API - Integration Tests', () => {
 
       const response = await request(app)
         .post('/api/inscripciones')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({ usuario_id: usuario.id, edicion_id: edicion.id, cargo_id: cargo.id })
         .expect('Content-Type', /json/)
         .expect(409);

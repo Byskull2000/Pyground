@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import { PrismaClient } from '../../generated/prisma';
+import { JWT_SECRET } from './helpers/auth.helper';
 
+// Configurar variables de entorno para tests
+process.env.JWT_SECRET = JWT_SECRET;
 dotenv.config({ path: '.env.test' });
 
 export const prisma = new PrismaClient();
@@ -16,9 +19,14 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-  // Limpiar datos después de cada test - Ajustado a tu schema
-  await prisma.inscripcion.deleteMany({});
-  await prisma.usuario.deleteMany({});
+  // Limpiar datos después de cada test en orden para evitar violaciones de FK
+  await prisma.inscripcion.deleteMany();
+  await prisma.topicoPlantilla.deleteMany();
+  await prisma.unidadPlantilla.deleteMany();
+  await prisma.unidad.deleteMany();
+  await prisma.edicion.deleteMany();
+  await prisma.curso.deleteMany();
+  await prisma.usuario.deleteMany();
 });
 
 // Helpers para tests
