@@ -1,5 +1,7 @@
 import * as cursoRepo from '../repositories/cursos.repository';
 import * as unidadPlantillaRepo from '../repositories/unidades.plantilla.repository';
+import * as topicoPlantillaRepo from '../repositories/topicos.plantilla.repository';
+
 import { CursoResponse } from '../types/cursos.types';
 
 export const getCursos = async (): Promise<CursoResponse[]> => {
@@ -40,13 +42,13 @@ export const publicateCurso = async (id: number) => {
   if (unidadesPlantillaListas == null || unidadesPlantillaListas.length == 0) throw { 
     status: 404, message: 'Este curso no tiene unidades listas' 
   };
-/*
+
   const topicosPlantillaListos = await topicoPlantillaRepo.getTopicosPlantillaByCurso(id);
 
   if (topicosPlantillaListos == null || topicosPlantillaListos.length == 0) throw { 
     status: 404, message: 'Este curso no tiene topicos listos' 
   };
-*/
+
   const cursoPublicado = await cursoRepo.publicateCurso(id);
 
   return cursoPublicado;

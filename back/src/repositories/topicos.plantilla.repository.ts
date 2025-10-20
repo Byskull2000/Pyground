@@ -12,6 +12,20 @@ export const getTopicosByUnidadPlantilla = async (id_unidad_plantilla: number) =
   });
 };
 
+export const getTopicosPlantillaByCurso = async (id_curso: number) => {
+  return prisma.topicoPlantilla.findMany({
+    where: {
+      unidadPlantilla:{
+        id_curso: id_curso,
+      },
+      activo: true,
+    },
+    orderBy: {
+      orden: 'asc',
+    },
+  });
+};
+
 export const getTopicoPlantillaById = async (id: number) => {
   return prisma.topicoPlantilla.findUnique({
     where: { id },

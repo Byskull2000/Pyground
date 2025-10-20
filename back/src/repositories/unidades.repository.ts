@@ -44,21 +44,28 @@ export const deleteUnidad = async (id: number) => {
 
 
 export const cloneFromPlantillas = async (unidadesPlantilla: UnidadPlantilla[], id_edicion: number) => {
-  if (!unidadesPlantilla || unidadesPlantilla.length === 0) return [];
+  if (!unidadesPlantilla || unidadesPlantilla.length === 0) return {};
 
-  const data = unidadesPlantilla.map((u) => ({
-    id_edicion,
-    id_unidad_plantilla: u.id,
-    titulo: u.titulo,
-    descripcion: u.descripcion,
-    orden: u.orden,
-    icono: u.icono,
-    color: u.color,
-    activo: true,
-    fecha_creacion: new Date()
-  }));
+  const unidadMap: Record<number, number> = {}; // { id_unidad_plantilla: id_unidad_clonada }
 
-  return prisma.unidad.createMany({
-    data,
-  });
+  await Promise.all(
+    unidadesPlantilla.map(async (u) => {
+      const nuevaUnidad = await prisma.unidad.create({
+        data: {
+          id_edicion,
+          id_unidad_plantilla: u.id,
+          titulo: u.titulo,
+          descripcion: u.descripcion,
+          orden: u.orden,
+          icono: u.icono,
+          color: u.color,
+          activo: true,
+          fecha_creacion: new Date(),
+        },
+      });
+      unidadMap[u.id] = nuevaUnidad.id;
+    })
+  );
+
+  return unidadMap;
 };

@@ -8,6 +8,10 @@ export const getInscripcionesByEdicion = (id_edicion: number) => {
   return inscripcionRepo.getInscripcionesByEdicion(id_edicion);
 };
 
+export const getEstudiantesByEdicion = (id_edicion: number) => {
+  return inscripcionRepo.getEstudiantesByEdicion(id_edicion);
+};
+
 
 export const getInscripcion = async (id: number) => {
   const inscripcion = await inscripcionRepo.getInscripcionById(id);

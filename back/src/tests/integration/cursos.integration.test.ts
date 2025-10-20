@@ -150,13 +150,24 @@ describe('Cursos API - Integration Tests', () => {
             }
         });
 
-        await prisma.unidadPlantilla.create({
+        const unidad = await prisma.unidadPlantilla.create({
             data: {
-            titulo: 'Unidad 1',
-            descripcion: 'Intro',
-            id_curso: curso.id,
-            orden: 1,
-            version: 1
+                titulo: 'Unidad 1',
+                descripcion: 'Intro',
+                id_curso: curso.id,
+                orden: 1,
+                version: 1
+            }
+        });
+
+        await prisma.topicoPlantilla.create({
+            data: {
+                titulo: 'Topico 1',
+                descripcion: 'Intro',
+                id_unidad_plantilla: unidad.id,
+                orden: 1,
+                version: 1,
+                duracion_estimada: 15
             }
         });
 

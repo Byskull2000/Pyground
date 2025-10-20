@@ -1,10 +1,12 @@
 import * as cursoService from '../../services/cursos.service';
 import * as cursoRepo from '../../repositories/cursos.repository';
 import * as unidadPlantillaRepo from '../../repositories/unidades.plantilla.repository';
+import * as topicoPlantillaRepo from '../../repositories/topicos.plantilla.repository';
 
 // Mock del repositorio
 jest.mock('../../repositories/cursos.repository');
 jest.mock('../../repositories/unidades.plantilla.repository');
+jest.mock('../../repositories/topicos.plantilla.repository');
 
 describe('Cursos Service', () => {
   beforeEach(() => {
@@ -92,10 +94,12 @@ describe('Cursos Service', () => {
     it('PC1 - debe publicar un curso existente con unidades listas', async () => {
       const mockCurso = { id: 1, nombre: 'Python' };
       const mockUnidades = [{ id: 10, nombre: 'Unidad 1' }];
+      const mockTopicos = [{ id: 10, nombre: 'Topico 1' }];
       const mockPublicado = { id: 1, nombre: 'Python', publicado: true };
 
       (cursoRepo.getCursoById as jest.Mock).mockResolvedValue(mockCurso);
       (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue(mockUnidades);
+      (topicoPlantillaRepo.getTopicosPlantillaByCurso as jest.Mock).mockResolvedValue(mockTopicos);
       (cursoRepo.publicateCurso as jest.Mock).mockResolvedValue(mockPublicado);
 
       const result = await cursoService.publicateCurso(1);
@@ -103,6 +107,7 @@ describe('Cursos Service', () => {
       expect(result).toEqual(mockPublicado);
       expect(cursoRepo.getCursoById).toHaveBeenCalledWith(1);
       expect(unidadPlantillaRepo.getUnidadesPlantillaByCurso).toHaveBeenCalledWith(1);
+      expect(topicoPlantillaRepo.getTopicosPlantillaByCurso).toHaveBeenCalledWith(1);
       expect(cursoRepo.publicateCurso).toHaveBeenCalledWith(1);
     });
 

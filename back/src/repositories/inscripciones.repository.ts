@@ -9,7 +9,43 @@ export const getInscripcionesByEdicion = async (id: number) => {
     },
     include: {
       edicion: true,
-      usuario: true,
+      cargo: true,
+      usuario: {
+        select: {
+          id: true,
+          nombre: true,
+          apellido: true,
+          avatar_url: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      fecha_inscripcion: 'desc',
+    },
+  });
+};
+
+export const getEstudiantesByEdicion = async (id: number) => {
+  return prisma.inscripcion.findMany({
+    where: {
+      edicion_id: id,
+      activo: true,
+      cargo:{
+        nombre: 'Estudiante'
+      }
+    },
+    include: {
+      edicion: true,
+      usuario: {
+        select: {
+          id: true,
+          nombre: true,
+          apellido: true,
+          avatar_url: true,
+          email: true,
+        },
+      },
       cargo: true,
     },
     orderBy: {
