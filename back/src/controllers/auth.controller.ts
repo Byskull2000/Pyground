@@ -5,18 +5,6 @@ import * as emailService from '../services/email.service';
 import { ApiResponse } from '../utils/apiResponse';
 import prisma from '../config/prisma';
 
-// Extender el tipo Request para incluir user
-declare global {
-  namespace Express {
-    interface User {
-      id: number;
-      email: string;
-      nombre: string;
-      apellido: string;
-    }
-  }
-}
-
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -98,7 +86,7 @@ export const verificarEmail = async (req: Request, res: Response) => {
       return res.status(400).json(new ApiResponse(false, null, 'Código de verificación inválido'));
     }
 
-    //console.error('Error al verificar email:', err);
+    console.error('Error al verificar email:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al verificar email'));
   }
 };
@@ -131,7 +119,7 @@ export const reenviarCodigo = async (req: Request, res: Response) => {
         .json(new ApiResponse(false, null, 'Error al enviar el código'));
     }
 
-    //console.error('Error al reenviar código:', err);
+    console.error('Error al reenviar código:', err);
     res.status(500).json(new ApiResponse(false, null, 'Error al reenviar código'));
   }
 };
@@ -191,7 +179,7 @@ export const enviarEmailVerificacion = async (req: Request, res: Response) => {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
 
-    //console.error('Error al enviar email de verificación:', err);
+    console.error('Error al enviar email de verificación:', err);
     
     if (message === 'Error al enviar email de verificación') {
       return res

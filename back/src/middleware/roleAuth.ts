@@ -12,9 +12,9 @@ export const requireRoles = (allowedRoles: RolesEnum[]) => {
         );
       }
 
-      const userRole = req.user.rol;
+      const userRole = req.user.rol as RolesEnum;
 
-      if (!allowedRoles.includes(userRole)) {
+      if (!userRole || !allowedRoles.includes(userRole)) {
         return res.status(403).json(
           new ApiResponse(false, null, 'No tiene permisos para realizar esta acción')
         );
@@ -41,7 +41,7 @@ export const requireOwnershipOrAdmin = (paramName: string) => {
       }
 
       const resourceId = parseInt(req.params[paramName]);
-      const userRole = req.user.rol;
+      const userRole = req.user.rol as RolesEnum;
       const userId = req.user.id;
 
       // Los admins siempre tienen acceso

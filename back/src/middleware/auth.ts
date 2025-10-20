@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '../../generated/prisma';
+import { RolesEnum } from '../types/roles';
 
 const prisma = new PrismaClient();
 
@@ -45,34 +46,35 @@ export const authRequired = async (
       return;
     }
 
+
     // Agregar usuario al request
-    (req.user as any) = {
+    req.user = {
       id: usuario.id,
       email: usuario.email,
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       provider: usuario.provider,
-      rol: usuario.rol
-    };
+      rol: usuario.rol as RolesEnum
+    } as Express.Request['user'];
 
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({ 
-        error: 'Invalid token' 
+      res.status(401).json({
+        error: 'Invalid token'
       });
       return;
     }
     if (error instanceof jwt.TokenExpiredError) {
-      res.status(401).json({ 
-        error: 'Token expired' 
+      res.status(401).json({
+        error: 'Token expired'
       });
       return;
     }
-    
+
     console.error('Auth middleware error:', error);
-    res.status(500).json({ 
-      error: 'Internal server error' 
+    res.status(500).json({
+      error: 'Internal server error'
     });
   }
 };
@@ -99,18 +101,18 @@ export const optionalAuth = async (
     });
 
     if (usuario && usuario.activo) {
-      (req.user as any) = {
+      req.user = {
         id: usuario.id,
         email: usuario.email,
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         provider: usuario.provider,
-        rol: usuario.rol
-      };
+        rol: usuario.rol as RolesEnum
+      } as Express.Request['user'];
     }
 
     next();
-  } catch (error) {
+  } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
     next();
   }
 };

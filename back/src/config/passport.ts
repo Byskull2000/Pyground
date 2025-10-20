@@ -6,6 +6,14 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile, VerifyCallback } from 'passport-google-oauth20';
 import { PrismaClient } from '../../generated/prisma';
 
+interface User {
+  id: number;
+  email: string;
+  nombre: string;
+  apellido: string;
+  provider?: string | null;
+  avatar_url?: string | null;
+}
 
 const prisma = new PrismaClient();
 
@@ -73,7 +81,7 @@ passport.use(
   )
 );
 
-passport.serializeUser((user: any, done) => {
+passport.serializeUser((user: User, done) => {
   done(null, user.id);
 });
 

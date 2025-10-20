@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ApiResponse } from '../utils/apiResponse';
-import topicosPlantillaRepository from '../repositories/topicos.plantilla.repository';
+import * as topicosPlantillaRepository from '../repositories/topicos.plantilla.repository';
 import * as unidadesPlantillaRepository from '../repositories/unidades.plantilla.repository';
 
 export async function getTopicosByUnidadPlantilla(req: Request, res: Response) {

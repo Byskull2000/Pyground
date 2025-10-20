@@ -1,21 +1,15 @@
-// back/src/tests/services/topicos.plantilla.service.test.ts
-
 jest.mock('../../repositories/topicos.plantilla.repository', () => ({
   __esModule: true,
-  default: {
-    getTopicosByUnidadPlantilla: jest.fn(),
-    getTopicoPlantillaById: jest.fn(),
-    createTopicoPlantilla: jest.fn(),
-    updateTopicoPlantilla: jest.fn(),
-    deleteTopicoPlantilla: jest.fn(),
-    getMaxOrden: jest.fn(),
-  },
-  TopicosPlantillaRepository: jest.fn(),
+  getTopicosByUnidadPlantilla: jest.fn(),
+  getTopicoPlantillaById: jest.fn(),
+  createTopicoPlantilla: jest.fn(),
+  updateTopicoPlantilla: jest.fn(),
+  deleteTopicoPlantilla: jest.fn(),
+  getMaxOrden: jest.fn(),
 }));
 
-
 import * as topicosService from '../../services/topicos.plantilla.service';
-import topicosRepository from '../../repositories/topicos.plantilla.repository';
+import * as topicosRepository from '../../repositories/topicos.plantilla.repository';
 
 
 describe('Topicos Plantilla Service', () => {

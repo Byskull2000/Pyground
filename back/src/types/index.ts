@@ -10,6 +10,9 @@ export interface AuthUser {
   provider?: string | null;
 }
 
+// Alias para IUser usado en passport.d.ts
+export type IUser = AuthUser;
+
 // Payload del JWT
 export interface JWTPayload {
   id: number;

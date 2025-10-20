@@ -41,7 +41,7 @@ export const loginUser = async (email: string, password: string) => {
 
   // Comparar contraseñas
   const isPasswordValid = await bcrypt.compare(password, usuario.password_hash);
-  
+
   if (!isPasswordValid) {
     throw new Error('Invalid credentials');
   }
@@ -56,10 +56,6 @@ export const loginUser = async (email: string, password: string) => {
     throw new Error('Account inactive');
   }
 
-  if (!isPasswordValid) {
-    throw new Error('Invalid credentials');
-  }
-
   // Actualizar último acceso
   await prisma.usuario.update({
     where: { id: usuario.id },
@@ -70,6 +66,7 @@ export const loginUser = async (email: string, password: string) => {
   const token = generateToken(usuario.id, usuario.email, usuario.nombre, usuario.apellido);
 
   // Eliminar password_hash de la respuesta
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password_hash, ...userWithoutPassword } = usuario;
 
   return {

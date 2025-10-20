@@ -1,86 +1,78 @@
-// back/src/repositories/topicos.plantilla.repository.ts
-import { PrismaClient } from '@prisma/client';
 import prisma from '../config/prisma';
 
-export class TopicosPlantillaRepository {
-  constructor(private prismaClient: PrismaClient = prisma) {}
+export const getTopicosByUnidadPlantilla = async (id_unidad_plantilla: number) => {
+  return prisma.topicoPlantilla.findMany({
+    where: {
+      id_unidad_plantilla,
+      activo: true,
+    },
+    orderBy: {
+      orden: 'asc',
+    },
+  });
+};
 
-  async getTopicosByUnidadPlantilla(id_unidad_plantilla: number) {
-    return await this.prismaClient.topicoPlantilla.findMany({
-      where: {
-        id_unidad_plantilla,
-        activo: true,
-      },
-      orderBy: {
-        orden: 'asc',
-      },
-    });
-  }
+export const getTopicoPlantillaById = async (id: number) => {
+  return prisma.topicoPlantilla.findUnique({
+    where: { id },
+  });
+};
 
-  async getTopicoPlantillaById(id: number) {
-    return await this.prismaClient.topicoPlantilla.findUnique({
-      where: { id },
-    });
-  }
+export const createTopicoPlantilla = async (data: {
+  id_unidad_plantilla: number;
+  titulo: string;
+  descripcion?: string;
+  duracion_estimada: number;
+  orden: number;
+  version: number;
+  publicado?: boolean;
+  objetivos_aprendizaje?: string;
+  activo?: boolean;
+}) => {
+  return prisma.topicoPlantilla.create({
+    data,
+  });
+};
 
-  async createTopicoPlantilla(data: {
-    id_unidad_plantilla: number;
-    titulo: string;
+export const updateTopicoPlantilla = async (
+  id: number,
+  data: {
+    titulo?: string;
     descripcion?: string;
-    duracion_estimada: number;
-    orden: number;
-    version: number;
+    duracion_estimada?: number;
+    orden?: number;
+    version?: number;
     publicado?: boolean;
     objetivos_aprendizaje?: string;
     activo?: boolean;
-  }) {
-    return await this.prismaClient.topicoPlantilla.create({
-      data,
-    });
-  }
+  },
+) => {
+  return prisma.topicoPlantilla.update({
+    where: { id },
+    data,
+  });
+};
 
-  async updateTopicoPlantilla(
-    id: number,
-    data: {
-      titulo?: string;
-      descripcion?: string;
-      duracion_estimada?: number;
-      orden?: number;
-      version?: number;
-      publicado?: boolean;
-      objetivos_aprendizaje?: string;
-      activo?: boolean;
+export const deleteTopicoPlantilla = async (id: number) => {
+  return prisma.topicoPlantilla.update({
+    where: { id },
+    data: { activo: false },
+  });
+};
+
+export const getMaxOrden = async (id_unidad_plantilla: number): Promise<number> => {
+  const result = await prisma.topicoPlantilla.findFirst({
+    where: {
+      id_unidad_plantilla,
+      activo: true,
     },
-  ) {
-    return await this.prismaClient.topicoPlantilla.update({
-      where: { id },
-      data,
-    });
-  }
+    orderBy: {
+      orden: 'desc',
+    },
+    select: {
+      orden: true,
+    },
+  });
 
-  async deleteTopicoPlantilla(id: number) {
-    return await this.prismaClient.topicoPlantilla.update({
-      where: { id },
-      data: { activo: false },
-    });
-  }
-
-  async getMaxOrden(id_unidad_plantilla: number): Promise<number> {
-    const result = await this.prismaClient.topicoPlantilla.findFirst({
-      where: {
-        id_unidad_plantilla,
-        activo: true,
-      },
-      orderBy: {
-        orden: 'desc',
-      },
-      select: {
-        orden: true,
-      },
-    });
-
-    return result?.orden ?? 0;
-  }
-}
-
-export default new TopicosPlantillaRepository();
+  return result?.orden ?? 0;
+};

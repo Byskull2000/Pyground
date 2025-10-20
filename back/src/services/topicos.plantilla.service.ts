@@ -1,5 +1,4 @@
-// back/src/services/topicos.plantilla.service.ts
-import topicosRepository from '../repositories/topicos.plantilla.repository';
+import * as topicosRepository from '../repositories/topicos.plantilla.repository';
 
 export const getTopicosByUnidadPlantilla = async (id_unidad_plantilla: number) => {
   return await topicosRepository.getTopicosByUnidadPlantilla(id_unidad_plantilla);

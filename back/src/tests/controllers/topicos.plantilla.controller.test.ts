@@ -1,7 +1,6 @@
-// back/src/tests/controllers/topicos.plantilla.controller.test.ts
 import { Request, Response } from 'express';
 import * as topicosController from '../../controllers/topicos.plantilla.controller';
-import topicosPlantillaRepository from '../../repositories/topicos.plantilla.repository';
+import * as topicosPlantillaRepository from '../../repositories/topicos.plantilla.repository';
 import * as unidadesPlantillaRepository from '../../repositories/unidades.plantilla.repository';
 import { ApiResponse } from '../../utils/apiResponse';
 import { RolesEnum } from '../../types/roles';

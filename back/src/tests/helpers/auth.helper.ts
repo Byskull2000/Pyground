@@ -5,6 +5,8 @@ import { RolesEnum } from '../../../generated/prisma';
 
 export const JWT_SECRET = 'test-secret';
 
+
+
 // Función para crear un usuario administrador y generar su token JWT
 export const createAdminUserAndToken = async () => {
     // Crear usuario admin

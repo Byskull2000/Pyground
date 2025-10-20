@@ -1,5 +1,6 @@
 // back/src/types/express.d.ts
 // Extensión de tipos para Express Request
+import { RolesEnum } from './roles';
 
 declare global {
   namespace Express {
@@ -10,6 +11,7 @@ declare global {
         nombre: string;
         apellido: string;
         provider: string | null;
+        rol: RolesEnum;
       };
     }
   }
