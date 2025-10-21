@@ -54,8 +54,8 @@ export default function InscritosPanel({ inscripciones }: InscritosPanelProps) {
         }
     };
 
-    const getRolIcon = (rol: string) => {
-        const rolUpper = rol.toUpperCase();
+    const getRolIcon = (rol?: string) => {
+        const rolUpper = (rol ?? '').toUpperCase();
         switch (rolUpper) {
             case 'ADMIN': return <Shield className="w-4 h-4 text-red-400" />;
             case 'DOCENTE': return <UserCheck className="w-4 h-4 text-green-400" />;
