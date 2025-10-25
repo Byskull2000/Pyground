@@ -16,11 +16,8 @@ export const createUnidadPlantilla = async (data: UnidadPlantillaCreate) => {
   if (!data.id_curso) throw { status: 400, message: 'El curso es obligatorio' };
   if (!data.orden || data.orden === undefined) throw { status: 400, message: 'El orden es obligatorio' };
 
-  const existentes = await unidadPlantillaRepo.getUnidadesPlantillaByCurso(data.id_curso);
-  if (existentes.some(u => u.titulo === data.titulo)) {
-    throw { status: 409, message: 'Ya existe una unidad con ese nombre para este curso' };
-  }
-
+  if (await unidadPlantillaRepo.getUnidadPlantillaRedudante(data.id_curso, data.titulo) != null) throw { status: 409, message: 'Ya existe una unidad con ese nombre para este curso' };
+  
   return unidadPlantillaRepo.createUnidadPlantilla({
     ...data,
     version: data.version ?? 1,

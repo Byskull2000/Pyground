@@ -91,7 +91,7 @@ describe('UnidadPlantilla Service', () => {
     });
 
     it('UP5: Unidad duplicada en el mismo curso', async () => {
-      (unidadPlantillaRepo.getUnidadesPlantillaByCurso as jest.Mock).mockResolvedValue([{ id: 1, titulo: 'Introducción' }]);
+      (unidadPlantillaRepo.getUnidadPlantillaRedudante as jest.Mock).mockResolvedValue([{ id: 1, titulo: 'Introducción' }]);
       await expect(unidadPlantillaService.createUnidadPlantilla(baseData))
         .rejects.toMatchObject({ status: 409, message: 'Ya existe una unidad con ese nombre para este curso' });
     });

@@ -6,7 +6,6 @@ export interface UnidadCreate {
   orden: number;               
   icono?: string;
   color?: string;
-  publicado?: boolean;          
   activo?: boolean;             
 }
 
@@ -18,5 +17,4 @@ export interface UnidadUpdate {
   color?: string;
   publicado?: boolean;
   fecha_actualizacion?: Date;
-  activo?: boolean;
 }
