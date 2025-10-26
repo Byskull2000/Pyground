@@ -2,7 +2,7 @@ import { BookOpen, ArrowRight } from 'lucide-react';
 
 interface Unidad {
     id: number;
-    id_curso: number;
+    id_edicion: number;
     titulo: string;
     descripcion: string;
     orden: number;
@@ -12,15 +12,14 @@ interface Unidad {
 
 interface UnidadesPanelProps {
     unidades: Unidad[];
-    cursoId: number;
-    edicionId?: number;
+    edicionId: number;
     onNavigate?: (path: string) => void;
 }
 
-export default function UnidadesPanel({ unidades, cursoId, edicionId, onNavigate }: UnidadesPanelProps) {
+export default function UnidadesPanel({ unidades, edicionId, onNavigate }: UnidadesPanelProps) {
     const handleNavigate = () => {
         if (onNavigate && edicionId) {
-            onNavigate(`/mis-ediciones/${edicionId}/contenido`);
+            onNavigate(`/mis-ediciones/${edicionId}/unidades`);
         }
     };
 
@@ -34,7 +33,7 @@ export default function UnidadesPanel({ unidades, cursoId, edicionId, onNavigate
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-white">
-                                Unidades del Curso
+                                Unidades de la edición
                             </h2>
                             <p className="text-sm text-gray-400">
                                 {unidades.length} {unidades.length === 1 ? 'unidad disponible' : 'unidades disponibles'}

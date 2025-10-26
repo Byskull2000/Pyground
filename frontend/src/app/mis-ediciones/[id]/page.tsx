@@ -45,7 +45,7 @@ interface Inscripcion {
 
 interface Unidad {
     id: number;
-    id_curso: number;
+    id_edicion: number;
     titulo: string;
     descripcion: string;
     orden: number;
@@ -77,7 +77,7 @@ export default function EdicionDetailPage() {
     const fetchEdicionData = async () => {
         try {
             const token = localStorage.getItem('token');
-            
+
             const edicionResponse = await fetch(`${API_URL}/api/ediciones/${edicionId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -105,7 +105,7 @@ export default function EdicionDetailPage() {
             );
             setUserRole(userInscripcion?.cargo_id || null);
 
-            const unidadesResponse = await fetch(`${API_URL}/api/unidades-plantilla/curso/${edicionData.data.id_curso}`, {
+            const unidadesResponse = await fetch(`${API_URL}/api/unidades/edicion/${edicionId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -183,19 +183,18 @@ export default function EdicionDetailPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2 space-y-6">
                             <EdicionInfoPanel edicion={edicion!} />
-                            
-                            <UnidadesPanel 
-                                unidades={unidades} 
+
+                            <UnidadesPanel
+                                unidades={unidades}
                                 edicionId={edicion!.id}
-                                cursoId={edicion!.id_curso}
                                 onNavigate={(path: string) => router.push(path)}
                             />
-                            
+
                             <InscritosPanel inscripciones={inscripciones} />
                         </div>
 
                         <div className="lg:col-span-1">
-                            <EdicionActionsPanel 
+                            <EdicionActionsPanel
                                 edicion={edicion}
                                 userRole={userRole}
                                 onToggleEstado={handleToggleEstado}

@@ -17,7 +17,7 @@ import {
 
 interface Unidad {
     id: number;
-    id_curso: number;
+    id_edicion: number;
     titulo: string;
     descripcion: string;
     orden: number;
@@ -37,7 +37,6 @@ export default function UnidadesPage() {
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editingUnidad, setEditingUnidad] = useState<Unidad | null>(null);
-    const [cursoId, setCursoId] = useState<number | null>(null);
 
     const [formData, setFormData] = useState({
         titulo: '',
@@ -64,27 +63,15 @@ export default function UnidadesPage() {
 
     useEffect(() => {
         if (!authLoading && user && edicionId) {
-            fetchEdicionAndUnidades();
+            fetchUnidades();
         }
     }, [user, authLoading, edicionId]);
 
-    const fetchEdicionAndUnidades = async () => {
+    const fetchUnidades = async () => {
         try {
             const token = localStorage.getItem('token');
             
-            const edicionResponse = await fetch(`${API_URL}/api/ediciones/${edicionId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (!edicionResponse.ok) {
-                throw new Error('Error al cargar la edición');
-            }
-
-            const edicionData = await edicionResponse.json();
-            const idCurso = edicionData.data.id_curso;
-            setCursoId(idCurso);
-
-            const unidadesResponse = await fetch(`${API_URL}/api/unidades-plantilla/curso/${idCurso}`, {
+            const unidadesResponse = await fetch(`${API_URL}/api/unidades/edicion/${edicionId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -104,8 +91,8 @@ export default function UnidadesPage() {
     };
 
     const handleSubmit = async () => {
-        if (!cursoId) {
-            setError('No se pudo obtener el ID del curso');
+        if (!edicionId) {
+            setError('No se pudo obtener el ID de la edición');
             return;
         }
 
@@ -117,10 +104,17 @@ export default function UnidadesPage() {
         try {
             const token = localStorage.getItem('token');
             const url = editingUnidad 
-                ? `${API_URL}/api/unidades-plantilla/curso/${editingUnidad.id}`
-                : `${API_URL}/api/unidades-plantilla`;
+                ? `${API_URL}/api/unidades/${editingUnidad.id}`
+                : `${API_URL}/api/unidades`;
             
             const method = editingUnidad ? 'PUT' : 'POST';
+
+            const bodyData = editingUnidad 
+                ? formData
+                : {
+                    id_edicion: Number(edicionId),
+                    ...formData
+                };
 
             const response = await fetch(url, {
                 method,
@@ -128,17 +122,14 @@ export default function UnidadesPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    id_curso: cursoId,
-                    ...formData
-                })
+                body: JSON.stringify(bodyData)
             });
 
             if (!response.ok) {
                 throw new Error(editingUnidad ? 'Error al actualizar unidad' : 'Error al crear unidad');
             }
 
-            await fetchEdicionAndUnidades();
+            await fetchUnidades();
             handleCloseModal();
             setError('');
         } catch (err) {
@@ -154,7 +145,7 @@ export default function UnidadesPage() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/api/unidades-plantilla/${id}`, {
+            const response = await fetch(`${API_URL}/api/unidades/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -163,7 +154,7 @@ export default function UnidadesPage() {
                 throw new Error('Error al eliminar unidad');
             }
 
-            await fetchEdicionAndUnidades();
+            await fetchUnidades();
             setError('');
         } catch (err) {
             console.error('Error:', err);
