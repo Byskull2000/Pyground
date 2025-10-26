@@ -13,7 +13,8 @@ export const getCursos = async (): Promise<CursoResponse[]> => {
     codigo_curso: c.codigo_curso,
     activo: c.activo ?? true,
     fecha_creacion: c.fecha_creacion,
-    creado_por: c.creado_por
+    creado_por: c.creado_por,
+    estado_publicado: c.estado_publicado
   }));
 };
 
