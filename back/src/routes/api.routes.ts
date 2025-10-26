@@ -6,6 +6,7 @@ import inscripcionesRouter from "./inscripciones.routes";
 import unidadesPlantillaRouter from "./unidades.plantilla.routes";
 import unidadesRouter from "./unidades.routes";
 import topicosPlantillaRouter from "./topicos.plantilla.routes";
+import topicosRouter from "./topicos.routes";
 
 const apiRouter = Router();
 
@@ -29,5 +30,8 @@ apiRouter.use('/unidades', unidadesRouter)
 
 // Rutas de tópicos plantilla
 apiRouter.use('/topicos-plantilla', topicosPlantillaRouter)
+
+// Rutas de tópicos
+apiRouter.use('/topicos', topicosRouter)
 
 export default apiRouter

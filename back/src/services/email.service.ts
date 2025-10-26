@@ -55,7 +55,23 @@ ${enlaceVerificacion}
 Si no solicitaste este registro, puedes ignorar este mensaje.
 
 ---
-Este es un correo automático, por favor no responder.`
+Este es un correo automático, por favor no responder.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Hola ${nombre},</h2>
+          <p>Gracias por registrarte en nuestra plataforma.</p>
+          <p>Tu código de verificación es:</p>
+          <div style="background-color: #f0f0f0; border: 2px solid #ccc; padding: 20px; text-align: center; margin: 20px 0; border-radius: 5px;">
+            <span style="font-size: 32px; font-weight: bold; color: #333;">${codigo}</span>
+          </div>
+          <p>Este código expirará en 15 minutos.</p>
+          <p>También puedes verificar tu cuenta haciendo clic en el siguiente enlace:</p>
+          <p><a href="${enlaceVerificacion}" style="color: #007bff;">Verificar cuenta</a></p>
+          <p>Si no solicitaste este registro, puedes ignorar este mensaje.</p>
+          <hr>
+          <p style="font-size: 12px; color: #666;">Este es un correo automático, por favor no responder.</p>
+        </div>
+      `
     };
 
     const info = await transporter.sendMail(mailOptions);
