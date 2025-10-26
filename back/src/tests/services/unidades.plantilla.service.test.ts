@@ -1,12 +1,15 @@
 import * as unidadPlantillaService from '../../services/unidades.plantilla.service';
 import * as unidadPlantillaRepo from '../../repositories/unidades.plantilla.repository';
+import * as cursoRepo from '../../repositories/cursos.repository';
 import { UnidadPlantillaCreate, UnidadPlantillaUpdate } from '../../types/unidades.plantilla.types';
 
 jest.mock('../../repositories/unidades.plantilla.repository');
+jest.mock('../../repositories/cursos.repository');
 
 describe('UnidadPlantilla Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (cursoRepo.getCursoById as jest.Mock).mockResolvedValue({ id: 1, nombre: 'Curso A' });
   });
 
   // TEST - OBTENER UNIDADES

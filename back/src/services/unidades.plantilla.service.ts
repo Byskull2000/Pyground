@@ -1,7 +1,9 @@
 import * as unidadPlantillaRepo from '../repositories/unidades.plantilla.repository';
+import * as cursoRepo from '../repositories/cursos.repository';
 import { UnidadPlantillaCreate, UnidadPlantillaUpdate } from '../types/unidades.plantilla.types';
 
-export const getUnidadesPlantilla = (id_curso:number) => {
+export const getUnidadesPlantilla = async (id_curso:number) => {
+  if (await cursoRepo.getCursoById(id_curso) == null) throw { status: 404, message: 'Curso no encontrado' };
   return unidadPlantillaRepo.getUnidadesPlantillaByCurso(id_curso);
 };
 
