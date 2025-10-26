@@ -23,7 +23,7 @@ export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps)
     const pathname = usePathname();
 
     const handleAddUnidad = () => {
-        router.push(`/cursos/${cursoId}/unidades`);
+        router.push(`/admin/cursos/${cursoId}/unidades`);
     };
 
     return (
@@ -71,7 +71,7 @@ export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps)
                             <div
                                 key={unidad.id}
                                 className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all hover:shadow-lg group cursor-pointer"
-                                onClick={() => router.push(`/cursos/${cursoId}/unidades/${unidad.id}`)}
+                                onClick={() => router.push(`/admin/cursos/${cursoId}/unidades/${unidad.id}`)}
                             >
                                 <div className="flex items-start gap-4">
                                     <div
