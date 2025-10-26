@@ -7,4 +7,5 @@ export interface CursoResponse {
   activo: boolean;
   fecha_creacion: Date;
   creado_por?: string | null;
+  estado_publicado: boolean;
 }
