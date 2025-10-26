@@ -165,11 +165,17 @@ export default function AdminCursosPage() {
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm text-gray-400">Ediciones:</span>
                                             <span className="text-sm font-semibold text-white">
-                                                {curso._count?.ediciones || 0}
+                                                {curso._count?.ediciones || 1}
                                             </span>
                                         </div>
                                     </div>
-
+                                    <Link
+                                        href={`/admin/cursos/${curso.id}`}
+                                        className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+                                    >
+                                        <BookOpen className="w-4 h-4" />
+                                        Administrar Contenido
+                                    </Link>
                                     <Link
                                         href={`/admin/ediciones?curso=${curso.id}`}
                                         className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all"
