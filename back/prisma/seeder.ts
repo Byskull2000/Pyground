@@ -349,7 +349,7 @@ async function main() {
       where: { email: "admin.sys@mail.com" },
     });
     const cargoDocente = await prisma.cargo.findUnique({
-      where: { nombre: "Docente" },
+      where: { nombre: "Editor" },
     });
 
     if (admin && cargoDocente) {
@@ -370,7 +370,7 @@ async function main() {
             cargo_id: cargoDocente.id,
           },
         });
-        console.log("Admin inscrito como docente en la edición base");
+        console.log("Admin inscrito como editor en la edición base");
       } else {
         console.log("Admin ya inscrito en la edición base");
       }

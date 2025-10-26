@@ -63,7 +63,7 @@ export const createEdicion = async (data: EdicionCreate) => {
   if (data.id_creador != null && data.id_creador > 0){
     const usuarioValido = await usuarioRepo.getUsuarioById(data.id_creador)
     if(usuarioValido != null){
-      await inscripcionRepo.createDocenteEdicion(nuevaEdicion.id, usuarioValido.id);
+      await inscripcionRepo.createEditorEdicion(nuevaEdicion.id, usuarioValido.id);
     }
   }
 

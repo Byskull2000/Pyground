@@ -135,3 +135,43 @@ export const createDocenteEdicion = async (id_edicion: number, id_usuario: numbe
     }
   });
 };
+
+export const createEditorEdicion = async (id_edicion: number, id_usuario: number) => {
+  const cargoEditor = await prisma.cargo.findUnique({
+    where: { nombre: "Editor" },
+  });
+
+  if (!cargoEditor) {
+    throw new Error('El cargo "Editor" no existe en la base de datos.');
+  }
+
+  return prisma.inscripcion.create({
+    data: {
+      usuario_id: id_usuario,
+      edicion_id: id_edicion,
+      cargo_id: cargoEditor.id,
+      fecha_inscripcion: new Date(),
+      activo: true,
+    }
+  });
+};
+
+export const createEstudianteEdicion = async (id_edicion: number, id_usuario: number) => {
+  const cargoEstudiante = await prisma.cargo.findUnique({
+    where: { nombre: "Estudiante" },
+  });
+
+  if (!cargoEstudiante) {
+    throw new Error('El cargo "Estudiante" no existe en la base de datos.');
+  }
+
+  return prisma.inscripcion.create({
+    data: {
+      usuario_id: id_usuario,
+      edicion_id: id_edicion,
+      cargo_id: cargoEstudiante.id,
+      fecha_inscripcion: new Date(),
+      activo: true,
+    }
+  });
+};
