@@ -103,6 +103,27 @@ export const updateInscripcion = async (id: number, data: InscripcionUpdate) => 
   });
 };
 
+export const upsertInscripcion = async (data: InscripcionCreate) => {
+  return prisma.inscripcion.upsert({
+    where: {
+      usuario_id_edicion_id: {
+        usuario_id: data.usuario_id,
+        edicion_id: data.edicion_id,
+      },
+    },
+    update: {
+      cargo_id: data.cargo_id,
+      activo: true,
+      fecha_inscripcion: data.fecha_inscripcion ?? new Date(),
+      fecha_terminacion: data.fecha_terminacion ?? null,    
+    },
+    create: {
+      ...data,
+      activo: true,
+    },
+  });
+};
+
 export const deleteInscripcion = async (id: number) => {
   const existing = await prisma.inscripcion.findUnique({ where: { id } });
 

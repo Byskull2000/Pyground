@@ -85,13 +85,13 @@ describe('Inscripciones Service', () => {
       (edicionRepo.getEdicionById as jest.Mock).mockResolvedValue(mockEdicion);
       (cargoRepo.getCargoById as jest.Mock).mockResolvedValue(mockCargo);
       (inscripcionRepo.getInscripcionesByEdicion as jest.Mock).mockResolvedValue([]);
-      (inscripcionRepo.createInscripcion as jest.Mock).mockResolvedValue(mockNueva);
+      (inscripcionRepo.upsertInscripcion as jest.Mock).mockResolvedValue(mockNueva);
       (inscripcionRepo.getInscripcionById as jest.Mock).mockResolvedValue(mockNueva);
 
       const result = await inscripcionService.createInscripcion(baseData);
 
       expect(result).toEqual(mockNueva);
-      expect(inscripcionRepo.createInscripcion).toHaveBeenCalledWith(baseData);
+      expect(inscripcionRepo.upsertInscripcion).toHaveBeenCalledWith(baseData);
       expect(inscripcionRepo.getInscripcionById).toHaveBeenCalledWith(mockNueva.id);
     });
 
