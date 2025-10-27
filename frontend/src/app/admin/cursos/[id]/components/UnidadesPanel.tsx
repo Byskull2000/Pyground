@@ -47,8 +47,8 @@ export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps)
                         onClick={handleAddUnidad}
                         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium"
                     >
-                        <Plus className="w-4 h-4" />
-                        Agregar Unidad
+                        <Plus className="w-5 h-5" />
+                        Gestionar Unidades
                     </button>
                 </div>
             </div>
