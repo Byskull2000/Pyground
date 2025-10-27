@@ -35,7 +35,10 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUnidadPlantilla = exports.updateUnidadPlantilla = exports.createUnidadPlantilla = exports.getUnidadPlantilla = exports.getUnidadesPlantilla = void 0;
 const unidadPlantillaRepo = __importStar(require("../repositories/unidades.plantilla.repository"));
-const getUnidadesPlantilla = (id_curso) => {
+const cursoRepo = __importStar(require("../repositories/cursos.repository"));
+const getUnidadesPlantilla = async (id_curso) => {
+    if (await cursoRepo.getCursoById(id_curso) == null)
+        throw { status: 404, message: 'Curso no encontrado' };
     return unidadPlantillaRepo.getUnidadesPlantillaByCurso(id_curso);
 };
 exports.getUnidadesPlantilla = getUnidadesPlantilla;
@@ -53,10 +56,8 @@ const createUnidadPlantilla = async (data) => {
         throw { status: 400, message: 'El curso es obligatorio' };
     if (!data.orden || data.orden === undefined)
         throw { status: 400, message: 'El orden es obligatorio' };
-    const existentes = await unidadPlantillaRepo.getUnidadesPlantillaByCurso(data.id_curso);
-    if (existentes.some(u => u.titulo === data.titulo)) {
+    if (await unidadPlantillaRepo.getUnidadPlantillaRedudante(data.id_curso, data.titulo) != null)
         throw { status: 409, message: 'Ya existe una unidad con ese nombre para este curso' };
-    }
     return unidadPlantillaRepo.createUnidadPlantilla({
         ...data,
         version: data.version ?? 1,

@@ -35,10 +35,13 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const unidadPlantillaService = __importStar(require("../../services/unidades.plantilla.service"));
 const unidadPlantillaRepo = __importStar(require("../../repositories/unidades.plantilla.repository"));
+const cursoRepo = __importStar(require("../../repositories/cursos.repository"));
 jest.mock('../../repositories/unidades.plantilla.repository');
+jest.mock('../../repositories/cursos.repository');
 describe('UnidadPlantilla Service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        cursoRepo.getCursoById.mockResolvedValue({ id: 1, nombre: 'Curso A' });
     });
     // TEST - OBTENER UNIDADES
     describe('getUnidadesPlantilla', () => {
@@ -103,7 +106,7 @@ describe('UnidadPlantilla Service', () => {
                 .rejects.toMatchObject({ status: 400, message: 'El orden es obligatorio' });
         });
         it('UP5: Unidad duplicada en el mismo curso', async () => {
-            unidadPlantillaRepo.getUnidadesPlantillaByCurso.mockResolvedValue([{ id: 1, titulo: 'Introducción' }]);
+            unidadPlantillaRepo.getUnidadPlantillaRedudante.mockResolvedValue([{ id: 1, titulo: 'Introducción' }]);
             await expect(unidadPlantillaService.createUnidadPlantilla(baseData))
                 .rejects.toMatchObject({ status: 409, message: 'Ya existe una unidad con ese nombre para este curso' });
         });

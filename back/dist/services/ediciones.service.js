@@ -37,8 +37,8 @@ exports.deleteEdicion = exports.updateEdicion = exports.createEdicion = exports.
 const edicionRepo = __importStar(require("../repositories/ediciones.repository"));
 const cursoRepo = __importStar(require("../repositories/cursos.repository"));
 const unidadPlantillaRepo = __importStar(require("../repositories/unidades.plantilla.repository"));
-//import * as topicoPlantillaRepo from '../repositories/topicos.plantilla.repository';
-//import * as topicoRepo from '../repositories/topicos.repository';
+const topicoPlantillaRepo = __importStar(require("../repositories/topicos.plantilla.repository"));
+const topicoRepo = __importStar(require("../repositories/topicos.repository"));
 const unidadRepo = __importStar(require("../repositories/unidades.repository"));
 const inscripcionRepo = __importStar(require("../repositories/inscripciones.repository"));
 const usuarioRepo = __importStar(require("../repositories/usuarios.repository"));
@@ -73,21 +73,18 @@ const createEdicion = async (data) => {
     if (existente.length > 0)
         throw Object.assign(new Error('Ya existe una edición con ese nombre para este curso'), { status: 409 });
     const nuevaEdicion = await edicionRepo.createEdicion(data);
-    // Crear unidades (y cotenidos) de acuerdo a las unidades plantilla del curso
     const unidadesPlantilla = await unidadPlantillaRepo.getUnidadesPlantillaByCurso(data.id_curso);
     if (unidadesPlantilla != null && unidadesPlantilla.length > 0) {
-        await unidadRepo.cloneFromPlantillas(unidadesPlantilla, nuevaEdicion.id);
+        const unidadMap = await unidadRepo.cloneFromPlantillas(unidadesPlantilla, nuevaEdicion.id);
+        const topicosPlantilla = await topicoPlantillaRepo.getTopicosPlantillaByCurso(data.id_curso);
+        if (topicosPlantilla.length > 0) {
+            await topicoRepo.cloneTopicosFromPlantillas(topicosPlantilla, unidadMap);
+        }
     }
-    /*
-      const topicosPlantilla = await topicoPlantillaRepo.getTopicosPlantillaByCurso(data.id_curso);
-    
-      if (topicosPlantilla != null && topicosPlantilla.length > 0) {
-        await topicoRepo.cloneFromPlantillas(topicosPlantilla, nuevaEdicion.id);
-      }*/
     if (data.id_creador != null && data.id_creador > 0) {
         const usuarioValido = await usuarioRepo.getUsuarioById(data.id_creador);
         if (usuarioValido != null) {
-            await inscripcionRepo.createDocenteEdicion(nuevaEdicion.id, usuarioValido.id);
+            await inscripcionRepo.createEditorEdicion(nuevaEdicion.id, usuarioValido.id);
         }
     }
     const edicionCreada = await edicionRepo.getEdicionById(nuevaEdicion.id);

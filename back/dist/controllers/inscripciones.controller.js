@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcion = exports.getInscripcionesByUsuario = exports.getInscripcionesByEdicion = void 0;
+exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcion = exports.getInscripcionesByUsuario = exports.getInscrip = exports.getInscripcionesByEdicion = void 0;
 const inscripcionService = __importStar(require("../services/inscripciones.service"));
 const apiResponse_1 = require("../utils/apiResponse");
 const getInscripcionesByEdicion = async (req, res) => {
@@ -50,6 +50,20 @@ const getInscripcionesByEdicion = async (req, res) => {
     }
 };
 exports.getInscripcionesByEdicion = getInscripcionesByEdicion;
+const getInscrip = async (req, res) => {
+    try {
+        const id_edicion = parseInt(req.params.id_edicion);
+        const inscripciones = await inscripcionService.getInscripcionesByEdicion(id_edicion);
+        return res.json(new apiResponse_1.ApiResponse(true, inscripciones));
+    }
+    catch (err) {
+        console.error(err);
+        const status = err?.status ?? 500;
+        const message = err?.message ?? 'Error al obtener inscripciones';
+        return res.status(status).json(new apiResponse_1.ApiResponse(false, null, message));
+    }
+};
+exports.getInscrip = getInscrip;
 const getInscripcionesByUsuario = async (req, res) => {
     try {
         const id_usuario = parseInt(req.params.id_usuario);

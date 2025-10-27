@@ -32,12 +32,9 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const topicosController = __importStar(require("../../controllers/topicos.plantilla.controller"));
-const topicos_plantilla_repository_1 = __importDefault(require("../../repositories/topicos.plantilla.repository"));
+const topicosPlantillaRepository = __importStar(require("../../repositories/topicos.plantilla.repository"));
 const unidadesPlantillaRepository = __importStar(require("../../repositories/unidades.plantilla.repository"));
 const apiResponse_1 = require("../../utils/apiResponse");
 const roles_1 = require("../../types/roles");
@@ -71,10 +68,10 @@ describe('Topicos Plantilla Controller', () => {
             ];
             mockRequest.params = { id_unidad_plantilla: '1' };
             unidadesPlantillaRepository.getUnidadPlantillaById.mockResolvedValue(mockUnidad);
-            topicos_plantilla_repository_1.default.getTopicosByUnidadPlantilla.mockResolvedValue(mockTopicos);
+            topicosPlantillaRepository.getTopicosByUnidadPlantilla.mockResolvedValue(mockTopicos);
             await topicosController.getTopicosByUnidadPlantilla(mockRequest, mockResponse);
             expect(unidadesPlantillaRepository.getUnidadPlantillaById).toHaveBeenCalledWith(1);
-            expect(topicos_plantilla_repository_1.default.getTopicosByUnidadPlantilla).toHaveBeenCalledWith(1);
+            expect(topicosPlantillaRepository.getTopicosByUnidadPlantilla).toHaveBeenCalledWith(1);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(true, mockTopicos));
         });
         it('debe fallar si la unidad plantilla no existe', async () => {
@@ -112,12 +109,12 @@ describe('Topicos Plantilla Controller', () => {
             mockRequest.params = { id_unidad_plantilla: '1' };
             mockRequest.body = topicoData;
             unidadesPlantillaRepository.getUnidadPlantillaById.mockResolvedValue(mockUnidad);
-            topicos_plantilla_repository_1.default.getMaxOrden.mockResolvedValue(0);
-            topicos_plantilla_repository_1.default.createTopicoPlantilla.mockResolvedValue(createdTopico);
+            topicosPlantillaRepository.getMaxOrden.mockResolvedValue(0);
+            topicosPlantillaRepository.createTopicoPlantilla.mockResolvedValue(createdTopico);
             await topicosController.createTopicoPlantilla(mockRequest, mockResponse);
             expect(unidadesPlantillaRepository.getUnidadPlantillaById).toHaveBeenCalledWith(1);
-            expect(topicos_plantilla_repository_1.default.getMaxOrden).toHaveBeenCalledWith(1);
-            expect(topicos_plantilla_repository_1.default.createTopicoPlantilla).toHaveBeenCalled();
+            expect(topicosPlantillaRepository.getMaxOrden).toHaveBeenCalledWith(1);
+            expect(topicosPlantillaRepository.createTopicoPlantilla).toHaveBeenCalled();
             expect(statusMock).toHaveBeenCalledWith(201);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(true, createdTopico));
         });
@@ -183,17 +180,17 @@ describe('Topicos Plantilla Controller', () => {
             };
             mockRequest.params = { id: '1' };
             mockRequest.body = updateData;
-            topicos_plantilla_repository_1.default.getTopicoPlantillaById.mockResolvedValue(existingTopico);
-            topicos_plantilla_repository_1.default.updateTopicoPlantilla.mockResolvedValue(updatedTopico);
+            topicosPlantillaRepository.getTopicoPlantillaById.mockResolvedValue(existingTopico);
+            topicosPlantillaRepository.updateTopicoPlantilla.mockResolvedValue(updatedTopico);
             await topicosController.updateTopicoPlantilla(mockRequest, mockResponse);
-            expect(topicos_plantilla_repository_1.default.getTopicoPlantillaById).toHaveBeenCalledWith(1);
-            expect(topicos_plantilla_repository_1.default.updateTopicoPlantilla).toHaveBeenCalled();
+            expect(topicosPlantillaRepository.getTopicoPlantillaById).toHaveBeenCalledWith(1);
+            expect(topicosPlantillaRepository.updateTopicoPlantilla).toHaveBeenCalled();
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(true, updatedTopico));
         });
         it('debe fallar si el tópico no existe', async () => {
             mockRequest.params = { id: '999' };
             mockRequest.body = { titulo: 'Nuevo título' };
-            topicos_plantilla_repository_1.default.getTopicoPlantillaById.mockResolvedValue(null);
+            topicosPlantillaRepository.getTopicoPlantillaById.mockResolvedValue(null);
             await topicosController.updateTopicoPlantilla(mockRequest, mockResponse);
             expect(statusMock).toHaveBeenCalledWith(404);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Tópico no encontrado'));
@@ -201,7 +198,7 @@ describe('Topicos Plantilla Controller', () => {
         it('debe manejar errores del servidor', async () => {
             mockRequest.params = { id: '1' };
             mockRequest.body = { titulo: 'Nuevo título' };
-            topicos_plantilla_repository_1.default.getTopicoPlantillaById.mockRejectedValue(new Error('Database error'));
+            topicosPlantillaRepository.getTopicoPlantillaById.mockRejectedValue(new Error('Database error'));
             await topicosController.updateTopicoPlantilla(mockRequest, mockResponse);
             expect(statusMock).toHaveBeenCalledWith(500);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Error al actualizar el tópico'));
@@ -215,23 +212,23 @@ describe('Topicos Plantilla Controller', () => {
                 activo: true
             };
             mockRequest.params = { id: '1' };
-            topicos_plantilla_repository_1.default.getTopicoPlantillaById.mockResolvedValue(existingTopico);
-            topicos_plantilla_repository_1.default.deleteTopicoPlantilla.mockResolvedValue(null);
+            topicosPlantillaRepository.getTopicoPlantillaById.mockResolvedValue(existingTopico);
+            topicosPlantillaRepository.deleteTopicoPlantilla.mockResolvedValue(null);
             await topicosController.deleteTopicoPlantilla(mockRequest, mockResponse);
-            expect(topicos_plantilla_repository_1.default.getTopicoPlantillaById).toHaveBeenCalledWith(1);
-            expect(topicos_plantilla_repository_1.default.deleteTopicoPlantilla).toHaveBeenCalledWith(1);
+            expect(topicosPlantillaRepository.getTopicoPlantillaById).toHaveBeenCalledWith(1);
+            expect(topicosPlantillaRepository.deleteTopicoPlantilla).toHaveBeenCalledWith(1);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(true, null, 'Tópico plantilla eliminado correctamente'));
         });
         it('debe fallar si el tópico no existe', async () => {
             mockRequest.params = { id: '999' };
-            topicos_plantilla_repository_1.default.getTopicoPlantillaById.mockResolvedValue(null);
+            topicosPlantillaRepository.getTopicoPlantillaById.mockResolvedValue(null);
             await topicosController.deleteTopicoPlantilla(mockRequest, mockResponse);
             expect(statusMock).toHaveBeenCalledWith(404);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Tópico no encontrado'));
         });
         it('debe manejar errores del servidor', async () => {
             mockRequest.params = { id: '1' };
-            topicos_plantilla_repository_1.default.getTopicoPlantillaById.mockRejectedValue(new Error('Database error'));
+            topicosPlantillaRepository.getTopicoPlantillaById.mockRejectedValue(new Error('Database error'));
             await topicosController.deleteTopicoPlantilla(mockRequest, mockResponse);
             expect(statusMock).toHaveBeenCalledWith(500);
             expect(jsonMock).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Error al eliminar el tópico'));

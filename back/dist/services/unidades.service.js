@@ -33,9 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
+exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
 const unidadRepo = __importStar(require("../repositories/unidades.repository"));
-const getUnidadesByEdicion = (id_edicion) => {
+const edicionRepo = __importStar(require("../repositories/ediciones.repository"));
+const getUnidadesByEdicion = async (id_edicion) => {
+    if (await edicionRepo.getEdicionById(id_edicion) == null)
+        throw { status: 404, message: 'Edición no encontrada' };
     return unidadRepo.getUnidadesByEdicion(id_edicion);
 };
 exports.getUnidadesByEdicion = getUnidadesByEdicion;
@@ -51,8 +54,12 @@ const createUnidad = async (data) => {
         throw { status: 400, message: 'El título es obligatorio' };
     if (!data.id_edicion)
         throw { status: 400, message: 'La edición es obligatoria' };
+    if (await edicionRepo.getEdicionById(data.id_edicion) == null)
+        throw { status: 404, message: 'Edición no encontrada' };
     if (data.orden === undefined)
         throw { status: 400, message: 'El orden es obligatorio' };
+    if (await unidadRepo.getUnidadRedudante(data.id_edicion, data.titulo) != null)
+        throw { status: 409, message: 'Ya existe una unidad con este titulo en este unidad' };
     return unidadRepo.createUnidad(data);
 };
 exports.createUnidad = createUnidad;
@@ -70,3 +77,26 @@ const deleteUnidad = async (id) => {
     return unidadRepo.deleteUnidad(id);
 };
 exports.deleteUnidad = deleteUnidad;
+const restoreUnidad = async (id) => {
+    const unidad = await unidadRepo.getUnidadById(id);
+    if (!unidad)
+        throw { status: 404, message: 'Unidad no encontrada' };
+    return unidadRepo.restoreUnidad(id);
+};
+exports.restoreUnidad = restoreUnidad;
+const publicateUnidad = async (id) => {
+    const unidad = await unidadRepo.getUnidadById(id);
+    if (!unidad)
+        throw Object.assign(new Error('Unidad no encontrada'), { status: 404 });
+    const unidadPublicada = await unidadRepo.publicateUnidad(id);
+    return unidadPublicada;
+};
+exports.publicateUnidad = publicateUnidad;
+const deactivateUnidad = async (id) => {
+    const unidad = await unidadRepo.getUnidadById(id);
+    if (!unidad)
+        throw Object.assign(new Error('Unidad no encontrada'), { status: 404 });
+    const unidadArchivado = await unidadRepo.deactivateUnidad(id);
+    return unidadArchivado;
+};
+exports.deactivateUnidad = deactivateUnidad;

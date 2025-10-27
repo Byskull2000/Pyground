@@ -80,9 +80,6 @@ const loginUser = async (email, password) => {
     if (!usuario.activo) {
         throw new Error('Account inactive');
     }
-    if (!isPasswordValid) {
-        throw new Error('Invalid credentials');
-    }
     // Actualizar último acceso
     await prisma_1.default.usuario.update({
         where: { id: usuario.id },
@@ -91,6 +88,7 @@ const loginUser = async (email, password) => {
     // Generar token
     const token = generateToken(usuario.id, usuario.email, usuario.nombre, usuario.apellido);
     // Eliminar password_hash de la respuesta
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = usuario;
     return {
         message: 'Login exitoso',

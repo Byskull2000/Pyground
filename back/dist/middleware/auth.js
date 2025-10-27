@@ -86,7 +86,7 @@ const optionalAuth = async (req, res, next) => {
         }
         next();
     }
-    catch (error) {
+    catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
         next();
     }
 };

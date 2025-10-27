@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
+exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
 const unidadService = __importStar(require("../services/unidades.service"));
 const apiResponse_1 = require("../utils/apiResponse");
 const getUnidadesByEdicion = async (req, res) => {
@@ -107,3 +107,45 @@ const deleteUnidad = async (req, res) => {
     }
 };
 exports.deleteUnidad = deleteUnidad;
+const restoreUnidad = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await unidadService.restoreUnidad(id);
+        return res.json(new apiResponse_1.ApiResponse(true, { message: 'Unidad restaurada correctamente' }));
+    }
+    catch (err) {
+        console.error(err);
+        const status = err?.status ?? 500;
+        const message = err?.message ?? 'Error al restaurar unidad';
+        return res.status(status).json(new apiResponse_1.ApiResponse(false, null, message));
+    }
+};
+exports.restoreUnidad = restoreUnidad;
+const publicateUnidad = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await unidadService.publicateUnidad(id);
+        return res.json(new apiResponse_1.ApiResponse(true, { message: 'Unidad publicada correctamente' }));
+    }
+    catch (err) {
+        console.error(err);
+        const status = err?.status ?? 500;
+        const message = err?.message ?? 'Error al publicar unidad';
+        return res.status(status).json(new apiResponse_1.ApiResponse(false, null, message));
+    }
+};
+exports.publicateUnidad = publicateUnidad;
+const deactivateUnidad = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await unidadService.deactivateUnidad(id);
+        return res.json(new apiResponse_1.ApiResponse(true, { message: 'Unidad archivada correctamente' }));
+    }
+    catch (err) {
+        console.error(err);
+        const status = err?.status ?? 500;
+        const message = err?.message ?? 'Error al archivar unidad';
+        return res.status(status).json(new apiResponse_1.ApiResponse(false, null, message));
+    }
+};
+exports.deactivateUnidad = deactivateUnidad;

@@ -7,6 +7,7 @@ const supertest_1 = __importDefault(require("supertest"));
 const express_1 = __importDefault(require("express"));
 const cursos_routes_1 = __importDefault(require("../../routes/cursos.routes"));
 const prisma_1 = __importDefault(require("../../config/prisma"));
+const auth_helper_1 = require("../helpers/auth.helper");
 // Crear app de prueba
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -124,6 +125,7 @@ describe('Cursos API - Integration Tests', () => {
     // --- PUT /api/cursos/publicar/:id ---
     describe('PUT /api/cursos/publicar/:id', () => {
         it('PC1 - debe publicar un curso correctamente', async () => {
+            const { token } = await (0, auth_helper_1.createAcademicoUserAndToken)();
             const curso = await prisma_1.default.curso.create({
                 data: {
                     nombre: 'C++',
@@ -134,7 +136,7 @@ describe('Cursos API - Integration Tests', () => {
                     creado_por: 'Admin'
                 }
             });
-            await prisma_1.default.unidadPlantilla.create({
+            const unidad = await prisma_1.default.unidadPlantilla.create({
                 data: {
                     titulo: 'Unidad 1',
                     descripcion: 'Intro',
@@ -143,8 +145,19 @@ describe('Cursos API - Integration Tests', () => {
                     version: 1
                 }
             });
+            await prisma_1.default.topicoPlantilla.create({
+                data: {
+                    titulo: 'Topico 1',
+                    descripcion: 'Intro',
+                    id_unidad_plantilla: unidad.id,
+                    orden: 1,
+                    version: 1,
+                    duracion_estimada: 15
+                }
+            });
             const response = await (0, supertest_1.default)(app)
                 .put(`/api/cursos/publicar/${curso.id}`)
+                .set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(200);
             const body = response.body;
@@ -152,8 +165,10 @@ describe('Cursos API - Integration Tests', () => {
             expect(body.data).toHaveProperty('message', 'Curso publicado correctamente');
         });
         it('PC2 - debe retornar 404 si el curso no existe', async () => {
+            const { token } = await (0, auth_helper_1.createAcademicoUserAndToken)();
             const response = await (0, supertest_1.default)(app)
                 .put('/api/cursos/publicar/9999')
+                .set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(404);
             const body = response.body;
@@ -164,6 +179,7 @@ describe('Cursos API - Integration Tests', () => {
     // --- PUT /api/cursos/desactivar/:id ---
     describe('PUT /api/cursos/desactivar/:id', () => {
         it('DC1 - debe archivar un curso correctamente', async () => {
+            const { token } = await (0, auth_helper_1.createAcademicoUserAndToken)();
             const curso = await prisma_1.default.curso.create({
                 data: {
                     nombre: 'Go',
@@ -176,6 +192,7 @@ describe('Cursos API - Integration Tests', () => {
             });
             const response = await (0, supertest_1.default)(app)
                 .put(`/api/cursos/desactivar/${curso.id}`)
+                .set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(200);
             const body = response.body;
@@ -183,8 +200,10 @@ describe('Cursos API - Integration Tests', () => {
             expect(body.data).toHaveProperty('message', 'Curso archivado');
         });
         it('DC2 - debe retornar 404 si el curso no existe', async () => {
+            const { token } = await (0, auth_helper_1.createAcademicoUserAndToken)();
             const response = await (0, supertest_1.default)(app)
                 .put('/api/cursos/desactivar/9999')
+                .set('Authorization', `Bearer ${token}`)
                 .expect('Content-Type', /json/)
                 .expect(404);
             const body = response.body;

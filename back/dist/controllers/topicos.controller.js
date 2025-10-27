@@ -33,21 +33,22 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTopicosByUnidadPlantilla = getTopicosByUnidadPlantilla;
-exports.createTopicoPlantilla = createTopicoPlantilla;
-exports.updateTopicoPlantilla = updateTopicoPlantilla;
-exports.deleteTopicoPlantilla = deleteTopicoPlantilla;
+exports.getTopicosByUnidad = getTopicosByUnidad;
+exports.getTopicoById = getTopicoById;
+exports.createTopico = createTopico;
+exports.updateTopico = updateTopico;
+exports.deleteTopico = deleteTopico;
 const apiResponse_1 = require("../utils/apiResponse");
-const topicosPlantillaRepository = __importStar(require("../repositories/topicos.plantilla.repository"));
-const unidadesPlantillaRepository = __importStar(require("../repositories/unidades.plantilla.repository"));
-async function getTopicosByUnidadPlantilla(req, res) {
+const topicosService = __importStar(require("../services/topicos.service"));
+const unidadesRepository = __importStar(require("../repositories/unidades.repository"));
+async function getTopicosByUnidad(req, res) {
     try {
-        const id_unidad_plantilla = parseInt(req.params.id_unidad_plantilla);
-        const unidadPlantilla = await unidadesPlantillaRepository.getUnidadPlantillaById(id_unidad_plantilla);
-        if (!unidadPlantilla) {
-            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, 'Unidad plantilla no encontrada'));
+        const id_unidad = parseInt(req.params.id_unidad);
+        const unidad = await unidadesRepository.getUnidadById(id_unidad);
+        if (!unidad) {
+            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, 'Unidad no encontrada'));
         }
-        const topicos = await topicosPlantillaRepository.getTopicosByUnidadPlantilla(id_unidad_plantilla);
+        const topicos = await topicosService.getTopicosByUnidad(id_unidad);
         return res.json(new apiResponse_1.ApiResponse(true, topicos));
     }
     catch (err) {
@@ -55,10 +56,28 @@ async function getTopicosByUnidadPlantilla(req, res) {
         return res.status(500).json(new apiResponse_1.ApiResponse(false, null, 'Error al obtener los tópicos'));
     }
 }
-async function createTopicoPlantilla(req, res) {
+async function getTopicoById(req, res) {
     try {
-        const id_unidad_plantilla = parseInt(req.params.id_unidad_plantilla);
-        const { titulo, descripcion, duracion_estimada, objetivos_aprendizaje } = req.body;
+        const idStr = req.params.id;
+        if (!idStr || isNaN(Number(idStr))) {
+            return res.status(400).json(new apiResponse_1.ApiResponse(false, null, 'ID de tópico inválido'));
+        }
+        const id = parseInt(idStr);
+        const topico = await topicosService.getTopicoById(id);
+        return res.json(new apiResponse_1.ApiResponse(true, topico));
+    }
+    catch (err) {
+        console.error(err);
+        if (err instanceof Error && err.message === 'Tópico no encontrado') {
+            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, err.message));
+        }
+        return res.status(500).json(new apiResponse_1.ApiResponse(false, null, 'Error al obtener el tópico'));
+    }
+}
+async function createTopico(req, res) {
+    try {
+        const id_unidad = parseInt(req.params.id_unidad);
+        const { titulo, descripcion, duracion_estimada, orden, publicado, objetivos_aprendizaje, id_topico_plantilla } = req.body;
         // Validaciones
         if (!titulo || !duracion_estimada) {
             return res.status(400).json(new apiResponse_1.ApiResponse(false, null, 'Título y duración estimada son requeridos'));
@@ -66,22 +85,20 @@ async function createTopicoPlantilla(req, res) {
         if (duracion_estimada <= 0) {
             return res.status(400).json(new apiResponse_1.ApiResponse(false, null, 'La duración estimada debe ser mayor a 0'));
         }
-        // Verificar que la unidad plantilla existe
-        const unidadPlantilla = await unidadesPlantillaRepository.getUnidadPlantillaById(id_unidad_plantilla);
-        if (!unidadPlantilla) {
-            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, 'Unidad plantilla no encontrada'));
+        // Verificar que la unidad existe
+        const unidad = await unidadesRepository.getUnidadById(id_unidad);
+        if (!unidad) {
+            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, 'Unidad no encontrada'));
         }
-        // Obtener el orden máximo actual
-        const maxOrden = await topicosPlantillaRepository.getMaxOrden(id_unidad_plantilla);
-        const newTopico = await topicosPlantillaRepository.createTopicoPlantilla({
-            id_unidad_plantilla,
+        const newTopico = await topicosService.createTopico({
+            id_unidad,
             titulo,
             descripcion,
             duracion_estimada,
-            orden: maxOrden + 1,
-            version: 1,
+            orden,
+            publicado,
             objetivos_aprendizaje,
-            activo: true,
+            id_topico_plantilla,
         });
         return res.status(201).json(new apiResponse_1.ApiResponse(true, newTopico));
     }
@@ -90,7 +107,7 @@ async function createTopicoPlantilla(req, res) {
         return res.status(500).json(new apiResponse_1.ApiResponse(false, null, 'Error al crear el tópico'));
     }
 }
-async function updateTopicoPlantilla(req, res) {
+async function updateTopico(req, res) {
     try {
         const idStr = req.params.id;
         if (!idStr || isNaN(Number(idStr))) {
@@ -102,16 +119,11 @@ async function updateTopicoPlantilla(req, res) {
             orden === undefined && publicado === undefined && !objetivos_aprendizaje) {
             return res.status(400).json(new apiResponse_1.ApiResponse(false, null, 'No hay datos para actualizar'));
         }
-        const topicoExistente = await topicosPlantillaRepository.getTopicoPlantillaById(id);
-        if (!topicoExistente) {
-            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, 'Tópico no encontrado'));
-        }
-        const updatedTopico = await topicosPlantillaRepository.updateTopicoPlantilla(id, {
+        const updatedTopico = await topicosService.updateTopico(id, {
             titulo,
             descripcion,
             duracion_estimada,
             orden,
-            version: topicoExistente.version + 1,
             publicado,
             objetivos_aprendizaje,
         });
@@ -119,25 +131,27 @@ async function updateTopicoPlantilla(req, res) {
     }
     catch (err) {
         console.error(err);
+        if (err instanceof Error && err.message === 'Tópico no encontrado') {
+            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, err.message));
+        }
         return res.status(500).json(new apiResponse_1.ApiResponse(false, null, 'Error al actualizar el tópico'));
     }
 }
-async function deleteTopicoPlantilla(req, res) {
+async function deleteTopico(req, res) {
     try {
         const idStr = req.params.id;
         if (!idStr || isNaN(Number(idStr))) {
             return res.status(400).json(new apiResponse_1.ApiResponse(false, null, 'ID de tópico inválido'));
         }
         const id = parseInt(idStr);
-        const topicoExistente = await topicosPlantillaRepository.getTopicoPlantillaById(id);
-        if (!topicoExistente) {
-            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, 'Tópico no encontrado'));
-        }
-        const deletedTopico = await topicosPlantillaRepository.deleteTopicoPlantilla(id);
-        return res.json(new apiResponse_1.ApiResponse(true, deletedTopico, 'Tópico plantilla eliminado correctamente'));
+        const deletedTopico = await topicosService.deleteTopico(id);
+        return res.json(new apiResponse_1.ApiResponse(true, deletedTopico, 'Tópico eliminado correctamente'));
     }
     catch (err) {
         console.error(err);
+        if (err instanceof Error && err.message.includes('no encontrado')) {
+            return res.status(404).json(new apiResponse_1.ApiResponse(false, null, err.message));
+        }
         return res.status(500).json(new apiResponse_1.ApiResponse(false, null, 'Error al eliminar el tópico'));
     }
 }

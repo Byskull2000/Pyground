@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDocenteEdicion = exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcionesByUsuario = exports.getInscripcionById = exports.getInscripcionesByEdicion = void 0;
+exports.createEstudianteEdicion = exports.createEditorEdicion = exports.createDocenteEdicion = exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcionesByUsuario = exports.getInscripcionById = exports.getEstudiantesByEdicion = exports.getInscripcionesByEdicion = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
 const getInscripcionesByEdicion = async (id) => {
     return prisma_1.default.inscripcion.findMany({
@@ -13,8 +13,16 @@ const getInscripcionesByEdicion = async (id) => {
         },
         include: {
             edicion: true,
-            usuario: true,
             cargo: true,
+            usuario: {
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    avatar_url: true,
+                    email: true,
+                },
+            },
         },
         orderBy: {
             fecha_inscripcion: 'desc',
@@ -22,6 +30,34 @@ const getInscripcionesByEdicion = async (id) => {
     });
 };
 exports.getInscripcionesByEdicion = getInscripcionesByEdicion;
+const getEstudiantesByEdicion = async (id) => {
+    return prisma_1.default.inscripcion.findMany({
+        where: {
+            edicion_id: id,
+            activo: true,
+            cargo: {
+                nombre: 'Estudiante'
+            }
+        },
+        include: {
+            edicion: true,
+            usuario: {
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    avatar_url: true,
+                    email: true,
+                },
+            },
+            cargo: true,
+        },
+        orderBy: {
+            fecha_inscripcion: 'desc',
+        },
+    });
+};
+exports.getEstudiantesByEdicion = getEstudiantesByEdicion;
 const getInscripcionById = async (id) => {
     return prisma_1.default.inscripcion.findUnique({
         where: { id },
@@ -100,3 +136,39 @@ const createDocenteEdicion = async (id_edicion, id_usuario) => {
     });
 };
 exports.createDocenteEdicion = createDocenteEdicion;
+const createEditorEdicion = async (id_edicion, id_usuario) => {
+    const cargoEditor = await prisma_1.default.cargo.findUnique({
+        where: { nombre: "Editor" },
+    });
+    if (!cargoEditor) {
+        throw new Error('El cargo "Editor" no existe en la base de datos.');
+    }
+    return prisma_1.default.inscripcion.create({
+        data: {
+            usuario_id: id_usuario,
+            edicion_id: id_edicion,
+            cargo_id: cargoEditor.id,
+            fecha_inscripcion: new Date(),
+            activo: true,
+        }
+    });
+};
+exports.createEditorEdicion = createEditorEdicion;
+const createEstudianteEdicion = async (id_edicion, id_usuario) => {
+    const cargoEstudiante = await prisma_1.default.cargo.findUnique({
+        where: { nombre: "Estudiante" },
+    });
+    if (!cargoEstudiante) {
+        throw new Error('El cargo "Estudiante" no existe en la base de datos.');
+    }
+    return prisma_1.default.inscripcion.create({
+        data: {
+            usuario_id: id_usuario,
+            edicion_id: id_edicion,
+            cargo_id: cargoEstudiante.id,
+            fecha_inscripcion: new Date(),
+            activo: true,
+        }
+    });
+};
+exports.createEstudianteEdicion = createEstudianteEdicion;

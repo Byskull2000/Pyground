@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcionesByUsuario = exports.getInscripcion = exports.getInscripcionesByEdicion = void 0;
+exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcionesByUsuario = exports.getInscripcion = exports.getEstudiantesByEdicion = exports.getInscripcionesByEdicion = void 0;
 const inscripcionRepo = __importStar(require("../repositories/inscripciones.repository"));
 const usuarioRepo = __importStar(require("../repositories/usuarios.repository"));
 const edicionRepo = __importStar(require("../repositories/ediciones.repository"));
@@ -42,6 +42,10 @@ const getInscripcionesByEdicion = (id_edicion) => {
     return inscripcionRepo.getInscripcionesByEdicion(id_edicion);
 };
 exports.getInscripcionesByEdicion = getInscripcionesByEdicion;
+const getEstudiantesByEdicion = (id_edicion) => {
+    return inscripcionRepo.getEstudiantesByEdicion(id_edicion);
+};
+exports.getEstudiantesByEdicion = getEstudiantesByEdicion;
 const getInscripcion = async (id) => {
     const inscripcion = await inscripcionRepo.getInscripcionById(id);
     if (!inscripcion)

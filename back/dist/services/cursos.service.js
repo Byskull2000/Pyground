@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivateCurso = exports.publicateCurso = exports.getCursoById = exports.getCursos = void 0;
 const cursoRepo = __importStar(require("../repositories/cursos.repository"));
 const unidadPlantillaRepo = __importStar(require("../repositories/unidades.plantilla.repository"));
+const topicoPlantillaRepo = __importStar(require("../repositories/topicos.plantilla.repository"));
 const getCursos = async () => {
     const cursos = await cursoRepo.getAllCursos();
     return cursos.map(c => ({
@@ -45,7 +46,8 @@ const getCursos = async () => {
         codigo_curso: c.codigo_curso,
         activo: c.activo ?? true,
         fecha_creacion: c.fecha_creacion,
-        creado_por: c.creado_por
+        creado_por: c.creado_por,
+        estado_publicado: c.estado_publicado
     }));
 };
 exports.getCursos = getCursos;
@@ -60,7 +62,8 @@ const getCursoById = async (id) => {
         codigo_curso: c.codigo_curso,
         activo: c.activo ?? true,
         fecha_creacion: c.fecha_creacion,
-        creado_por: c.creado_por
+        creado_por: c.creado_por,
+        estado_publicado: c.estado_publicado
     };
 };
 exports.getCursoById = getCursoById;
@@ -73,13 +76,11 @@ const publicateCurso = async (id) => {
         throw {
             status: 404, message: 'Este curso no tiene unidades listas'
         };
-    /*
-      const topicosPlantillaListos = await topicoPlantillaRepo.getTopicosPlantillaByCurso(id);
-    
-      if (topicosPlantillaListos == null || topicosPlantillaListos.length == 0) throw {
-        status: 404, message: 'Este curso no tiene topicos listos'
-      };
-    */
+    const topicosPlantillaListos = await topicoPlantillaRepo.getTopicosPlantillaByCurso(id);
+    if (topicosPlantillaListos == null || topicosPlantillaListos.length == 0)
+        throw {
+            status: 404, message: 'Este curso no tiene topicos listos'
+        };
     const cursoPublicado = await cursoRepo.publicateCurso(id);
     return cursoPublicado;
 };

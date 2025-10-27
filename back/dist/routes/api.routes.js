@@ -9,7 +9,9 @@ const cursos_routes_1 = __importDefault(require("./cursos.routes"));
 const ediciones_routes_1 = __importDefault(require("./ediciones.routes"));
 const inscripciones_routes_1 = __importDefault(require("./inscripciones.routes"));
 const unidades_plantilla_routes_1 = __importDefault(require("./unidades.plantilla.routes"));
+const unidades_routes_1 = __importDefault(require("./unidades.routes"));
 const topicos_plantilla_routes_1 = __importDefault(require("./topicos.plantilla.routes"));
+const topicos_routes_1 = __importDefault(require("./topicos.routes"));
 const apiRouter = (0, express_1.Router)();
 // Rutas de usuarios
 apiRouter.use('/usuarios', usuarios_routes_1.default);
@@ -19,8 +21,12 @@ apiRouter.use('/cursos', cursos_routes_1.default);
 apiRouter.use('/ediciones', ediciones_routes_1.default);
 // Rutas de inscripciones
 apiRouter.use('/inscripciones', inscripciones_routes_1.default);
-// Rutas de inscripciones
+// Rutas de unidades plantilla
 apiRouter.use('/unidades-plantilla', unidades_plantilla_routes_1.default);
+// Rutas de unidades
+apiRouter.use('/unidades', unidades_routes_1.default);
 // Rutas de tópicos plantilla
 apiRouter.use('/topicos-plantilla', topicos_plantilla_routes_1.default);
+// Rutas de tópicos
+apiRouter.use('/topicos', topicos_routes_1.default);
 exports.default = apiRouter;

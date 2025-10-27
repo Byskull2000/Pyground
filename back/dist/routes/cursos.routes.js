@@ -35,9 +35,12 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const cursoController = __importStar(require("../controllers/cursos.controller"));
+const auth_1 = require("@/middleware/auth");
+const roleAuth_1 = require("@/middleware/roleAuth");
+const roles_1 = require("@/types/roles");
 const router = (0, express_1.Router)();
 router.get('/', cursoController.getCursos);
 router.get('/:id', cursoController.getCursoById);
-router.put('/publicar/:id', cursoController.publicateCurso);
-router.put('/desactivar/:id', cursoController.deactivateCurso);
+router.put('/publicar/:id', auth_1.authRequired, (0, roleAuth_1.requireRoles)([roles_1.RolesEnum.ADMIN, roles_1.RolesEnum.ACADEMICO]), cursoController.publicateCurso);
+router.put('/desactivar/:id', auth_1.authRequired, (0, roleAuth_1.requireRoles)([roles_1.RolesEnum.ADMIN, roles_1.RolesEnum.ACADEMICO]), cursoController.deactivateCurso);
 exports.default = router;

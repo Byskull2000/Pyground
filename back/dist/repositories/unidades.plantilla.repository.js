@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUnidadPlantilla = exports.updateUnidadPlantilla = exports.createUnidadPlantilla = exports.getUnidadPlantillaById = exports.getUnidadesPlantillaPublicadasByCurso = exports.getUnidadesPlantillaByCurso = void 0;
+exports.deleteUnidadPlantilla = exports.updateUnidadPlantilla = exports.createUnidadPlantilla = exports.getUnidadPlantillaById = exports.getUnidadesPlantillaPublicadasByCurso = exports.getUnidadPlantillaRedudante = exports.getUnidadesPlantillaByCurso = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
 const getUnidadesPlantillaByCurso = async (id) => {
     return prisma_1.default.unidadPlantilla.findMany({
@@ -13,6 +13,18 @@ const getUnidadesPlantillaByCurso = async (id) => {
     });
 };
 exports.getUnidadesPlantillaByCurso = getUnidadesPlantillaByCurso;
+const getUnidadPlantillaRedudante = async (id_curso, titulo) => {
+    return prisma_1.default.unidadPlantilla.findFirst({
+        where: {
+            id_curso,
+            titulo: {
+                equals: titulo,
+                mode: 'insensitive',
+            },
+        }
+    });
+};
+exports.getUnidadPlantillaRedudante = getUnidadPlantillaRedudante;
 const getUnidadesPlantillaPublicadasByCurso = async (id) => {
     return prisma_1.default.unidadPlantilla.findMany({
         where: {

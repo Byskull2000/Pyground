@@ -22,10 +22,11 @@ afterAll(async () => {
 afterEach(async () => {
     // Limpiar datos después de cada test en orden para evitar violaciones de FK
     await exports.prisma.inscripcion.deleteMany();
-    await exports.prisma.topicoPlantilla.deleteMany();
-    await exports.prisma.unidadPlantilla.deleteMany();
+    await exports.prisma.topico.deleteMany();
     await exports.prisma.unidad.deleteMany();
     await exports.prisma.edicion.deleteMany();
+    await exports.prisma.topicoPlantilla.deleteMany();
+    await exports.prisma.unidadPlantilla.deleteMany();
     await exports.prisma.curso.deleteMany();
     await exports.prisma.usuario.deleteMany();
 });
