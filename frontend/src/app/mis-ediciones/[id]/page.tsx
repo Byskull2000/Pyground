@@ -8,6 +8,7 @@ import EdicionActionsPanel from './components/EdicionActionsPanel';
 import InscritosPanel from './components/InscritosPanel';
 import UnidadesPanel from './components/UnidadesPanel';
 import { AlertCircle, Loader } from 'lucide-react';
+import type { Unidad } from '@/interfaces/Unidad';
 
 interface Edicion {
     id: number;
@@ -43,15 +44,7 @@ interface Inscripcion {
     };
 }
 
-interface Unidad {
-    id: number;
-    id_edicion: number;
-    titulo: string;
-    descripcion: string;
-    orden: number;
-    icono: string;
-    color: string;
-}
+
 
 export default function EdicionDetailPage() {
     const { user, loading: authLoading } = useAuth();
@@ -186,8 +179,8 @@ export default function EdicionDetailPage() {
 
                             <UnidadesPanel
                                 unidades={unidades}
-                                edicionId={edicion!.id}
-                                onNavigate={(path: string) => router.push(path)}
+                                cursoId={edicion!.id_curso}
+                                edicionId={edicion!.id}  
                             />
 
                             <InscritosPanel inscripciones={inscripciones} />

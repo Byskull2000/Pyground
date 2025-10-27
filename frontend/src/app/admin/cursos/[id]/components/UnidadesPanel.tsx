@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { BookOpen, Plus, ArrowRight } from 'lucide-react';
 
 interface Unidad {
@@ -16,14 +16,28 @@ interface Unidad {
 interface UnidadesPanelProps {
     unidades: Unidad[];
     cursoId: number;
+    edicionId?: number;
 }
 
-export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps) {
+export default function UnidadesPanel({ unidades, cursoId, edicionId }: UnidadesPanelProps) {
     const router = useRouter();
-    const pathname = usePathname();
 
     const handleAddUnidad = () => {
-        router.push(`/admin/cursos/${cursoId}/unidades`);
+        if (edicionId) {
+            router.push(`/mis-ediciones/${edicionId}/unidades`);
+        } else {
+            router.push(`/admin/cursos/${cursoId}/unidades`);
+        }
+    };
+
+    const handleUnidadClick = (unidadId: number) => {
+        if (edicionId) {
+            // Para ediciones (estudiantes/docentes)
+            router.push(`/mis-ediciones/${edicionId}/unidades/${unidadId}`);
+        } else {
+            // Para cursos (admin)
+            router.push(`/admin/cursos/${cursoId}/unidades/${unidadId}`);
+        }
     };
 
     return (
@@ -36,7 +50,7 @@ export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps)
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                                Unidades del Curso
+                                Unidades
                             </h2>
                             <p className="text-sm text-gray-400">
                                 {unidades.length} {unidades.length === 1 ? 'unidad disponible' : 'unidades disponibles'}
@@ -48,10 +62,11 @@ export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps)
                         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium"
                     >
                         <Plus className="w-5 h-5" />
-                        Gestionar Unidades
+                        Gestionar
                     </button>
                 </div>
             </div>
+
             <div className="p-6">
                 {unidades.length === 0 ? (
                     <div className="text-center py-12">
@@ -71,7 +86,7 @@ export default function UnidadesPanel({ unidades, cursoId }: UnidadesPanelProps)
                             <div
                                 key={unidad.id}
                                 className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all hover:shadow-lg group cursor-pointer"
-                                onClick={() => router.push(`/admin/cursos/${cursoId}/unidades/${unidad.id}`)}
+                                onClick={() => handleUnidadClick(unidad.id)}
                             >
                                 <div className="flex items-start gap-4">
                                     <div

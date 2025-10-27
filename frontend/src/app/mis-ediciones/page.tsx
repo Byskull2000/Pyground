@@ -36,12 +36,14 @@ export default function MisEdicionesPage() {
     const [error, setError] = useState('');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
     useEffect(() => {
+        if (!authLoading && !user) {
+            router.replace('/login'); 
+        }
         if (!authLoading && user) {
             fetchInscripciones();
         }
-    }, [user, authLoading]);
+    }, [authLoading, user, router]);
 
     const fetchInscripciones = async () => {
         try {
