@@ -7,6 +7,7 @@ import unidadesPlantillaRouter from "./unidades.plantilla.routes";
 import unidadesRouter from "./unidades.routes";
 import topicosPlantillaRouter from "./topicos.plantilla.routes";
 import topicosRouter from "./topicos.routes";
+import contenidosRouter from "./contenidos.routes";
 
 const apiRouter = Router();
 
@@ -33,5 +34,8 @@ apiRouter.use('/topicos-plantilla', topicosPlantillaRouter)
 
 // Rutas de tópicos
 apiRouter.use('/topicos', topicosRouter)
+
+// Rutas de tópicos
+apiRouter.use('/contenidos', contenidosRouter)
 
 export default apiRouter
