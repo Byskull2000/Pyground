@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { BookOpen, Plus, Edit2, Trash2, AlertCircle, Loader, Save, Clock, Target } from 'lucide-react';
+import { BookOpen, Plus, Edit2, Trash2, AlertCircle, Loader, Save, Clock, Target, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Topico {
     id: number;
@@ -20,9 +21,12 @@ interface Topico {
 interface TopicosPanelProps {
     unidadId: number;
     unidadTitulo: string;
+    canEdit?: boolean;
+    userRole?: number;
 }
 
-export default function TopicosPanel({ unidadId, unidadTitulo }: TopicosPanelProps) {
+export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true, userRole }: TopicosPanelProps) {
+    const router = useRouter();
     const [topicos, setTopicos] = useState<Topico[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -116,7 +120,8 @@ export default function TopicosPanel({ unidadId, unidadTitulo }: TopicosPanelPro
         }
     };
 
-    const handleEdit = (topico: Topico) => {
+    const handleEdit = (e: React.MouseEvent, topico: Topico) => {
+        e.stopPropagation();
         setFormData({
             titulo: topico.titulo,
             descripcion: topico.descripcion,
@@ -161,6 +166,15 @@ export default function TopicosPanel({ unidadId, unidadTitulo }: TopicosPanelPro
         });
     };
 
+    const handleViewTopico = (topicoId: number) => {
+        // Obtener los parámetros necesarios de la URL actual
+        const pathParts = window.location.pathname.split('/');
+        const edicionIdIndex = pathParts.indexOf('mis-ediciones') + 1;
+        const edicionId = pathParts[edicionIdIndex];
+
+        router.push(`/mis-ediciones/${edicionId}/unidades/${unidadId}/topicos/${topicoId}`);
+    };
+
     if (loading) {
         return (
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg border border-white/10 p-8">
@@ -185,7 +199,7 @@ export default function TopicosPanel({ unidadId, unidadTitulo }: TopicosPanelPro
                         <p className="text-sm text-gray-400">{unidadTitulo}</p>
                     </div>
                 </div>
-                {!showForm && (
+                {!showForm && canEdit && (
                     <button
                         onClick={() => setShowForm(true)}
                         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all"
@@ -283,6 +297,8 @@ export default function TopicosPanel({ unidadId, unidadTitulo }: TopicosPanelPro
                     <div className="space-y-3">
                         {topicos.map((topico) => (
                             <div
+
+                                onClick={() => handleViewTopico(topico.id)}
                                 key={topico.id}
                                 className="bg-gray-800/50 border border-white/10 rounded-lg p-4 hover:border-purple-400/50 transition-all"
                             >
@@ -312,20 +328,27 @@ export default function TopicosPanel({ unidadId, unidadTitulo }: TopicosPanelPro
                                         </div>
                                     </div>
                                     <div className="flex gap-2 flex-shrink-0">
-                                        <button
-                                            onClick={() => handleEdit(topico)}
-                                            className="p-2 bg-blue-500/20 text-blue-300 rounded hover:bg-blue-500/30 transition-colors"
-                                            title="Editar"
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => setDeleteModal({ show: true, topico })}
-                                            className="p-2 bg-red-500/20 text-red-300 rounded hover:bg-red-500/30 transition-colors"
-                                            title="Eliminar"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        {canEdit && (
+                                            <>
+                                                <button
+                                                    onClick={(e) => handleEdit(e, topico)}
+                                                    className="p-2 bg-blue-500/20 text-blue-300 rounded hover:bg-blue-500/30 transition-colors"
+                                                    title="Editar"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setDeleteModal({ show: true, topico });
+                                                    }}
+                                                    className="p-2 bg-red-500/20 text-red-300 rounded hover:bg-red-500/30 transition-colors"
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
