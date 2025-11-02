@@ -1,19 +1,18 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, useParams } from 'next/navigation';
-import { 
-    BookOpen, 
-    Plus, 
-    Edit2, 
-    Trash2, 
-    ArrowLeft, 
-    Loader, 
+import { useParams, useRouter } from 'next/navigation';
+import {
+    BookOpen,
+    Plus,
+    Edit2,
+    Trash2,
+    ArrowLeft,
+    Loader,
     AlertCircle,
-    GripVertical,
     Save,
     X
 } from 'lucide-react';
+import { DraggableList } from '@/components/DraggableList';
 
 interface Unidad {
     id: number;
@@ -23,14 +22,14 @@ interface Unidad {
     orden: number;
     icono: string;
     color: string;
+    estado_publicado?: boolean;
     fecha_creacion?: string;
 }
 
 export default function UnidadesPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { id } = useParams();
     const router = useRouter();
-    const params = useParams();
-    const edicionId = params?.id;
+    const authLoading = false;
 
     const [unidades, setUnidades] = useState<Unidad[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,7 +48,7 @@ export default function UnidadesPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     const iconos = ['📘', '📗', '📙', '📕', '📚', '🎓', '💡', '🔬', '🎨', '🎭', '🎪', '🎯', '🚀', '⚡', '🌟', '💻', '🔧', '📊', '🎵', '🏆'];
-    
+
     const colores = [
         { name: 'Azul', value: '#4B8BBE' },
         { name: 'Verde', value: '#48BB78' },
@@ -62,16 +61,15 @@ export default function UnidadesPage() {
     ];
 
     useEffect(() => {
-        if (!authLoading && user && edicionId) {
-            fetchUnidades();
-        }
-    }, [user, authLoading, edicionId]);
+        fetchUnidades();
+    }, []);
 
     const fetchUnidades = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('token');
-            
-            const unidadesResponse = await fetch(`${API_URL}/api/unidades/edicion/${edicionId}`, {
+
+            const unidadesResponse = await fetch(`${API_URL}/api/unidades/edicion/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -90,8 +88,32 @@ export default function UnidadesPage() {
         }
     };
 
+    const handleReorderUnidades = async (reorderedUnidades: Unidad[]) => {
+        const token = localStorage.getItem('token');
+
+        const ordenData = reorderedUnidades.map(u => ({
+            id: u.id,
+            orden: u.orden
+        }));
+
+        const response = await fetch(`${API_URL}/api/unidades/reordenar`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(ordenData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al actualizar orden');
+        }
+
+        setUnidades(reorderedUnidades);
+    };
+
     const handleSubmit = async () => {
-        if (!edicionId) {
+        if (!id) {
             setError('No se pudo obtener el ID de la edición');
             return;
         }
@@ -103,16 +125,16 @@ export default function UnidadesPage() {
 
         try {
             const token = localStorage.getItem('token');
-            const url = editingUnidad 
+            const url = editingUnidad
                 ? `${API_URL}/api/unidades/${editingUnidad.id}`
                 : `${API_URL}/api/unidades`;
-            
+
             const method = editingUnidad ? 'PUT' : 'POST';
 
-            const bodyData = editingUnidad 
+            const bodyData = editingUnidad
                 ? formData
                 : {
-                    id_edicion: Number(edicionId),
+                    id_edicion: Number(id),
                     ...formData
                 };
 
@@ -138,14 +160,14 @@ export default function UnidadesPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (unidadId: number) => {
         if (!confirm('¿Estás seguro de que deseas eliminar esta unidad?')) {
             return;
         }
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/api/unidades/${id}`, {
+            const response = await fetch(`${API_URL}/api/unidades/${unidadId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -197,6 +219,72 @@ export default function UnidadesPage() {
         setShowModal(true);
     };
 
+    const renderUnidad = (unidad: Unidad) => (
+        <div className="flex items-center gap-4 w-full">
+            <div
+                className="flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-3xl shadow-lg"
+                style={{ backgroundColor: unidad.color + '33' }}
+            >
+                {unidad.icono}
+            </div>
+
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Unidad {unidad.orden}
+                    </span>
+                    {unidad.estado_publicado && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Publicada
+                        </span>
+                    )}
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1 truncate">
+                    {unidad.titulo}
+                </h3>
+                <p className="text-gray-400 text-sm line-clamp-2">
+                    {unidad.descripcion}
+                </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(unidad);
+                    }}
+                    className="p-3 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl hover:bg-blue-500/30 transition-all hover:scale-105"
+                >
+                    <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(unidad.id);
+                    }}
+                    className="p-3 bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl hover:bg-red-500/30 transition-all hover:scale-105"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    );
+
+    const emptyState = (
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-12 text-center">
+            <BookOpen className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">No hay unidades</h3>
+            <p className="text-gray-400 mb-6">Comienza agregando tu primera unidad</p>
+            <button
+                onClick={handleOpenModal}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium"
+            >
+                <Plus className="w-5 h-5" />
+                Crear Primera Unidad
+            </button>
+        </div>
+    );
+
     if (authLoading || loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -213,7 +301,7 @@ export default function UnidadesPage() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
                     <button
-                        onClick={() => router.push(`/mis-ediciones/${edicionId}`)}
+                        onClick={() => router.push(`/mis-ediciones/${id}`)}
                         className="mb-4 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-lg text-gray-300 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
                     >
                         <ArrowLeft className="w-4 h-4" />
@@ -252,71 +340,12 @@ export default function UnidadesPage() {
                     </div>
                 )}
 
-                <div className="space-y-4">
-                    {unidades.length === 0 ? (
-                        <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-12 text-center">
-                            <BookOpen className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-white mb-2">No hay unidades</h3>
-                            <p className="text-gray-400 mb-6">Comienza agregando tu primera unidad</p>
-                            <button
-                                onClick={handleOpenModal}
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium"
-                            >
-                                <Plus className="w-5 h-5" />
-                                Crear Primera Unidad
-                            </button>
-                        </div>
-                    ) : (
-                        unidades.map((unidad) => (
-                            <div
-                                key={unidad.id}
-                                className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 hover:border-white/20 transition-all group"
-                            >
-                                <div className="p-6 flex items-center gap-4">
-                                    <div className="flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity cursor-move">
-                                        <GripVertical className="w-5 h-5 text-gray-400" />
-                                    </div>
-
-                                    <div
-                                        className="flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-3xl shadow-lg"
-                                        style={{ backgroundColor: unidad.color + '33' }}
-                                    >
-                                        {unidad.icono}
-                                    </div>
-
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                                Unidad {unidad.orden}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-xl font-bold text-white mb-1 truncate">
-                                            {unidad.titulo}
-                                        </h3>
-                                        <p className="text-gray-400 text-sm line-clamp-2">
-                                            {unidad.descripcion}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleEdit(unidad)}
-                                            className="p-3 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl hover:bg-blue-500/30 transition-all hover:scale-105"
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(unidad.id)}
-                                            className="p-3 bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl hover:bg-red-500/30 transition-all hover:scale-105"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
+                <DraggableList
+                    items={unidades}
+                    onReorder={handleReorderUnidades}
+                    renderItem={renderUnidad}
+                    emptyState={emptyState}
+                />
 
                 {showModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -385,11 +414,10 @@ export default function UnidadesPage() {
                                                 key={icono}
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, icono })}
-                                                className={`p-3 text-2xl rounded-xl transition-all ${
-                                                    formData.icono === icono
-                                                        ? 'bg-purple-500/30 border-2 border-purple-500 scale-110'
-                                                        : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                                                }`}
+                                                className={`p-3 text-2xl rounded-xl transition-all ${formData.icono === icono
+                                                    ? 'bg-purple-500/30 border-2 border-purple-500 scale-110'
+                                                    : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                                                    }`}
                                             >
                                                 {icono}
                                             </button>
@@ -407,11 +435,10 @@ export default function UnidadesPage() {
                                                 key={color.value}
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, color: color.value })}
-                                                className={`p-4 rounded-xl transition-all ${
-                                                    formData.color === color.value
-                                                        ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-105'
-                                                        : 'hover:scale-105'
-                                                }`}
+                                                className={`p-4 rounded-xl transition-all ${formData.color === color.value
+                                                    ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-105'
+                                                    : 'hover:scale-105'
+                                                    }`}
                                                 style={{ backgroundColor: color.value }}
                                             >
                                                 <span className="text-white font-medium text-sm">
