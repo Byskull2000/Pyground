@@ -1,6 +1,6 @@
 import prisma from '../config/prisma';
 import {UnidadPlantilla } from '@prisma/client';
-import { UnidadCreate, UnidadUpdate } from '../types/unidades.types';
+import { UnidadCreate, UnidadUpdate, UnidadReorganize } from '../types/unidades.types';
 
 
 export const getUnidadesByEdicion = async (id_edicion: number) => {
@@ -118,4 +118,23 @@ export const cloneFromPlantillas = async (unidadesPlantilla: UnidadPlantilla[], 
   );
 
   return unidadMap;
+};
+
+export const reorderUnidades = async (unidades: UnidadReorganize[]) => {
+  return prisma.$transaction(
+    unidades.map(u =>
+      prisma.unidad.update({
+        where: { id: u.id },
+        data: { orden: u.orden, fecha_actualizacion: new Date() },
+      })
+    )
+  );
+};
+
+export const existUnidadesByIds = async (ids: number[]) => {
+  const encontrados = await prisma.unidad.findMany({
+    where: { id: { in: ids } },
+    select: { id: true },
+  });
+  return encontrados.map(u => u.id);
 };

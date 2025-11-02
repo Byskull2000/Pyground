@@ -1,7 +1,7 @@
 import * as unidadService from '../../services/unidades.service';
 import * as unidadRepo from '../../repositories/unidades.repository';
 import * as edicionRepo from '../../repositories/ediciones.repository';
-import { UnidadCreate, UnidadUpdate } from '../../types/unidades.types';
+import { UnidadCreate, UnidadReorganize, UnidadUpdate } from '../../types/unidades.types';
 
 jest.mock('../../repositories/unidades.repository');
 jest.mock('../../repositories/ediciones.repository');
@@ -207,4 +207,58 @@ describe('Unidad Service', () => {
         .rejects.toMatchObject({ status: 404, message: 'Unidad no encontrada' });
     });
   });
+
+  // TEST - REORDENAMIENTO DE UNIDADES
+  describe('reorderUnidades', () => {
+    const unidadesValidas = [
+      { id: 1, orden: 2 },
+      { id: 2, orden: 1 },
+    ];
+
+    it('U22: Reordenamiento exitoso', async () => {
+      (unidadRepo.existUnidadesByIds as jest.Mock).mockResolvedValue([1, 2]);
+      (unidadRepo.reorderUnidades as jest.Mock).mockResolvedValue(unidadesValidas);
+
+      const result = await unidadService.reorderUnidades(unidadesValidas);
+
+      expect(result).toEqual({
+        message: 'Unidades reordenadas correctamente',
+        count: unidadesValidas.length,
+      });
+      expect(unidadRepo.reorderUnidades).toHaveBeenCalledWith(unidadesValidas);
+    });
+
+    it('U23: Error por array vacío', async () => {
+      await expect(unidadService.reorderUnidades([]))
+        .rejects.toMatchObject({ status: 400, message: 'Debe enviar al menos una unidad para reordenar' });
+    });
+
+    it('U24: Error por unidad sin id o sin orden', async () => {
+      const invalidUnidades = [
+        { id: 1 } as unknown as UnidadReorganize, // falta orden
+        { orden: 2 } as unknown as UnidadReorganize, // falta id
+      ];
+      await expect(unidadService.reorderUnidades(invalidUnidades))
+        .rejects.toMatchObject({ status: 400, message: 'Cada unidad debe tener id y orden válidos' });
+    });
+
+
+    it('U25: Error por unidad inexistente', async () => {
+      const unidades = [{ id: 1, orden: 1 }, { id: 2, orden: 2 }];
+      (unidadRepo.existUnidadesByIds as jest.Mock).mockResolvedValue([1]);
+
+      await expect(unidadService.reorderUnidades(unidades))
+        .rejects.toMatchObject({ status: 404, message: 'Una o más unidades no existen' });
+    });
+
+    it('U26: Error interno del repositorio', async () => {
+      (unidadRepo.existUnidadesByIds as jest.Mock).mockResolvedValue([1, 2]);
+      (unidadRepo.reorderUnidades as jest.Mock).mockRejectedValue(new Error('Error al reordenar'));
+      
+      await expect(unidadService.reorderUnidades(unidadesValidas))
+        .rejects.toThrow('Error al reordenar');
+    });
+  });
+
 });
+

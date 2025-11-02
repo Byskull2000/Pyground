@@ -18,3 +18,8 @@ export interface UnidadUpdate {
   publicado?: boolean;
   fecha_actualizacion?: Date;
 }
+
+export interface UnidadReorganize {
+  id: number;
+  orden: number;
+}

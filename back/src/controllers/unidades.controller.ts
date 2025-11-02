@@ -106,3 +106,16 @@ export const deactivateUnidad = async (req: Request, res: Response) => {
     return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
+
+export const reorderUnidades = async (req: Request, res: Response) => {
+  try {
+    const unidades = req.body; 
+    const result = await unidadService.reorderUnidades(unidades);
+    return res.json(new ApiResponse(true, result, 'Unidades reordenadas correctamente'));
+  } catch (err: unknown) {
+    console.error(err);
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al reordenar unidades';
+    return res.status(status).json(new ApiResponse(false, null, message));
+  }
+};

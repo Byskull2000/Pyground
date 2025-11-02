@@ -371,4 +371,91 @@ describe('PUT /api/unidades/desactivar/:id', () => {
   });
 });
 
+// PUT REORDENAR UNIDADES
+describe('PUT /api/unidades/reordenar', () => {
+  it('U22: reordenamiento exitoso', async () => {
+    const curso = await prisma.curso.create({ data: { nombre: 'Curso Reorder', codigo_curso: 'CR', descripcion: 'Demo' } });
+    const edicion = await prisma.edicion.create({ data: { nombre_edicion: 'Edicion Reorder', activo: true, fecha_apertura: new Date(), creado_por: 'Admin', id_curso: curso.id } });
+    const unidad1 = await prisma.unidad.create({ data: { id_edicion: edicion.id, titulo: 'Unidad 1', orden: 1, activo: true } });
+    const unidad2 = await prisma.unidad.create({ data: { id_edicion: edicion.id, titulo: 'Unidad 2', orden: 2, activo: true } });
+    const unidad3 = await prisma.unidad.create({ data: { id_edicion: edicion.id, titulo: 'Unidad 3', orden: 3, activo: true } });
+    const { token } = await createAcademicoUserAndToken();
+
+    const reordered = [
+      { id: unidad2.id, orden: 1 },
+      { id: unidad1.id, orden: 2 },
+      { id: unidad3.id, orden: 3 },
+    ];
+
+    const res = await request(app)
+      .put(`/api/unidades/reordenar`)
+      .send(reordered)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const body: ApiResponse<any> = res.body;
+    expect(body.success).toBe(true);
+    expect(body.data.message).toMatch(/Unidades reordenadas correctamente/);
+
+    // Comprobamos en BD que los cambios se aplicaron
+    const unidadesDb = await prisma.unidad.findMany({ where: { id_edicion: edicion.id }, orderBy: { orden: 'asc' } });
+    expect(unidadesDb[0].id).toBe(unidad2.id);
+    expect(unidadesDb[1].id).toBe(unidad1.id);
+    expect(unidadesDb[2].id).toBe(unidad3.id);
+  });
+
+  it('U23: error por array vacío', async () => {
+    const { token } = await createAcademicoUserAndToken();
+
+    const res = await request(app)
+      .put(`/api/unidades/reordenar`)
+      .send([])
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
+
+    const body: ApiResponse<any> = res.body;
+    expect(body.success).toBe(false);
+    expect(body.error).toMatch(/Debe enviar al menos una unidad para reordenar/);
+  });
+
+  it('U24: error por unidad sin id o sin orden', async () => {
+    const { token } = await createAcademicoUserAndToken();
+
+    const invalidUnits = [
+      { id: 1 } as any,  // falta orden
+      { orden: 2 } as any // falta id
+    ];
+
+    const res = await request(app)
+      .put(`/api/unidades/reordenar`)
+      .send(invalidUnits)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
+
+    const body: ApiResponse<any> = res.body;
+    expect(body.success).toBe(false);
+    expect(body.error).toMatch(/Cada unidad debe tener id y orden válidos/);
+  });
+
+  it('U25: error por unidad inexistente en BD', async () => {
+    const { token } = await createAcademicoUserAndToken();
+
+    const invalidUnits = [
+      { id: 9999, orden: 1 },
+      { id: 10000, orden: 2 },
+    ];
+
+    const res = await request(app)
+      .put(`/api/unidades/reordenar`)
+      .send(invalidUnits)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404);
+
+    const body: ApiResponse<any> = res.body;
+    expect(body.success).toBe(false);
+    expect(body.error).toMatch(/Una o más unidades no existen/);
+  });
+});
+
+
 });

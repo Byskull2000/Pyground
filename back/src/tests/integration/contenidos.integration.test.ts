@@ -75,13 +75,13 @@ describe('Contenidos API - Integration Tests', () => {
 
     const topico = await prisma.topico.create({
         data: {
-        unidad: { connect: { id: unidad.id } },
-        titulo: 'Tópico Test',
-        descripcion: 'Descripción del tópico',
-        duracion_estimada: 60,
-        orden: 1,
-        publicado: false,
-        activo: true
+          unidad: { connect: { id: unidad.id } },
+          titulo: 'Tópico Test',
+          descripcion: 'Descripción del tópico',
+          duracion_estimada: 60,
+          orden: 1,
+          publicado: false,
+          activo: true
         }
     });
     topicoId = topico.id;

@@ -1,6 +1,6 @@
 import * as unidadRepo from '../repositories/unidades.repository';
 import * as edicionRepo from '../repositories/ediciones.repository';
-import { UnidadCreate, UnidadUpdate } from '../types/unidades.types';
+import { UnidadCreate, UnidadReorganize, UnidadUpdate } from '../types/unidades.types';
 
 export const getUnidadesByEdicion = async (id_edicion: number) => {
   if (await edicionRepo.getEdicionById(id_edicion) == null) throw { status: 404, message: 'Edición no encontrada' };
@@ -66,4 +66,23 @@ export const deactivateUnidad = async (id: number) => {
   const unidadArchivado = await unidadRepo.deactivateUnidad(id);
 
   return unidadArchivado;
+};
+
+export const reorderUnidades = async (unidades: UnidadReorganize[]) => {
+  if (!unidades || unidades.length === 0)
+    throw { status: 400, message: 'Debe enviar al menos una unidad para reordenar' };
+
+  for (const u of unidades) {
+    if (!u.id || u.orden === undefined)
+      throw { status: 400, message: 'Cada unidad debe tener id y orden válidos' };
+  }
+
+  const ids = unidades.map(u => u.id);
+  const existentes = await unidadRepo.existUnidadesByIds(ids);
+
+  if (existentes.length !== ids.length)
+    throw { status: 404, message: 'Una o más unidades no existen' };
+
+  const result = await unidadRepo.reorderUnidades(unidades);
+  return { message: 'Unidades reordenadas correctamente', count: result.length };
 };
