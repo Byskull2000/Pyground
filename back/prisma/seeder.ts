@@ -376,6 +376,53 @@ async function main() {
       }
     }
 
+    const primerTopico = await prisma.topico.findFirst({
+      where: { activo: true },
+      orderBy: { id: "asc" },
+    });
+
+    if (primerTopico) {
+      const contenidosExistentes = await prisma.contenido.findMany({
+        where: { id_topico: primerTopico.id },
+      });
+
+      if (contenidosExistentes.length === 0) {
+        await prisma.contenido.createMany({
+          data: [
+            {
+              id_topico: primerTopico.id,
+              tipo: "TEXTO",
+              orden: 1,
+              titulo: "Introducción a Python",
+              descripcion: "Explicación breve sobre el lenguaje y su historia",
+              texto: "Python es un lenguaje de programación interpretado y de alto nivel.",
+            },
+            {
+              id_topico: primerTopico.id,
+              tipo: "TEXTO",
+              orden: 2,
+              titulo: "Ventajas de Python",
+              descripcion: "Por qué usar Python en proyectos modernos",
+              texto: "Su sintaxis es simple y clara, ideal para principiantes y profesionales.",
+            },
+            {
+              id_topico: primerTopico.id,
+              tipo: "IMAGEN",
+              orden: 3,
+              titulo: "Logo de Python",
+              descripcion: "Representación visual del lenguaje",
+              enlace_archivo: "https://cdn.ejemplo.com/python-logo.png",
+            },
+          ],
+        });
+        console.log("Contenidos base creados para el primer tópico");
+      } else {
+        console.log("El primer tópico ya tiene contenidos");
+      }
+    } else {
+      console.log("No se encontró ningún tópico para agregar contenidos");
+    }
+
     console.log("Seeding completo");
 
   } catch (error) {

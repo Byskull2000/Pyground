@@ -19,6 +19,7 @@ describe('Ediciones API - Integration Tests', () => {
   });
 
   beforeEach(async () => {
+    await prisma.contenido.deleteMany({});
     await prisma.topico.deleteMany({});
     await prisma.topicoPlantilla.deleteMany({});
     await prisma.inscripcion.deleteMany({});
