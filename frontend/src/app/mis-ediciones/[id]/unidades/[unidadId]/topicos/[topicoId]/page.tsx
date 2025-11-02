@@ -1,230 +1,25 @@
+// app/topic/[id]/page.tsx
 'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import {
-  Eye,
-  Edit2,
-  CheckCircle,
-  Loader,
-  AlertCircle,
-  Plus,
-  Lock,
-  Unlock,
-  ChevronRight,
-  Save,
-  X,
-  ArrowLeft,
-  Layout
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
-import type { Topico } from '@/interfaces/Topico';
-import type { Unidad } from '@/interfaces/Unidad';
-import type { Edicion } from '@/interfaces/Edicion';
-import type { Curso } from '@/app/cursos/interfaces/Curso';
-import { Breadcrumb } from './components/Breadcrumb';
-import { ContenidoEditable, type ContenidoData } from './components/ContenidoEditable';
-import { SelectorPlantillas } from './components/SelectorPlantilllas';
-import { Plantilla3Columnas, PlantillaAccordion, PlantillaCarrusel, PlantillaComparativa, PlantillaDosColumnas, PlantillaDosColumnasInversa, PlantillaGaleria3, PlantillaImagenGrande, PlantillaLineal, PlantillaVideoDestacado, PlantillaVideoGaleriaTexto, PlantillaVideoLateral } from './components/Renderizadores';
+import React, { useState } from 'react';
+import { Edit2, ChevronRight, Layout, Eye, FileText, Image, Video } from 'lucide-react';
+import { ContenidoData } from './types/content';
+import TemplateRenderer from './components/templates/TemplateRenderer';
+import TemplateSelectorModal from './components/templates/TemplateSelectorModal';
 
-// ============ INTERFACES ============
+export default function TopicEditorPage() {
+  const [contenidos, setContenidos] = useState<ContenidoData[]>([]);
+  const [vista, setVista] = useState<'preview' | 'editar'>('editar');
+  const [plantilla, setPlantilla] = useState(1);
+  const [mostrarSelector, setMostrarSelector] = useState(false);
 
-interface Inscripcion {
-  id: number;
-  usuario_id: number;
-  edicion_id: number;
-  cargo_id: number;
-  fecha_inscripcion: string;
-  activo: boolean;
-}
-
-
-interface UserRole {
-  cargo_id: number; // 1: Docente, 2: Editor, 3: Estudiante
-}
-
-// ============ MOCK DATA ============
-const MOCK_CONTENIDOS: ContenidoData[] = [
-  {
-    tipo: 'TEXTO',
-    orden: 1,
-    titulo: 'Introducción al tema',
-    descripcion: 'Breve resumen de los objetivos y contexto del tópico.',
-    texto: 'En este apartado exploraremos los conceptos fundamentales del aprendizaje automático supervisado y cómo se aplican en problemas reales de clasificación y predicción.'
-  },
-  {
-    tipo: 'TEXTO',
-    orden: 2,
-    titulo: 'Desarrollo del contenido',
-    descripcion: 'Explicación detallada del tema principal.',
-    texto: 'El algoritmo de regresión lineal busca una función que minimice el error cuadrático medio entre las predicciones y los valores reales. Esta técnica es fundamental en el análisis de datos.'
-  },
-  {
-    tipo: 'IMAGEN',
-    orden: 3,
-    titulo: 'Gráfico explicativo',
-    descripcion: 'Representación visual del modelo de regresión.',
-    enlace_archivo: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop'
-  },
-  {
-    tipo: 'VIDEO',
-    orden: 4,
-    titulo: 'Tutorial práctico',
-    descripcion: 'Demostración paso a paso del concepto.',
-    enlace_archivo: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  }
-];
-
-const RENDERIZADORES: Record<number, React.FC<{
-  contenidos: ContenidoData[];
-  editable: boolean;
-  onActualizar: (index: number, contenido: ContenidoData) => void;
-  onEliminar: (index: number) => void;
-}>> = {
-  1: PlantillaLineal,
-  2: PlantillaDosColumnas,
-  3: PlantillaDosColumnasInversa,
-  4: PlantillaVideoDestacado,
-  5: PlantillaGaleria3,
-  6: PlantillaVideoLateral,
-  7: PlantillaCarrusel,
-  8: Plantilla3Columnas,
-  9: PlantillaImagenGrande,
-  10: PlantillaVideoGaleriaTexto,
-  11: PlantillaAccordion,
-  12: PlantillaComparativa,
-};
-// ============ PÁGINA PRINCIPAL ============
-export default function TopicoContenidosPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-  const params = useParams();
-  const topicoId = params?.topicoId as string;
-  const unidadId = params?.unidadId as string;
-  const edicionId = params?.id as string;
-
-  const [topico, setTopico] = useState<Topico | null>(null);
-  const [unidad, setUnidad] = useState<Unidad | null>(null);
-  const [edicion, setEdicion] = useState<Edicion | null>(null);
-  const [curso, setCurso] = useState<Curso | null>(null);
-  const [contenidos, setContenidos] = useState<ContenidoData[]>(MOCK_CONTENIDOS);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [vista, setVista] = useState<'preview' | 'editar'>('preview');
-  const [guardando, setGuardando] = useState(false);
-  const [mostrarSelectorPlantillas, setMostrarSelectorPlantillas] = useState(false);
-
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-  useEffect(() => {
-    if (!authLoading && user && topicoId) {
-      fetchTopicoData();
-    }
-  }, [user, authLoading, topicoId]);
-  const handleCambiarPlantilla = async (nuevaPlantillaId: number) => {
-    if (!topico) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      // const response = await fetch(`${API_URL}/api/topicos/${topicoId}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({ id_plantilla: nuevaPlantillaId }),
-      // });
-
-      // if (!response.ok) throw new Error('Error al cambiar plantilla');
-
-      setTopico({ ...topico, id_plantilla: nuevaPlantillaId });
-      setError('');
-    } catch (err) {
-      console.error('Error:', err);
-      setError('Error al cambiar la plantilla');
-    }
-  }; 
-  const fetchTopicoData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-
-      // Obtener tópico
-      const topicoRes = await fetch(`${API_URL}/api/topicos/${topicoId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!topicoRes.ok) throw new Error('Error al cargar tópico');
-
-      const topicoData = await topicoRes.json();
-      setTopico(topicoData.data);
-
-      // Obtener unidad
-      const unidadRes = await fetch(`${API_URL}/api/unidades/${topicoData.data.id_unidad}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (unidadRes.ok) {
-        const unidadData = await unidadRes.json();
-        setUnidad(unidadData.data);
-
-        // Obtener edición
-        const edicionRes = await fetch(`${API_URL}/api/ediciones/${unidadData.data.id_edicion}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (edicionRes.ok) {
-          const edicionData = await edicionRes.json();
-          setEdicion(edicionData.data);
-
-          // Obtener curso
-          const cursoRes = await fetch(`${API_URL}/api/cursos/${edicionData.data.id_curso}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-
-          if (cursoRes.ok) {
-            const cursoData = await cursoRes.json();
-            setCurso(cursoData.data);
-          }
-        }
-
-        // Obtener rol del usuario
-        const inscripcionRes = await fetch(`${API_URL}/api/inscripciones/edicion/${unidadData.data.id_edicion}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (inscripcionRes.ok) {
-          const inscripcionData = await inscripcionRes.json();
-          const userInscripcion = inscripcionData.data?.find(
-            (i: Inscripcion) => i.usuario_id === user?.id
-          );
-          if (userInscripcion) {
-            setUserRole({ cargo_id: userInscripcion.cargo_id });
-          } else if (user?.rol === 'ACADEMICO' || user?.rol === 'ADMIN') {
-            // Si el usuario es ACADEMICO o ADMIN del sistema, darle permisos de editor
-            setUserRole({ cargo_id: 2 });
-          }
-        }
-      }
-
-      setError('');
-    } catch (err) {
-      console.error('Error:', err);
-      setError('Error al cargar el tópico');
-    } finally {
-      setLoading(false);
-    }
+  const handleActualizar = (index: number, contenido: ContenidoData) => {
+    const nuevos = [...contenidos];
+    nuevos[index] = contenido;
+    setContenidos(nuevos);
   };
 
-  const handleActualizarContenido = (index: number, nuevoContenido: ContenidoData) => {
-    const nuevosContenidos = [...contenidos];
-    nuevosContenidos[index] = nuevoContenido;
-    setContenidos(nuevosContenidos);
-  };
-
-  const handleEliminarContenido = (index: number) => {
+  const handleEliminar = (index: number) => {
     if (confirm('¿Estás seguro de eliminar este contenido?')) {
       setContenidos(contenidos.filter((_, i) => i !== index));
     }
@@ -235,272 +30,170 @@ export default function TopicoContenidosPage() {
       tipo,
       orden: contenidos.length + 1,
       titulo: `Nuevo ${tipo}`,
-      descripcion: '',
-      texto: tipo === 'TEXTO' ? '' : undefined,
+      descripcion: 'Descripción del contenido',
+      texto: tipo === 'TEXTO' ? 'Escribe aquí el contenido...' : undefined,
       enlace_archivo: tipo !== 'TEXTO' ? '' : undefined
     };
     setContenidos([...contenidos, nuevoContenido]);
   };
 
-  const handleTogglePublicado = async () => {
-    if (!topico) return;
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/api/topicos/${topicoId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ estado_publicado: !topico.estado_publicado })
-      });
-      setTopico({ ...topico, estado_publicado: !topico.estado_publicado });
-    } catch (err) {
-      console.error('Error:', err);
-      setError('Error al cambiar el estado de publicación');
-    }
-  };
-
-  const handleGuardarContenidos = async () => {
-    setGuardando(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Contenidos guardados exitosamente (mock)');
-    } catch (err) {
-      console.error('Error:', err);
-      setError('Error al guardar contenidos');
-    } finally {
-      setGuardando(false);
-    }
-  };
-
-  if (authLoading || loading) {
-    return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <Loader className="w-12 h-12 text-blue-500 animate-spin mx-auto" />
-            <p className="mt-4 text-gray-400">Cargando tópico...</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  console.log("topico", topico)
-  console.log(user, user)
-
-  if (!topico || !userRole) {
-    return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <p className="text-gray-400 mb-6">No se pudo cargar el tópico o no tienes permisos</p>
-            <button
-              onClick={() => router.back()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Volver
-            </button>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  const isEditor = userRole.cargo_id === 2;
-  const isDocente = userRole.cargo_id === 1;
-  const canEdit = isEditor || isDocente;
-  const canTogglePublish = isEditor || isDocente;
-
-  const Renderizador = RENDERIZADORES[topico.id_plantilla] || RENDERIZADORES[1];
-
   return (
-    <>
+    <div className="min-h-screen bg-black">
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <button
-            onClick={() => router.push(`/mis-ediciones/${edicionId}/unidades/${unidadId}`)}
-            className="mb-4 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-lg text-gray-300 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver a la Unidad
-          </button>
-
-          <Breadcrumb topico={topico} unidad={unidad} edicion={edicion} curso={curso} />
-
-          <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+      
+      {/* Header con gradiente */}
+      <div className="flex justify-center mt-8">
+        <div className="relative w-[90%] max-w-5xl rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/5 border border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.2)]">
+          <div className="absolute inset-0 bg-gradient-to-tr from-sky-400/10 via-blue-500/5 to-purple-600/10 blur-2xl"></div>
+          <div className="relative px-8 py-6 flex flex-col gap-6">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{topico.titulo}</h1>
-              <p className="text-gray-400">{topico.descripcion}</p>
+              <div className="flex items-center gap-2 text-sm text-gray-300/70 mb-3">
+                <span>Curso</span>
+                <ChevronRight className="w-4 h-4 opacity-60" />
+                <span>Unidad 1</span>
+                <ChevronRight className="w-4 h-4 opacity-60" />
+                <span className="text-white font-medium">Nuevo Tópico</span>
+              </div>
+              <h1 className="text-3xl font-semibold text-white tracking-tight">
+                Editor de Contenido
+              </h1>
             </div>
 
-            <div className="flex items-center gap-3">
-              {topico.estado_publicado ? (
-                <span className="flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-300 rounded-lg text-sm border border-green-500/30">
-                  <CheckCircle className="w-4 h-4" />
-                  Publicado
-                </span>
-              ) : (
-                <span className="flex items-center gap-2 px-3 py-1 bg-orange-500/20 text-orange-300 rounded-lg text-sm border border-orange-500/30">
-                  <Lock className="w-4 h-4" />
-                  Borrador
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="mb-8 flex gap-4 items-center flex-wrap">
-            <button
-              onClick={() => setVista('preview')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-sm border ${vista === 'preview'
-                ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => setVista(vista === 'preview' ? 'editar' : 'preview')}
+                className={`group relative px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 overflow-hidden ${
+                  vista === 'editar'
+                    ? 'bg-gradient-to-r from-blue-500/80 to-indigo-600/80 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20 border border-white/10 backdrop-blur-sm'
                 }`}
-            >
-              <Eye className="w-4 h-4" />
-              Vista Previa
-            </button>
-            {canEdit && (
-              <button
-                onClick={() => setMostrarSelectorPlantillas(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-sm border bg-white/5 text-gray-400 border-white/10 hover:bg-white/10"
               >
-                <Layout className="w-4 h-4" />
-                Cambiar Plantilla
-              </button>
-            )}
-            {canEdit && (
-              <button
-                onClick={() => setVista('editar')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-sm border ${vista === 'editar'
-                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                  : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
-                  }`}
-              >
-                <Edit2 className="w-4 h-4" />
-                Editar Contenido
-              </button>
-            )}
-
-            {canTogglePublish && (
-              <button
-                onClick={handleTogglePublicado}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all text-sm border ${topico.estado_publicado
-                  ? 'bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/30'
-                  : 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
-                  }`}
-              >
-                {topico.estado_publicado ? (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    Despublicar
-                  </>
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"></div>
+                {vista === 'editar' ? (
+                  <Eye className="w-4 h-4 relative z-10" />
                 ) : (
-                  <>
-                    <Unlock className="w-4 h-4" />
-                    Publicar
-                  </>
+                  <Edit2 className="w-4 h-4 relative z-10" />
                 )}
+                <span className="relative z-10">
+                  {vista === 'editar' ? 'Vista Previa' : 'Editar'}
+                </span>
               </button>
-            )}
 
-            {vista === 'editar' && canEdit && (
               <button
-                onClick={handleGuardarContenidos}
-                disabled={guardando}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-300 rounded-xl font-medium transition-all text-sm border border-green-500/30 hover:bg-green-500/30 disabled:opacity-50"
+                onClick={() => setMostrarSelector(true)}
+                className="group relative px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 bg-white/10 text-gray-300 hover:bg-white/20 border border-white/10 backdrop-blur-sm overflow-hidden"
               >
-                {guardando ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {guardando ? 'Guardando...' : 'Guardar Todo'}
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"></div>
+                <Layout className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Cambiar Plantilla</span>
               </button>
-            )}
-          </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <p className="text-red-300">{error}</p>
-            </div>
-          )}
-
-          {vista === 'editar' && canEdit && (
-            <div className="mb-6 p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => handleAgregarContenido('TEXTO')}
-                  className="flex items-center gap-2 px-3 py-2 bg-green-500/20 text-green-300 rounded-lg text-sm border border-green-500/30 hover:bg-green-500/30"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Texto
-                </button>
-                <button
-                  onClick={() => handleAgregarContenido('IMAGEN')}
-                  className="flex items-center gap-2 px-3 py-2 bg-green-500/20 text-green-300 rounded-lg text-sm border border-green-500/30 hover:bg-green-500/30"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Imagen
-                </button>
-                <button
-                  onClick={() => handleAgregarContenido('VIDEO')}
-                  className="flex items-center gap-2 px-3 py-2 bg-green-500/20 text-green-300 rounded-lg text-sm border border-green-500/30 hover:bg-green-500/30"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Video
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8">
-            <Renderizador
-              contenidos={contenidos}
-              editable={vista === 'editar' && canEdit}
-              onActualizar={handleActualizarContenido}
-              onEliminar={handleEliminarContenido}
-            />
-          </div>
-
-          <div className="mt-8 p-6 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-gray-400 mb-1"><strong>Rol:</strong></p>
-                <p className="text-white font-semibold">
-                  {isEditor ? '✏️ Editor' : isDocente ? '👨‍🏫 Docente' : '📚 Estudiante'}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400 mb-1"><strong>Permisos:</strong></p>
-                <p className="text-white font-semibold">
-                  {canEdit ? 'Edición completa' : 'Solo lectura'}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400 mb-1"><strong>Plantilla:</strong></p>
-                <p className="text-white font-semibold">
-                  Plantilla #{topico.id_plantilla}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400 mb-1"><strong>Contenidos:</strong></p>
-                <p className="text-white font-semibold">{contenidos.length} elementos</p>
-              </div>
             </div>
           </div>
         </div>
       </div>
-      {mostrarSelectorPlantillas && (
-        <SelectorPlantillas
-          plantillaActual={topico.id_plantilla || 1}
-          onSeleccionar={handleCambiarPlantilla}
-          onCerrar={() => setMostrarSelectorPlantillas(false)}
+
+      {/* Botones para agregar contenido en modo edición */}
+      {vista === 'editar' && (
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="relative bg-white/10 border border-white/20 rounded-2xl p-8 backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.15)] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 via-purple-500/10 to-blue-600/20 opacity-70 rounded-2xl blur-2xl"></div>
+            <div className="absolute -top-10 -left-10 w-60 h-60 bg-gradient-to-br from-blue-500/40 to-transparent rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-72 h-72 bg-gradient-to-tr from-fuchsia-500/30 to-transparent rounded-full blur-3xl animate-pulse"></div>
+
+            <h3 className="text-white font-semibold mb-6 text-lg flex items-center gap-2 relative z-10">
+              Agregar Nuevo Contenido
+            </h3>
+
+            <div className="flex gap-4 flex-wrap relative z-10">
+              <button
+                onClick={() => handleAgregarContenido('TEXTO')}
+                className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500/80 to-indigo-600/80 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/40 hover:scale-[1.05] transition-all font-medium backdrop-blur-md relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all"></div>
+                <FileText className="w-5 h-5 relative z-10" />
+                <span className="relative z-10">Agregar Texto</span>
+              </button>
+
+              <button
+                onClick={() => handleAgregarContenido('IMAGEN')}
+                className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-500/80 to-pink-600/80 text-white rounded-xl hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.05] transition-all font-medium backdrop-blur-md relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all"></div>
+                <Image className="w-5 h-5 relative z-10" />
+                <span className="relative z-10">Agregar Imagen</span>
+              </button>
+
+              <button
+                onClick={() => handleAgregarContenido('VIDEO')}
+                className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500/80 to-teal-600/80 text-white rounded-xl hover:shadow-lg hover:shadow-cyan-500/40 hover:scale-[1.05] transition-all font-medium backdrop-blur-md relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all"></div>
+                <Video className="w-5 h-5 relative z-10" />
+                <span className="relative z-10">Agregar Video</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contenido principal */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {contenidos.length === 0 ? (
+          <div className="relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-black/80 backdrop-blur-2xl rounded-3xl border border-white/20 p-24 shadow-2xl text-center">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)] rounded-3xl"></div>
+            <div className="relative z-10">
+              <div className="text-6xl mb-6">📝</div>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                Comienza a crear contenido
+              </h2>
+              <p className="text-gray-400">
+                Agrega texto, imágenes o videos para empezar a construir tu tópico
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-black/80 backdrop-blur-2xl rounded-3xl border border-white/20 p-12 shadow-2xl before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-to-br before:from-blue-500/5 before:via-purple-500/5 before:to-pink-500/5 before:-z-10">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)] rounded-3xl"></div>
+              <div className="relative z-10">
+                <TemplateRenderer
+                  templateId={plantilla}
+                  contenidos={contenidos}
+                  editable={vista === 'editar'}
+                  onActualizar={handleActualizar}
+                  onEliminar={handleEliminar}
+                />
+              </div>
+            </div>
+
+            {/* Info de la plantilla */}
+            <div className="mt-8 relative bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/20 p-6 shadow-xl before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/5 before:to-transparent before:-z-10">
+              <div className="grid md:grid-cols-3 gap-6 text-sm relative z-10">
+                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
+                  <p className="text-gray-400 mb-1 font-medium">Plantilla Actual</p>
+                  <p className="text-white font-bold text-lg">Plantilla #{plantilla}</p>
+                </div>
+                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
+                  <p className="text-gray-400 mb-1 font-medium">Contenidos</p>
+                  <p className="text-white font-bold text-lg">{contenidos.length} elementos</p>
+                </div>
+                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
+                  <p className="text-gray-400 mb-1 font-medium">Modo</p>
+                  <p className="text-white font-bold text-lg">{vista === 'editar' ? 'Edición' : 'Visualización'}</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {mostrarSelector && (
+        <TemplateSelectorModal
+          plantillaActual={plantilla}
+          onSeleccionar={setPlantilla}
+          onCerrar={() => setMostrarSelector(false)}
         />
       )}
-    </>
+    </div>
   );
 }
