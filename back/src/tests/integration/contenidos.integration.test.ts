@@ -319,4 +319,85 @@ describe('Contenidos API - Integration Tests', () => {
     expect(body.success).toBe(false);
     expect(body.error).toBe('Contenido no encontrado');
   });
+
+  // REORDENAMIENTO DE CONTENIDOS
+  describe('PUT /api/contenidos/reordenar', () => {
+
+    it('CT15 - Reordenamiento exitoso', async () => {
+      const contenido1 = await prisma.contenido.create({
+        data: { id_topico: topicoId, tipo: 'TEXTO', orden: 2, titulo: 'C1', activo: true }
+      });
+      const contenido2 = await prisma.contenido.create({
+        data: { id_topico: topicoId, tipo: 'VIDEO', orden: 1, titulo: 'C2', activo: true }
+      });
+
+      const reordered = [
+        { id: contenido2.id, orden: 1 },
+        { id: contenido1.id, orden: 2 },
+      ];
+
+      const res = await request(app)
+        .put(`/api/contenidos/reordenar`)
+        .send(reordered)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const body: ApiResponse<any> = res.body;
+      expect(body.success).toBe(true);
+      expect(body.data.message).toMatch(/Contenidos reordenados correctamente/);
+
+      const contenidosDb = await prisma.contenido.findMany({
+        where: { id_topico: topicoId },
+        orderBy: { orden: 'asc' }
+      });
+      expect(contenidosDb[0].id).toBe(contenido2.id);
+      expect(contenidosDb[1].id).toBe(contenido1.id);
+    });
+
+    it('CT16 - Error por array vacío', async () => {
+      const res = await request(app)
+        .put(`/api/contenidos/reordenar`)
+        .send([])
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(400);
+
+      const body: ApiResponse<any> = res.body;
+      expect(body.success).toBe(false);
+      expect(body.error).toMatch(/Debe enviar al menos un contenido para reordenar/);
+    });
+
+    it('CT17 - Error por contenido sin id o sin orden', async () => {
+      const invalidContenidos = [
+        { id: 1 } as any,  // falta orden
+        { orden: 2 } as any // falta id
+      ];
+
+      const res = await request(app)
+        .put(`/api/contenidos/reordenar`)
+        .send(invalidContenidos)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(400);
+
+      const body: ApiResponse<any> = res.body;
+      expect(body.success).toBe(false);
+      expect(body.error).toMatch(/Cada contenido debe tener id y orden válidos/);
+    });
+
+    it('CT18 - Error por contenido inexistente', async () => {
+      const invalidContenidos = [
+        { id: 9999, orden: 1 },
+        { id: 10000, orden: 2 },
+      ];
+
+      const res = await request(app)
+        .put(`/api/contenidos/reordenar`)
+        .send(invalidContenidos)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+
+      const body: ApiResponse<any> = res.body;
+      expect(body.success).toBe(false);
+      expect(body.error).toMatch(/Uno o más contenidos no existen/);
+    });
+  });
 });

@@ -138,4 +138,57 @@ describe('Contenidos Service', () => {
         .rejects.toMatchObject({ status: 404, message: 'Contenido no encontrado' });
     });
   });
+
+  // TEST - REORDENAMIENTO DE CONTENIDOS
+  describe('reorderContenidos', () => {
+    const contenidosValidos = [
+      { id: 1, orden: 2 },
+      { id: 2, orden: 1 },
+    ];
+
+    it('CT15: Reordenamiento exitoso', async () => {
+      (contenidosRepo.existContenidosByIds as jest.Mock).mockResolvedValue([1, 2]);
+      (contenidosRepo.reorderContenidos as jest.Mock).mockResolvedValue(contenidosValidos);
+
+      const result = await contenidosService.reorderContenidos(contenidosValidos);
+
+      expect(result).toEqual({
+        message: 'Contenidos reordenados correctamente',
+        count: contenidosValidos.length,
+      });
+      expect(contenidosRepo.reorderContenidos).toHaveBeenCalledWith(contenidosValidos);
+    });
+
+    it('CT16: Error por array vacío', async () => {
+      await expect(contenidosService.reorderContenidos([]))
+        .rejects.toMatchObject({ status: 400, message: 'Debe enviar al menos un contenido para reordenar' });
+    });
+
+    it('CT17: Error por contenido sin id o sin orden', async () => {
+      const invalidContenidos = [
+        { id: 1 } as any, // falta orden
+        { orden: 2 } as any, // falta id
+      ];
+      await expect(contenidosService.reorderContenidos(invalidContenidos))
+        .rejects.toMatchObject({ status: 400, message: 'Cada contenido debe tener id y orden válidos' });
+    });
+
+    it('CT18: Error por contenido inexistente', async () => {
+      const contenidos = [{ id: 1, orden: 1 }, { id: 2, orden: 2 }];
+      (contenidosRepo.existContenidosByIds as jest.Mock).mockResolvedValue([1]);
+
+      await expect(contenidosService.reorderContenidos(contenidos))
+        .rejects.toMatchObject({ status: 404, message: 'Uno o más contenidos no existen' });
+    });
+
+    it('CT19: Error interno del repositorio', async () => {
+      (contenidosRepo.existContenidosByIds as jest.Mock).mockResolvedValue([1, 2]);
+      (contenidosRepo.reorderContenidos as jest.Mock).mockRejectedValue(new Error('Error al reordenar'));
+      
+      await expect(contenidosService.reorderContenidos(contenidosValidos))
+        .rejects.toThrow('Error al reordenar');
+    });
+  });
+
+
 });

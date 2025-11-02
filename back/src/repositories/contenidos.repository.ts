@@ -1,5 +1,5 @@
 import prisma from '../config/prisma';
-import { ContenidoUpdate, ContenidosCreate } from '../types/contenidos.types';
+import { ContenidoUpdate, ContenidosCreate, ContenidoReorganize } from '../types/contenidos.types';
 
 export const createContenidos = async (data: ContenidosCreate) => {
   return prisma.contenido.createMany({
@@ -40,4 +40,23 @@ export const deleteContenido = async (id: number) => {
     where: { id },
     data: { activo: false },
   });
+};
+
+export const reorderContenidos = async (contenidos: ContenidoReorganize[]) => {
+  return prisma.$transaction(
+    contenidos.map(u =>
+      prisma.contenido.update({
+        where: { id: u.id },
+        data: { orden: u.orden, fecha_actualizacion: new Date() },
+      })
+    )
+  );
+};
+
+export const existContenidosByIds = async (ids: number[]) => {
+  const encontrados = await prisma.contenido.findMany({
+    where: { id: { in: ids } },
+    select: { id: true },
+  });
+  return encontrados.map(u => u.id);
 };

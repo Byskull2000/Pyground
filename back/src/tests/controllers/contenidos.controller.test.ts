@@ -197,4 +197,112 @@ describe('Contenidos Controller', () => {
       expect(res.json).toHaveBeenCalledWith(new ApiResponse(false, null, 'Contenido no encontrado'));
     });
   });
+
+    // REORDER CONTENIDOS
+  describe('reorderContenidos', () => {
+    it('CT14: Reordenamiento exitoso', async () => {
+      const contenidos = [
+        { id: 1, orden: 2 },
+        { id: 2, orden: 1 },
+        { id: 3, orden: 3 },
+      ];
+      (contenidosService.reorderContenidos as jest.Mock).mockResolvedValue({
+        message: 'Contenidos reordenados correctamente',
+        count: 3,
+      });
+
+      const req = createMockRequest(contenidos);
+      const res = createMockResponse();
+
+      await contenidosController.reorderContenidos(req, res);
+
+      expect(contenidosService.reorderContenidos).toHaveBeenCalledWith(contenidos);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(true, { message: 'Contenidos reordenados correctamente', count: 3 }, 'Contenidos reordenados correctamente')
+      );
+    });
+
+    it('CT15: Error por array vacío', async () => {
+      const contenidos: any[] = [];
+      (contenidosService.reorderContenidos as jest.Mock).mockRejectedValue({
+        status: 400,
+        message: 'Debe enviar al menos un contenido para reordenar',
+      });
+
+      const req = createMockRequest(contenidos);
+      const res = createMockResponse();
+
+      await contenidosController.reorderContenidos(req, res);
+
+      expect(contenidosService.reorderContenidos).toHaveBeenCalledWith(contenidos);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Debe enviar al menos un contenido para reordenar')
+      );
+    });
+
+    it('CT16: Error por contenido sin id o sin orden', async () => {
+      const contenidos = [
+        { id: 1 } as any, // falta orden
+        { orden: 2 } as any, // falta id
+      ];
+      (contenidosService.reorderContenidos as jest.Mock).mockRejectedValue({
+        status: 400,
+        message: 'Cada contenido debe tener id y orden válidos',
+      });
+
+      const req = createMockRequest(contenidos);
+      const res = createMockResponse();
+
+      await contenidosController.reorderContenidos(req, res);
+
+      expect(contenidosService.reorderContenidos).toHaveBeenCalledWith(contenidos);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Cada contenido debe tener id y orden válidos')
+      );
+    });
+
+    it('CT17: Error por contenido inexistente en BD', async () => {
+      const contenidos = [
+        { id: 9999, orden: 1 },
+        { id: 2, orden: 2 },
+      ];
+      (contenidosService.reorderContenidos as jest.Mock).mockRejectedValue({
+        status: 404,
+        message: 'Uno o más contenidos no existen',
+      });
+
+      const req = createMockRequest(contenidos);
+      const res = createMockResponse();
+
+      await contenidosController.reorderContenidos(req, res);
+
+      expect(contenidosService.reorderContenidos).toHaveBeenCalledWith(contenidos);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Uno o más contenidos no existen')
+      );
+    });
+
+    it('CT18: Error interno inesperado', async () => {
+      const contenidos = [
+        { id: 1, orden: 1 },
+        { id: 2, orden: 2 },
+      ];
+      (contenidosService.reorderContenidos as jest.Mock).mockRejectedValue(new Error('Error interno'));
+
+      const req = createMockRequest(contenidos);
+      const res = createMockResponse();
+
+      await contenidosController.reorderContenidos(req, res);
+
+      expect(contenidosService.reorderContenidos).toHaveBeenCalledWith(contenidos);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Error interno')
+      );
+    });
+  });
+
 });

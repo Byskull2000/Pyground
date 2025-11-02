@@ -1,6 +1,6 @@
 import * as contenidosRepo from '../repositories/contenidos.repository';
 import * as topicosRepo from '../repositories/topicos.repository';
-import { ContenidoCreate } from '../types/contenidos.types';
+import { ContenidoCreate, ContenidoReorganize } from '../types/contenidos.types';
 
 export const getContenidosByTopico = async (id_topico: number) => {
   const topico = await topicosRepo.getTopicoById(id_topico);
@@ -41,4 +41,23 @@ export const deleteContenido = async (id: number) => {
   if (!contenido.activo) throw { status: 400, message: 'El contenido ya está inactivo' };
 
   return contenidosRepo.deleteContenido(id);
+};
+
+export const reorderContenidos = async (contenidos: ContenidoReorganize[]) => {
+  if (!contenidos || contenidos.length === 0)
+    throw { status: 400, message: 'Debe enviar al menos un contenido para reordenar' };
+
+  for (const u of contenidos) {
+    if (!u.id || u.orden === undefined)
+      throw { status: 400, message: 'Cada contenido debe tener id y orden válidos' };
+  }
+
+  const ids = contenidos.map(u => u.id);
+  const existentes = await contenidosRepo.existContenidosByIds(ids);
+
+  if (existentes.length !== ids.length)
+    throw { status: 404, message: 'Uno o más contenidos no existen' };
+
+  const result = await contenidosRepo.reorderContenidos(contenidos);
+  return { message: 'Contenidos reordenados correctamente', count: result.length };
 };

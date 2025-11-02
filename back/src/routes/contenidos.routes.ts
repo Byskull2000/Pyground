@@ -9,6 +9,7 @@ const router = Router();
 router.get('/topico/:id_topico', contenidoController.getContenidosByTopico);
 router.get('/:id', contenidoController.getContenidoById);
 router.post('/', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), contenidoController.createContenidos);
+router.put('/reordenar', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), contenidoController.reorderContenidos);
 router.put('/:id', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), contenidoController.updateContenido);
 router.delete('/:id', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), contenidoController.deleteContenido);
 

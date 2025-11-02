@@ -68,3 +68,16 @@ export const deleteContenido = async (req: Request, res: Response) => {
     return res.status(status).json(new ApiResponse(false, null, message));
   }
 };
+
+export const reorderContenidos = async (req: Request, res: Response) => {
+  try {
+    const contenidos = req.body; 
+    const result = await contenidosService.reorderContenidos(contenidos);
+    return res.json(new ApiResponse(true, result, 'Contenidos reordenados correctamente'));
+  } catch (err: unknown) {
+    console.error(err);
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al reordenar contenidos';
+    return res.status(status).json(new ApiResponse(false, null, message));
+  }
+};

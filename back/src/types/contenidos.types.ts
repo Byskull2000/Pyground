@@ -23,3 +23,8 @@ export interface ContenidosCreate {
   id_topico: number;
   contenidos: ContenidoCreate[];
 }
+
+export interface ContenidoReorganize {
+  id: number;
+  orden: number;
+}
