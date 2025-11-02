@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { BookOpen, Plus, Edit2, Trash2, AlertCircle, Loader, Save, Clock, Target, Eye } from 'lucide-react';
+import { BookOpen, Plus, Edit2, Trash2, AlertCircle, Loader, Save, Clock, Target } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { DraggableList } from '@/components/DraggableList';
 
 interface Topico {
     id: number;
@@ -12,7 +13,7 @@ interface Topico {
     duracion_estimada: number;
     orden: number;
     publicado: boolean;
-    objetivos_aprendizaje: string;
+    objetivos_aprendizaje?: string;
     fecha_creacion: string;
     fecha_actualizacion?: string;
     activo: boolean;
@@ -25,7 +26,7 @@ interface TopicosPanelProps {
     userRole?: number;
 }
 
-export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true, userRole }: TopicosPanelProps) {
+export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true }: TopicosPanelProps) {
     const router = useRouter();
     const [topicos, setTopicos] = useState<Topico[]>([]);
     const [loading, setLoading] = useState(true);
@@ -122,11 +123,12 @@ export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true, u
 
     const handleEdit = (e: React.MouseEvent, topico: Topico) => {
         e.stopPropagation();
+        console.log("topico", topico)
         setFormData({
             titulo: topico.titulo,
             descripcion: topico.descripcion,
             duracion_estimada: topico.duracion_estimada,
-            objetivos_aprendizaje: topico.objetivos_aprendizaje
+            objetivos_aprendizaje: topico.objetivos_aprendizaje || ""
         });
         setEditingId(topico.id);
         setShowForm(true);
@@ -175,6 +177,86 @@ export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true, u
         router.push(`/mis-ediciones/${edicionId}/unidades/${unidadId}/topicos/${topicoId}`);
     };
 
+    const handleReorderTopicos = async (reorderedTopicos: Topico[]) => {
+        const token = localStorage.getItem('token');
+
+        const ordenData = reorderedTopicos.map(t => ({
+            id: t.id,
+            orden: t.orden
+        }));
+
+        const response = await fetch(`${API_URL}/api/topicos/reordenar`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(ordenData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al actualizar orden');
+        }
+
+        setTopicos(reorderedTopicos);
+    };
+
+    const renderTopico = (topico: Topico) => (
+        <div
+
+            onClick={() => handleViewTopico(topico.id)}
+            key={topico.id}
+        >
+            <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                    <h4 className="font-semibold text-white mb-1">{topico.titulo}</h4>
+                    <p className="text-sm text-gray-400 mb-2">{topico.descripcion}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+                        <span className="flex items-center gap-2 text-gray-400">
+                            <Clock className="w-4 h-4" />
+                            <span>{topico.duracion_estimada} min</span>
+                        </span>
+                        {topico.objetivos_aprendizaje && (
+                            <span
+                                className="flex items-center gap-2 text-gray-400 max-w-[40ch] truncate"
+                                title={topico.objetivos_aprendizaje}
+                            >
+                                <Target className="w-4 h-4" />
+                                <span>{topico.objetivos_aprendizaje}</span>
+                            </span>
+                        )}
+                        {topico.publicado && (
+                            <span className="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">
+                                Publicado
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                    {canEdit && (
+                        <>
+                            <button
+                                onClick={(e) => handleEdit(e, topico)}
+                                className="p-3 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl hover:bg-blue-500/30 transition-all hover:scale-105"
+                            >
+                                <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteModal({ show: true, topico });
+                                }}
+                                className="p-3 bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl hover:bg-red-500/30 transition-all hover:scale-105"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </>
+
+                    )}
+                </div>
+            </div>
+        </div>
+    );
     if (loading) {
         return (
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl shadow-lg border border-white/10 p-8">
@@ -295,64 +377,11 @@ export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true, u
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        {topicos.map((topico) => (
-                            <div
-
-                                onClick={() => handleViewTopico(topico.id)}
-                                key={topico.id}
-                                className="bg-gray-800/50 border border-white/10 rounded-lg p-4 hover:border-purple-400/50 transition-all"
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <h4 className="font-semibold text-white mb-1">{topico.titulo}</h4>
-                                        <p className="text-sm text-gray-400 mb-2">{topico.descripcion}</p>
-                                        <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
-                                            <span className="flex items-center gap-2 text-gray-400">
-                                                <Clock className="w-4 h-4" />
-                                                <span>{topico.duracion_estimada} min</span>
-                                            </span>
-                                            {topico.objetivos_aprendizaje && (
-                                                <span
-                                                    className="flex items-center gap-2 text-gray-400 max-w-[40ch] truncate"
-                                                    title={topico.objetivos_aprendizaje}
-                                                >
-                                                    <Target className="w-4 h-4" />
-                                                    <span>{topico.objetivos_aprendizaje}</span>
-                                                </span>
-                                            )}
-                                            {topico.publicado && (
-                                                <span className="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">
-                                                    Publicado
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2 flex-shrink-0">
-                                        {canEdit && (
-                                            <>
-                                                <button
-                                                    onClick={(e) => handleEdit(e, topico)}
-                                                    className="p-2 bg-blue-500/20 text-blue-300 rounded hover:bg-blue-500/30 transition-colors"
-                                                    title="Editar"
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setDeleteModal({ show: true, topico });
-                                                    }}
-                                                    className="p-2 bg-red-500/20 text-red-300 rounded hover:bg-red-500/30 transition-colors"
-                                                    title="Eliminar"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                        <DraggableList
+                            items={topicos}
+                            onReorder={handleReorderTopicos}
+                            renderItem={renderTopico}
+                        />
                     </div>
                 )}
             </div>
