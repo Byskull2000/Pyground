@@ -19,6 +19,7 @@ describe('Unidad API - Integration Tests', () => {
   });
 
   beforeEach(async () => {
+    await prisma.contenido.deleteMany({});
     await prisma.inscripcion.deleteMany({});
     await prisma.topico.deleteMany({});
     await prisma.unidad.deleteMany({});

@@ -147,7 +147,7 @@ model Topico {
   requeridos_por       Topico[]  @relation("TopicoPrerequisitos")
 
   // a futuro: contenidos específicos de la edición
-  // contenidos Contenido[]
+  contenidos           Contenido[]
 }
 
 model Cargo {
@@ -169,4 +169,29 @@ model Inscripcion {
   activo            Boolean   @default(true)
 
   @@unique([usuario_id, edicion_id])
+}
+
+enum TipoContenidoEnum {
+  TEXTO
+  IMAGEN
+  VIDEO
+  AUDIO
+  TRANSCRIPCION
+  PDF
+  ARCHIVO
+}
+
+model Contenido {
+  id                  Int             @id @default(autoincrement())
+  id_topico           Int
+  topico              Topico          @relation(fields: [id_topico], references: [id])
+  tipo                TipoContenidoEnum
+  texto               String?         @db.Text
+  enlace_archivo      String?         @db.VarChar(500)
+  titulo              String?         @db.VarChar(200)
+  descripcion         String?         @db.Text
+  orden               Int             @default(1)
+  activo              Boolean         @default(true)
+  fecha_creacion      DateTime        @default(now())
+  fecha_actualizacion DateTime?
 }
