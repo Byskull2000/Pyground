@@ -9,6 +9,7 @@ import {
   createTopico,
   updateTopico,
   deleteTopico,
+  reorderTopicos,
 } from '../controllers/topicos.controller';
 
 const router = express.Router();
@@ -25,6 +26,8 @@ router.get('/:id', getTopicoById);
 
 // Crear nuevo tópico
 router.post('/unidad/:id_unidad', createTopico);
+
+router.put('/reordenar', reorderTopicos);
 
 // Actualizar tópico
 router.put('/:id', updateTopico);

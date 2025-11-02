@@ -1,6 +1,6 @@
 import prisma from '../config/prisma';
 import {TopicoPlantilla } from '@prisma/client';
-import { TopicoCreate, TopicoUpdate } from '../types/topicos.types';
+import { TopicoCreate, TopicoReorganize, TopicoUpdate } from '../types/topicos.types';
 
 
 export const getTopicosByUnidad = async (id_unidad: number) => {
@@ -71,4 +71,23 @@ export const cloneTopicosFromPlantillas = async (
   return prisma.topico.createMany({
     data,
   });
+};
+
+export const reorderTopicos = async (topicos: TopicoReorganize[]) => {
+  return prisma.$transaction(
+    topicos.map(u =>
+      prisma.topico.update({
+        where: { id: u.id },
+        data: { orden: u.orden, fecha_actualizacion: new Date() },
+      })
+    )
+  );
+};
+
+export const existTopicosByIds = async (ids: number[]) => {
+  const encontrados = await prisma.topico.findMany({
+    where: { id: { in: ids } },
+    select: { id: true },
+  });
+  return encontrados.map(u => u.id);
 };

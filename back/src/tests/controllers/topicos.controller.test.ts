@@ -406,4 +406,61 @@ describe('Topicos Controller', () => {
       );
     });
   });
+
+  describe('reorderTopicos', () => {
+    it('T24: debe reordenar tópicos exitosamente', async () => {
+      const topicosInput = [{ id: 2, orden: 1 }, { id: 1, orden: 2 }];
+      const serviceResult = { message: 'Topicos reordenados correctamente', count: 2 };
+
+      mockRequest.body = topicosInput;
+      (topicosService.reorderTopicos as jest.Mock).mockResolvedValue(serviceResult);
+
+      await topicosController.reorderTopicos(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(topicosService.reorderTopicos).toHaveBeenCalledWith(topicosInput);
+      expect(jsonMock).toHaveBeenCalledWith(
+        new ApiResponse(true, serviceResult, 'Topicos reordenados correctamente')
+      );
+    });
+
+    it('T25: debe manejar error de validación', async () => {
+      const error = { status: 400, message: 'Debe enviar al menos un topico para reordenar' };
+      mockRequest.body = [];
+
+      (topicosService.reorderTopicos as jest.Mock).mockRejectedValue(error);
+
+      await topicosController.reorderTopicos(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(topicosService.reorderTopicos).toHaveBeenCalledWith([]);
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Debe enviar al menos un topico para reordenar')
+      );
+    });
+
+    it('T26: debe manejar error inesperado', async () => {
+      const error = new Error('Database error');
+      mockRequest.body = [{ id: 1, orden: 1 }];
+
+      (topicosService.reorderTopicos as jest.Mock).mockRejectedValue(error);
+
+      await topicosController.reorderTopicos(
+        mockRequest as Request,
+        mockResponse as Response
+      );
+
+      expect(topicosService.reorderTopicos).toHaveBeenCalledWith([{ id: 1, orden: 1 }]);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith(
+        new ApiResponse(false, null, 'Database error')
+      );
+    });
+  });
+
 });

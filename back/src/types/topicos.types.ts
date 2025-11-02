@@ -20,3 +20,8 @@ export interface TopicoUpdate {
   fecha_actualizacion?: Date;
   activo?: boolean;
 }
+
+export interface TopicoReorganize {
+  id: number;
+  orden: number;
+}

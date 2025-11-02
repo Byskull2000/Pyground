@@ -1,3 +1,4 @@
+import { TopicoReorganize } from '@/types/topicos.types';
 import * as topicosRepository from '../repositories/topicos.repository';
 
 export const getTopicosByUnidad = async (id_unidad: number) => {
@@ -85,4 +86,23 @@ export const deleteTopico = async (id: number) => {
   }
 
   return await topicosRepository.deleteTopico(id);
+};
+
+export const reorderTopicos = async (topicos: TopicoReorganize[]) => {
+  if (!topicos || topicos.length === 0)
+    throw { status: 400, message: 'Debe enviar al menos un topico para reordenar' };
+
+  for (const u of topicos) {
+    if (!u.id || u.orden === undefined)
+      throw { status: 400, message: 'Cada topico debe tener id y orden válidos' };
+  }
+
+  const ids = topicos.map(u => u.id);
+  const existentes = await topicosRepository.existTopicosByIds(ids);
+
+  if (existentes.length !== ids.length)
+    throw { status: 404, message: 'Uno o más topicos no existen' };
+
+  const result = await topicosRepository.reorderTopicos(topicos);
+  return { message: 'Topicos reordenados correctamente', count: result.length };
 };

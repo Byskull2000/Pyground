@@ -145,3 +145,16 @@ export async function deleteTopico(req: Request, res: Response) {
     return res.status(500).json(new ApiResponse(false, null, 'Error al eliminar el tópico'));
   }
 }
+
+export const reorderTopicos = async (req: Request, res: Response) => {
+  try {
+    const topicos = req.body; 
+    const result = await topicosService.reorderTopicos(topicos);
+    return res.json(new ApiResponse(true, result, 'Topicos reordenados correctamente'));
+  } catch (err: unknown) {
+    console.error(err);
+    const status = (err as { status?: number })?.status ?? 500;
+    const message = (err as { message?: string })?.message ?? 'Error al reordenar topicos';
+    return res.status(status).json(new ApiResponse(false, null, message));
+  }
+};
