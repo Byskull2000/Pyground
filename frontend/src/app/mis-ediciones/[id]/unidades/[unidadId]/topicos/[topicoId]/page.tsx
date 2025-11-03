@@ -2,40 +2,87 @@
 'use client';
 import Header from '@/components/Header';
 import React, { useEffect, useState } from 'react';
-import { Edit2, ChevronRight, Layout, Eye, FileText, Image, Video, Save, Loader } from 'lucide-react';
+import { Edit2, ChevronRight, Layout, Eye, FileText, Image, Video, Loader } from 'lucide-react';
 import { ContenidoData } from './types/content';
 import TemplateRenderer from './components/templates/TemplateRenderer';
 import TemplateSelectorModal from './components/templates/TemplateSelectorModal';
-import { API_URL } from '@/app/config/config';
 import { useParams } from 'next/navigation';
+import { useContenidos } from '@/hooks/useContenidos';
+import  { useConfirmDialog } from '@/components/ConfirmDialog';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function TopicEditorPage() {
-  const [contenidos, setContenidos] = useState<ContenidoData[]>([]);
+  const { topicoId } = useParams();
   const [vista, setVista] = useState<'preview' | 'editar'>('editar');
   const [plantilla, setPlantilla] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [guardando, setGuardando] = useState(false);
 
-  const { topicoId } = useParams()
-
+  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
+  const {
+    contenidos,
+    loading,
+    error,
+    fetchContenidos,
+    createContenidos,
+    updateContenido,
+    deleteContenido,
+    setContenidos
+  } = useContenidos();
 
   useEffect(() => {
-    fetchContenidos()
-  }, [])
-  const handleActualizar = (index: number, contenido: ContenidoData) => {
-    const nuevos = [...contenidos];
-    nuevos[index] = contenido;
-    setContenidos(nuevos);
-  };
+    if (topicoId) {
+      fetchContenidos(Number(topicoId));
+    }
+  }, [topicoId, fetchContenidos]);
 
-  const handleEliminar = (index: number) => {
-    if (confirm('¿Estás seguro de eliminar este contenido?')) {
-      setContenidos(contenidos.filter((_, i) => i !== index));
+  const handleActualizar = async (index: number, contenidoActualizado: ContenidoData) => {
+    const contenido = contenidos[index];
+
+    // Si tiene ID numérico, actualizar en BD
+    if (contenido.id && typeof contenido.id === 'number') {
+      try {
+        await updateContenido(contenido.id, contenidoActualizado);
+      } catch (err) {
+        console.error('Error al actualizar:', err);
+      }
+    } else {
+      // Si no tiene ID, solo actualizar localmente (se guardará al guardar todo)
+      const nuevos = [...contenidos];
+      nuevos[index] = contenidoActualizado;
+      setContenidos(nuevos);
     }
   };
+  const handleEliminar = async (index: number) => {
+    const contenido = contenidos[index];
+
+    showConfirm({
+      title: 'Eliminar Contenido',
+      message: `¿Estás seguro de que deseas eliminar "${contenido.titulo || 'este contenido'}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger',
+      onConfirm: async () => {
+        // Si tiene ID, eliminar de BD
+        if (contenido.id && typeof contenido.id === 'number') {
+          try {
+            await deleteContenido(contenido.id);
+          } catch (err) {
+            console.error('Error al eliminar:', err);
+          }
+        } else {
+          // Si no tiene ID, solo eliminar localmente
+          setContenidos(contenidos.filter((_, i) => i !== index));
+        }
+      }
+    });
+  };
+
 
   const handleAgregarContenido = (tipo: 'TEXTO' | 'IMAGEN' | 'VIDEO') => {
     const nuevoContenido: ContenidoData = {
+      id: `temp-${Date.now()}`, // ID temporal
       tipo,
       orden: contenidos.length + 1,
       titulo: `Nuevo ${tipo}`,
@@ -45,41 +92,49 @@ export default function TopicEditorPage() {
     };
     setContenidos([...contenidos, nuevoContenido]);
   };
-  const fetchContenidos = async () => {
+
+  const handleGuardarTodo = async () => {
+    // Guardar todos los contenidos nuevos (sin ID numérico)
+    const contenidosNuevos = contenidos.filter(c =>
+      !c.id || typeof c.id !== 'number'
+    );
+
+    if (contenidosNuevos.length === 0) {
+      alert('No hay cambios pendientes');
+      return;
+    }
+
     try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
+      setGuardando(true);
 
-      // Obtener datos de la unidad de la edición
-      const response = await fetch(`${API_URL}/contenidos/topico/${topicoId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      // Preparar contenidos para enviar (sin el ID temporal)
+      const contenidosParaCrear = contenidosNuevos.map(({ id, ...rest }) => rest);
 
-      if (!response.ok) {
-        throw new Error('Error al cargar topico');
-      }
+      await createContenidos(Number(topicoId), contenidosParaCrear);
+      alert('Contenidos guardados exitosamente');
 
-      const result = await response.json();
-      setContenidos(result.data);
+      // Recargar contenidos
+      await fetchContenidos(Number(topicoId));
     } catch (err) {
       console.error('Error:', err);
+      alert('Error al guardar contenidos');
     } finally {
-      setLoading(false);
+      setGuardando(false);
     }
-  }
+  };
 
-
-  if (loading) {
+  if (loading && contenidos.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
-          <p className="mt-4 text-gray-400">Cargando contenidos del topico...</p>
+          <p className="mt-4 text-gray-400">Cargando contenidos del tópico...</p>
         </div>
       </div>
     );
   }
 
+  const hayContenidosNuevos = contenidos.some(c => !c.id || typeof c.id !== 'number');
 
   return (
     <div className="min-h-screen bg-black">
@@ -96,11 +151,14 @@ export default function TopicEditorPage() {
                 <ChevronRight className="w-4 h-4 opacity-60" />
                 <span>Unidad 1</span>
                 <ChevronRight className="w-4 h-4 opacity-60" />
-                <span className="text-white font-medium">Nuevo Tópico</span>
+                <span className="text-white font-medium">Tópico #{topicoId}</span>
               </div>
               <h1 className="text-3xl font-semibold text-white tracking-tight">
                 Editor de Contenido
               </h1>
+              {error && (
+                <p className="text-red-400 text-sm mt-2">⚠️ {error}</p>
+              )}
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
@@ -128,8 +186,26 @@ export default function TopicEditorPage() {
               >
                 <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"></div>
                 <Layout className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">Cambiar Plantilla</span>
+                <span className="relative z-10">Plantilla #{plantilla}</span>
               </button>
+
+              {hayContenidosNuevos && vista === 'editar' && (
+                <button
+                  onClick={handleGuardarTodo}
+                  disabled={guardando}
+                  className="group relative px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white shadow-lg shadow-green-500/30 overflow-hidden disabled:opacity-50"
+                >
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"></div>
+                  {guardando ? (
+                    <Loader className="w-4 h-4 animate-spin relative z-10" />
+                  ) : (
+                    <FileText className="w-4 h-4 relative z-10" />
+                  )}
+                  <span className="relative z-10">
+                    {guardando ? 'Guardando...' : 'Guardar Todo'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -140,8 +216,6 @@ export default function TopicEditorPage() {
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="relative bg-white/10 border border-white/20 rounded-2xl p-8 backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.15)] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 via-purple-500/10 to-blue-600/20 opacity-70 rounded-2xl blur-2xl"></div>
-            <div className="absolute -top-10 -left-10 w-60 h-60 bg-gradient-to-br from-blue-500/40 to-transparent rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-0 right-0 w-72 h-72 bg-gradient-to-tr from-fuchsia-500/30 to-transparent rounded-full blur-3xl animate-pulse"></div>
 
             <h3 className="text-white font-semibold mb-6 text-lg flex items-center gap-2 relative z-10">
               Agregar Nuevo Contenido
@@ -174,7 +248,6 @@ export default function TopicEditorPage() {
                 <Video className="w-5 h-5 relative z-10" />
                 <span className="relative z-10">Agregar Video</span>
               </button>
-
             </div>
           </div>
         </div>
@@ -212,7 +285,7 @@ export default function TopicEditorPage() {
 
             {/* Info de la plantilla */}
             <div className="mt-8 relative bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/20 p-6 shadow-xl before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/5 before:to-transparent before:-z-10">
-              <div className="grid md:grid-cols-3 gap-6 text-sm relative z-10">
+              <div className="grid md:grid-cols-4 gap-6 text-sm relative z-10">
                 <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
                   <p className="text-gray-400 mb-1 font-medium">Plantilla Actual</p>
                   <p className="text-white font-bold text-lg">Plantilla #{plantilla}</p>
@@ -225,11 +298,18 @@ export default function TopicEditorPage() {
                   <p className="text-gray-400 mb-1 font-medium">Modo</p>
                   <p className="text-white font-bold text-lg">{vista === 'editar' ? 'Edición' : 'Visualización'}</p>
                 </div>
+                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
+                  <p className="text-gray-400 mb-1 font-medium">Estado</p>
+                  <p className="text-white font-bold text-lg">
+                    {hayContenidosNuevos ? '⚠️ Sin guardar' : '✅ Guardado'}
+                  </p>
+                </div>
               </div>
             </div>
           </>
         )}
       </div>
+      <ConfirmDialogComponent />
 
       {mostrarSelector && (
         <TemplateSelectorModal

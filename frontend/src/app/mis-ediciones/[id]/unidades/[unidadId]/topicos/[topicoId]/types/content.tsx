@@ -1,6 +1,7 @@
 // types/content.ts
 
 export interface ContenidoData {
+  id?: number | string;
   tipo: 'TEXTO' | 'IMAGEN' | 'VIDEO';
   orden: number;
   titulo?: string;
