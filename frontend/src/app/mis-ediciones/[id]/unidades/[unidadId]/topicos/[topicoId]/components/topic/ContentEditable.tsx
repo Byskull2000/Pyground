@@ -1,8 +1,10 @@
 // components/topic/ContentEditable.tsx
 'use client';
 import React, { useState } from 'react';
-import { Edit2, Save, Trash2, X, Image, Video, FileText } from 'lucide-react';
+import { Edit2, Save, Trash2, X, Video, FileText, Upload, ImageIcon } from 'lucide-react';
 import { ContenidoData } from '../../types/content';
+import FileUploadModal from '@/components/FileUploadModal';
+import Image from 'next/image';
 
 interface ContentEditableProps {
   contenido: ContenidoData;
@@ -21,6 +23,8 @@ export default function ContentEditable({
 }: ContentEditableProps) {
   const [editando, setEditando] = useState(false);
   const [valor, setValor] = useState<ContenidoData>(contenido);
+  const [mostrarUpload, setMostrarUpload] = useState(false);
+
 
   const handleGuardar = () => {
     onActualizar(index, valor);
@@ -61,18 +65,22 @@ export default function ContentEditable({
                 {contenido.descripcion}
               </p>
             )}
-            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-              {contenido.enlace_archivo ? (
-                <img
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-video">
+              {contenido.enlace_archivo && contenido.enlace_archivo.trim() !== '' ? (
+                <Image
                   src={contenido.enlace_archivo}
                   alt={contenido.titulo || 'Imagen'}
+
+
+                  fill
                   className="w-full h-auto object-cover"
                 />
               ) : (
                 <div className="h-64 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                  <Image className="w-16 h-16 text-gray-600" />
+                  <ImageIcon className="w-16 h-16 text-gray-600" />
                 </div>
               )}
+
             </div>
           </div>
         );
@@ -131,7 +139,7 @@ export default function ContentEditable({
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-white font-semibold flex items-center gap-2">
             {contenido.tipo === 'TEXTO' && <FileText className="w-5 h-5" />}
-            {contenido.tipo === 'IMAGEN' && <Image className="w-5 h-5" />}
+            {contenido.tipo === 'IMAGEN' && <ImageIcon className="w-5 h-5" />}
             {contenido.tipo === 'VIDEO' && <Video className="w-5 h-5" />}
             Editando {contenido.tipo}
           </h4>
@@ -164,7 +172,6 @@ export default function ContentEditable({
             placeholder="Descripción breve"
           />
         </div>
-
         {valor.tipo === 'TEXTO' ? (
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Contenido</label>
@@ -177,24 +184,38 @@ export default function ContentEditable({
             />
           </div>
         ) : (
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-gray-300">
               URL de {valor.tipo === 'IMAGEN' ? 'Imagen' : 'Video'}
             </label>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={valor.enlace_archivo || ''}
+                onChange={(e) => setValor({ ...valor, enlace_archivo: e.target.value })}
+                className="flex-1 bg-black/40 backdrop-blur-xl text-white p-3 rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-inner"
+                placeholder={valor.tipo === 'VIDEO' ? 'https://youtube.com/watch?v=... o subir archivo' : 'https://... o subir archivo'}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarUpload(true)}
+                className="px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Subir
+              </button>
+            </div>
+
             {valor.tipo === 'VIDEO' && (
-              <p className="text-xs text-gray-400 mb-2">
-                💡 Tip: Puedes usar URLs de YouTube normales (youtube.com/watch?v=...)
+              <p className="text-xs text-gray-400">
+                💡 Tip: Puedes usar URLs de YouTube o subir tu propio archivo
               </p>
             )}
-            <input
-              type="text"
-              value={valor.enlace_archivo || ''}
-              onChange={(e) => setValor({ ...valor, enlace_archivo: e.target.value })}
-              className="w-full bg-black/40 backdrop-blur-xl text-white p-3 rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-inner"
-              placeholder={valor.tipo === 'VIDEO' ? 'https://youtube.com/watch?v=...' : 'https://...'}
-            />
           </div>
         )}
+
+
 
         <div className="flex gap-3 pt-4">
           <button
@@ -211,6 +232,15 @@ export default function ContentEditable({
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
+        <FileUploadModal
+          isOpen={mostrarUpload}
+          onClose={() => setMostrarUpload(false)}
+          onUploadComplete={(url) => {
+            setValor({ ...valor, enlace_archivo: url });
+            setMostrarUpload(false);
+          }}
+          type={valor.tipo === 'IMAGEN' ? 'image' : 'video'}
+        />
       </div>
     );
   }
