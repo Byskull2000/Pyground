@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTopico = exports.updateTopico = exports.createTopico = exports.getTopicoById = exports.getTopicosByUnidad = void 0;
+exports.reorderTopicos = exports.deleteTopico = exports.updateTopico = exports.createTopico = exports.getTopicoById = exports.getTopicosByUnidad = void 0;
 const topicosRepository = __importStar(require("../repositories/topicos.repository"));
 const getTopicosByUnidad = async (id_unidad) => {
     return await topicosRepository.getTopicosByUnidad(id_unidad);
@@ -93,3 +93,18 @@ const deleteTopico = async (id) => {
     return await topicosRepository.deleteTopico(id);
 };
 exports.deleteTopico = deleteTopico;
+const reorderTopicos = async (topicos) => {
+    if (!topicos || topicos.length === 0)
+        throw { status: 400, message: 'Debe enviar al menos un topico para reordenar' };
+    for (const u of topicos) {
+        if (!u.id || u.orden === undefined)
+            throw { status: 400, message: 'Cada topico debe tener id y orden válidos' };
+    }
+    const ids = topicos.map(u => u.id);
+    const existentes = await topicosRepository.existTopicosByIds(ids);
+    if (existentes.length !== ids.length)
+        throw { status: 404, message: 'Uno o más topicos no existen' };
+    const result = await topicosRepository.reorderTopicos(topicos);
+    return { message: 'Topicos reordenados correctamente', count: result.length };
+};
+exports.reorderTopicos = reorderTopicos;

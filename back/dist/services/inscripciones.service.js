@@ -99,7 +99,7 @@ const createInscripcion = async (data) => {
     if (duplicada)
         throw { status: 409, message: 'El usuario ya está inscrito en esta edición' };
     try {
-        const nueva = await inscripcionRepo.createInscripcion(data);
+        const nueva = await inscripcionRepo.upsertInscripcion(data);
         return inscripcionRepo.getInscripcionById(nueva.id);
     }
     catch {

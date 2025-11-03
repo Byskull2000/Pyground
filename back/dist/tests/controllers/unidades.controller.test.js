@@ -243,4 +243,56 @@ describe('Unidad Controller', () => {
             expect(res.json).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Unidad no encontrada'));
         });
     });
+    // REORDER UNIDADES
+    describe('reorderUnidades', () => {
+        it('U22: Reordenamiento exitoso', async () => {
+            const unidades = [
+                { id: 1, orden: 2 },
+                { id: 2, orden: 1 },
+                { id: 3, orden: 3 },
+            ];
+            unidadService.reorderUnidades.mockResolvedValue({ message: 'Unidades reordenadas correctamente', count: 3 });
+            const req = (0, setup_1.createMockRequest)(unidades);
+            const res = (0, setup_1.createMockResponse)();
+            await unidadController.reorderUnidades(req, res);
+            expect(unidadService.reorderUnidades).toHaveBeenCalledWith(unidades);
+            expect(res.json).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(true, { message: 'Unidades reordenadas correctamente', count: 3 }, 'Unidades reordenadas correctamente'));
+        });
+        it('U23: Error por array vacío', async () => {
+            const unidades = [];
+            unidadService.reorderUnidades.mockRejectedValue({ status: 400, message: 'Debe enviar al menos una unidad para reordenar' });
+            const req = (0, setup_1.createMockRequest)(unidades);
+            const res = (0, setup_1.createMockResponse)();
+            await unidadController.reorderUnidades(req, res);
+            expect(unidadService.reorderUnidades).toHaveBeenCalledWith(unidades);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Debe enviar al menos una unidad para reordenar'));
+        });
+        it('U24: Error por unidad sin id o sin orden', async () => {
+            const unidades = [
+                { id: 1 }, // falta orden
+                { orden: 2 } // falta id
+            ];
+            unidadService.reorderUnidades.mockRejectedValue({ status: 400, message: 'Cada unidad debe tener id y orden válidos' });
+            const req = (0, setup_1.createMockRequest)(unidades);
+            const res = (0, setup_1.createMockResponse)();
+            await unidadController.reorderUnidades(req, res);
+            expect(unidadService.reorderUnidades).toHaveBeenCalledWith(unidades);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Cada unidad debe tener id y orden válidos'));
+        });
+        it('U25: Error por unidad inexistente en BD', async () => {
+            const unidades = [
+                { id: 9999, orden: 1 },
+                { id: 2, orden: 2 },
+            ];
+            unidadService.reorderUnidades.mockRejectedValue({ status: 404, message: 'Una o más unidades no existen' });
+            const req = (0, setup_1.createMockRequest)(unidades);
+            const res = (0, setup_1.createMockResponse)();
+            await unidadController.reorderUnidades(req, res);
+            expect(unidadService.reorderUnidades).toHaveBeenCalledWith(unidades);
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith(new apiResponse_1.ApiResponse(false, null, 'Una o más unidades no existen'));
+        });
+    });
 });

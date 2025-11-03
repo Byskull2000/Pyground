@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cloneFromPlantillas = exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidadById = exports.getUnidadRedudante = exports.getUnidadesByEdicion = void 0;
+exports.existUnidadesByIds = exports.reorderUnidades = exports.cloneFromPlantillas = exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidadById = exports.getUnidadRedudante = exports.getUnidadesByEdicion = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
 const getUnidadesByEdicion = async (id_edicion) => {
     return prisma_1.default.unidad.findMany({
@@ -117,3 +117,18 @@ const cloneFromPlantillas = async (unidadesPlantilla, id_edicion) => {
     return unidadMap;
 };
 exports.cloneFromPlantillas = cloneFromPlantillas;
+const reorderUnidades = async (unidades) => {
+    return prisma_1.default.$transaction(unidades.map(u => prisma_1.default.unidad.update({
+        where: { id: u.id },
+        data: { orden: u.orden, fecha_actualizacion: new Date() },
+    })));
+};
+exports.reorderUnidades = reorderUnidades;
+const existUnidadesByIds = async (ids) => {
+    const encontrados = await prisma_1.default.unidad.findMany({
+        where: { id: { in: ids } },
+        select: { id: true },
+    });
+    return encontrados.map(u => u.id);
+};
+exports.existUnidadesByIds = existUnidadesByIds;

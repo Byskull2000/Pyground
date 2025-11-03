@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createEstudianteEdicion = exports.createEditorEdicion = exports.createDocenteEdicion = exports.deleteInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcionesByUsuario = exports.getInscripcionById = exports.getEstudiantesByEdicion = exports.getInscripcionesByEdicion = void 0;
+exports.createEstudianteEdicion = exports.createEditorEdicion = exports.createDocenteEdicion = exports.deleteInscripcion = exports.upsertInscripcion = exports.updateInscripcion = exports.createInscripcion = exports.getInscripcionStatus = exports.getInscripcionesByUsuario = exports.getInscripcionById = exports.getEstudiantesByEdicion = exports.getInscripcionesByEdicion = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
 const getInscripcionesByEdicion = async (id) => {
     return prisma_1.default.inscripcion.findMany({
@@ -107,6 +107,27 @@ const updateInscripcion = async (id, data) => {
     });
 };
 exports.updateInscripcion = updateInscripcion;
+const upsertInscripcion = async (data) => {
+    return prisma_1.default.inscripcion.upsert({
+        where: {
+            usuario_id_edicion_id: {
+                usuario_id: data.usuario_id,
+                edicion_id: data.edicion_id,
+            },
+        },
+        update: {
+            cargo_id: data.cargo_id,
+            activo: true,
+            fecha_inscripcion: data.fecha_inscripcion ?? new Date(),
+            fecha_terminacion: data.fecha_terminacion ?? null,
+        },
+        create: {
+            ...data,
+            activo: true,
+        },
+    });
+};
+exports.upsertInscripcion = upsertInscripcion;
 const deleteInscripcion = async (id) => {
     const existing = await prisma_1.default.inscripcion.findUnique({ where: { id } });
     if (!existing) {

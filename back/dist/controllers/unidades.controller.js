@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
+exports.reorderUnidades = exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
 const unidadService = __importStar(require("../services/unidades.service"));
 const apiResponse_1 = require("../utils/apiResponse");
 const getUnidadesByEdicion = async (req, res) => {
@@ -149,3 +149,17 @@ const deactivateUnidad = async (req, res) => {
     }
 };
 exports.deactivateUnidad = deactivateUnidad;
+const reorderUnidades = async (req, res) => {
+    try {
+        const unidades = req.body;
+        const result = await unidadService.reorderUnidades(unidades);
+        return res.json(new apiResponse_1.ApiResponse(true, result, 'Unidades reordenadas correctamente'));
+    }
+    catch (err) {
+        console.error(err);
+        const status = err?.status ?? 500;
+        const message = err?.message ?? 'Error al reordenar unidades';
+        return res.status(status).json(new apiResponse_1.ApiResponse(false, null, message));
+    }
+};
+exports.reorderUnidades = reorderUnidades;

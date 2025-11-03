@@ -42,7 +42,7 @@ const passport_1 = __importDefault(require("passport"));
 const authController = __importStar(require("../controllers/auth.controller"));
 const auth_1 = require("../middleware/auth");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const prisma_1 = require("../../generated/prisma");
+const prisma_1 = __importDefault(require("../config/prisma"));
 const router = express_1.default.Router();
 // ==================== AUTENTICACIÓN LOCAL ====================
 // Login de usuario
@@ -128,8 +128,7 @@ router.get('/me', auth_1.authRequired, async (req, res) => {
                 error: 'No autorizado'
             });
         }
-        const prisma = new prisma_1.PrismaClient();
-        const usuario = await prisma.usuario.findUnique({
+        const usuario = await prisma_1.default.usuario.findUnique({
             where: { id: req.user.id },
             select: {
                 id: true,

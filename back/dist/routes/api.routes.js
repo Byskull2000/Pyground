@@ -12,6 +12,7 @@ const unidades_plantilla_routes_1 = __importDefault(require("./unidades.plantill
 const unidades_routes_1 = __importDefault(require("./unidades.routes"));
 const topicos_plantilla_routes_1 = __importDefault(require("./topicos.plantilla.routes"));
 const topicos_routes_1 = __importDefault(require("./topicos.routes"));
+const contenidos_routes_1 = __importDefault(require("./contenidos.routes"));
 const apiRouter = (0, express_1.Router)();
 // Rutas de usuarios
 apiRouter.use('/usuarios', usuarios_routes_1.default);
@@ -29,4 +30,6 @@ apiRouter.use('/unidades', unidades_routes_1.default);
 apiRouter.use('/topicos-plantilla', topicos_plantilla_routes_1.default);
 // Rutas de tópicos
 apiRouter.use('/topicos', topicos_routes_1.default);
+// Rutas de tópicos
+apiRouter.use('/contenidos', contenidos_routes_1.default);
 exports.default = apiRouter;

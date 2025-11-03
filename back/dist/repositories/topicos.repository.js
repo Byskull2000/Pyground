@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cloneTopicosFromPlantillas = exports.deleteTopico = exports.updateTopico = exports.createTopico = exports.getTopicoById = exports.getTopicosByUnidad = void 0;
+exports.existTopicosByIds = exports.reorderTopicos = exports.cloneTopicosFromPlantillas = exports.deleteTopico = exports.updateTopico = exports.createTopico = exports.getTopicoById = exports.getTopicosByUnidad = void 0;
 const prisma_1 = __importDefault(require("../config/prisma"));
 const getTopicosByUnidad = async (id_unidad) => {
     return prisma_1.default.topico.findMany({
@@ -74,3 +74,18 @@ const cloneTopicosFromPlantillas = async (topicosPlantilla, unidadMap // { id_un
     });
 };
 exports.cloneTopicosFromPlantillas = cloneTopicosFromPlantillas;
+const reorderTopicos = async (topicos) => {
+    return prisma_1.default.$transaction(topicos.map(u => prisma_1.default.topico.update({
+        where: { id: u.id },
+        data: { orden: u.orden, fecha_actualizacion: new Date() },
+    })));
+};
+exports.reorderTopicos = reorderTopicos;
+const existTopicosByIds = async (ids) => {
+    const encontrados = await prisma_1.default.topico.findMany({
+        where: { id: { in: ids } },
+        select: { id: true },
+    });
+    return encontrados.map(u => u.id);
+};
+exports.existTopicosByIds = existTopicosByIds;

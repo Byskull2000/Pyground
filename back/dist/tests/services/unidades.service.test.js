@@ -199,4 +199,45 @@ describe('Unidad Service', () => {
                 .rejects.toMatchObject({ status: 404, message: 'Unidad no encontrada' });
         });
     });
+    // TEST - REORDENAMIENTO DE UNIDADES
+    describe('reorderUnidades', () => {
+        const unidadesValidas = [
+            { id: 1, orden: 2 },
+            { id: 2, orden: 1 },
+        ];
+        it('U22: Reordenamiento exitoso', async () => {
+            unidadRepo.existUnidadesByIds.mockResolvedValue([1, 2]);
+            unidadRepo.reorderUnidades.mockResolvedValue(unidadesValidas);
+            const result = await unidadService.reorderUnidades(unidadesValidas);
+            expect(result).toEqual({
+                message: 'Unidades reordenadas correctamente',
+                count: unidadesValidas.length,
+            });
+            expect(unidadRepo.reorderUnidades).toHaveBeenCalledWith(unidadesValidas);
+        });
+        it('U23: Error por array vacío', async () => {
+            await expect(unidadService.reorderUnidades([]))
+                .rejects.toMatchObject({ status: 400, message: 'Debe enviar al menos una unidad para reordenar' });
+        });
+        it('U24: Error por unidad sin id o sin orden', async () => {
+            const invalidUnidades = [
+                { id: 1 }, // falta orden
+                { orden: 2 },
+            ];
+            await expect(unidadService.reorderUnidades(invalidUnidades))
+                .rejects.toMatchObject({ status: 400, message: 'Cada unidad debe tener id y orden válidos' });
+        });
+        it('U25: Error por unidad inexistente', async () => {
+            const unidades = [{ id: 1, orden: 1 }, { id: 2, orden: 2 }];
+            unidadRepo.existUnidadesByIds.mockResolvedValue([1]);
+            await expect(unidadService.reorderUnidades(unidades))
+                .rejects.toMatchObject({ status: 404, message: 'Una o más unidades no existen' });
+        });
+        it('U26: Error interno del repositorio', async () => {
+            unidadRepo.existUnidadesByIds.mockResolvedValue([1, 2]);
+            unidadRepo.reorderUnidades.mockRejectedValue(new Error('Error al reordenar'));
+            await expect(unidadService.reorderUnidades(unidadesValidas))
+                .rejects.toThrow('Error al reordenar');
+        });
+    });
 });

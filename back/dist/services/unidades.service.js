@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
+exports.reorderUnidades = exports.deactivateUnidad = exports.publicateUnidad = exports.restoreUnidad = exports.deleteUnidad = exports.updateUnidad = exports.createUnidad = exports.getUnidad = exports.getUnidadesByEdicion = void 0;
 const unidadRepo = __importStar(require("../repositories/unidades.repository"));
 const edicionRepo = __importStar(require("../repositories/ediciones.repository"));
 const getUnidadesByEdicion = async (id_edicion) => {
@@ -100,3 +100,18 @@ const deactivateUnidad = async (id) => {
     return unidadArchivado;
 };
 exports.deactivateUnidad = deactivateUnidad;
+const reorderUnidades = async (unidades) => {
+    if (!unidades || unidades.length === 0)
+        throw { status: 400, message: 'Debe enviar al menos una unidad para reordenar' };
+    for (const u of unidades) {
+        if (!u.id || u.orden === undefined)
+            throw { status: 400, message: 'Cada unidad debe tener id y orden válidos' };
+    }
+    const ids = unidades.map(u => u.id);
+    const existentes = await unidadRepo.existUnidadesByIds(ids);
+    if (existentes.length !== ids.length)
+        throw { status: 404, message: 'Una o más unidades no existen' };
+    const result = await unidadRepo.reorderUnidades(unidades);
+    return { message: 'Unidades reordenadas correctamente', count: result.length };
+};
+exports.reorderUnidades = reorderUnidades;

@@ -19,6 +19,7 @@ describe('Inscripciones API - Integration Tests', () => {
         await prisma_1.default.$disconnect();
     });
     beforeEach(async () => {
+        await prisma_1.default.contenido.deleteMany({});
         await prisma_1.default.inscripcion.deleteMany({});
         await prisma_1.default.topico.deleteMany({});
         await prisma_1.default.unidad.deleteMany({});

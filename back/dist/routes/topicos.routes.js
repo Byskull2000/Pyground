@@ -19,6 +19,7 @@ router.get('/unidad/:id_unidad', topicos_controller_1.getTopicosByUnidad);
 router.get('/:id', topicos_controller_1.getTopicoById);
 // Crear nuevo tópico
 router.post('/unidad/:id_unidad', topicos_controller_1.createTopico);
+router.put('/reordenar', topicos_controller_1.reorderTopicos);
 // Actualizar tópico
 router.put('/:id', topicos_controller_1.updateTopico);
 // Eliminar tópico (soft delete)

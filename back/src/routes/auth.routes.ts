@@ -4,7 +4,8 @@ import passport from 'passport';
 import * as authController from '../controllers/auth.controller';
 import { authRequired } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
-import { Usuario, PrismaClient } from '../../generated/prisma';
+import { Usuario } from '../../generated/prisma';
+import prisma from '../config/prisma';
 
 interface JWTPayload {
   id: number;
@@ -123,8 +124,6 @@ router.get('/me', authRequired, async (req, res) => {
         error: 'No autorizado' 
       });
     }
-
-    const prisma = new PrismaClient();
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: req.user.id },

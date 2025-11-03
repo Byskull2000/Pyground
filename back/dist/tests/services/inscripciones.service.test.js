@@ -96,11 +96,11 @@ describe('Inscripciones Service', () => {
             edicionRepo.getEdicionById.mockResolvedValue(mockEdicion);
             cargoRepo.getCargoById.mockResolvedValue(mockCargo);
             inscripcionRepo.getInscripcionesByEdicion.mockResolvedValue([]);
-            inscripcionRepo.createInscripcion.mockResolvedValue(mockNueva);
+            inscripcionRepo.upsertInscripcion.mockResolvedValue(mockNueva);
             inscripcionRepo.getInscripcionById.mockResolvedValue(mockNueva);
             const result = await inscripcionService.createInscripcion(baseData);
             expect(result).toEqual(mockNueva);
-            expect(inscripcionRepo.createInscripcion).toHaveBeenCalledWith(baseData);
+            expect(inscripcionRepo.upsertInscripcion).toHaveBeenCalledWith(baseData);
             expect(inscripcionRepo.getInscripcionById).toHaveBeenCalledWith(mockNueva.id);
         });
         it('IS6: Faltan campos obligatorios', async () => {

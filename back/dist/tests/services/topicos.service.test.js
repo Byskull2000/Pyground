@@ -214,4 +214,28 @@ describe('Topicos Service', () => {
             await expect(topicosService.deleteTopico(1)).rejects.toThrow('El tópico ya está inactivo');
         });
     });
+    // REORDER TOPICOS
+    describe('reorderTopicos', () => {
+        it('T20: reordenamiento exitoso', async () => {
+            const topicosInput = [{ id: 2, orden: 1 }, { id: 1, orden: 2 }];
+            topicosRepository.existTopicosByIds.mockResolvedValue([1, 2]);
+            topicosRepository.reorderTopicos.mockResolvedValue(topicosInput);
+            const result = await topicosService.reorderTopicos(topicosInput);
+            expect(topicosRepository.existTopicosByIds).toHaveBeenCalledWith([2, 1]);
+            expect(topicosRepository.reorderTopicos).toHaveBeenCalledWith(topicosInput);
+            expect(result).toEqual({ message: 'Topicos reordenados correctamente', count: 2 });
+        });
+        it('T21: error por array vacío', async () => {
+            await expect(topicosService.reorderTopicos([])).rejects.toEqual({ status: 400, message: 'Debe enviar al menos un topico para reordenar' });
+        });
+        it('T22: error por tópico sin id o sin orden', async () => {
+            const invalidInput = [{ id: 1 }, { orden: 2 }];
+            await expect(topicosService.reorderTopicos(invalidInput)).rejects.toEqual({ status: 400, message: 'Cada topico debe tener id y orden válidos' });
+        });
+        it('T23: error por tópico inexistente', async () => {
+            const invalidInput = [{ id: 9999, orden: 1 }];
+            topicosRepository.existTopicosByIds.mockResolvedValue([]);
+            await expect(topicosService.reorderTopicos(invalidInput)).rejects.toEqual({ status: 404, message: 'Uno o más topicos no existen' });
+        });
+    });
 });

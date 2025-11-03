@@ -33,6 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.reorderTopicos = void 0;
 exports.getTopicosByUnidad = getTopicosByUnidad;
 exports.getTopicoById = getTopicoById;
 exports.createTopico = createTopico;
@@ -155,3 +156,17 @@ async function deleteTopico(req, res) {
         return res.status(500).json(new apiResponse_1.ApiResponse(false, null, 'Error al eliminar el tópico'));
     }
 }
+const reorderTopicos = async (req, res) => {
+    try {
+        const topicos = req.body;
+        const result = await topicosService.reorderTopicos(topicos);
+        return res.json(new apiResponse_1.ApiResponse(true, result, 'Topicos reordenados correctamente'));
+    }
+    catch (err) {
+        console.error(err);
+        const status = err?.status ?? 500;
+        const message = err?.message ?? 'Error al reordenar topicos';
+        return res.status(status).json(new apiResponse_1.ApiResponse(false, null, message));
+    }
+};
+exports.reorderTopicos = reorderTopicos;

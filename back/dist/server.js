@@ -21,6 +21,8 @@ app.use((0, cors_1.default)({
 }));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+// Servir archivos estáticos desde el directorio uploads
+app.use('/uploads', express_1.default.static('uploads'));
 app.use((0, express_session_1.default)({
     secret: process.env.SESSION_SECRET || 'default-secret',
     resave: false,
@@ -39,7 +41,7 @@ app.use('/api/protected', protected_1.default);
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
 });
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
         error: 'Something went wrong!',

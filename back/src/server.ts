@@ -23,6 +23,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Servir archivos estáticos desde el directorio uploads
+app.use('/uploads', express.static('uploads'));
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'default-secret',
@@ -52,11 +55,15 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 
-app.use((err: Error, req: Request, res: Response) => {
-  console.error(err.stack);
-  res.status(500).json({ 
+import { NextFunction } from 'express';
+
+app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+  console.error((err as Error).stack ?? err);
+  void _next;
+  const message = (err as Error).message ?? 'Internal server error';
+  res.status(500).json({
     error: 'Something went wrong!',
-    message: err.message 
+    message,
   });
 });
 
