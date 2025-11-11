@@ -16,3 +16,4 @@ export interface ComentarioRequest {
   id_topico: number;               
   id_usuario: number;                                         
 }
+

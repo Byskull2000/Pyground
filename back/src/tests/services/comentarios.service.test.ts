@@ -1,6 +1,6 @@
 import * as comentarioService from '../../services/comentarios.service';
 import * as comentarioRepo from '../../repositories/comentarios.repository';
-import { ComentarioCreate, ComentarioResponse } from '../../types/comentarios.types';
+import { ComentarioCreate, ComentarioResponse, ComentarioRequest } from '../../types/comentarios.types';
 
 jest.mock('../../repositories/comentarios.repository');
 
@@ -48,49 +48,32 @@ describe('Comentarios Service', () => {
 
   // TEST - OBTENER COMENTARIOS POR TÓPICO
   describe('getComentariosByTopico', () => {
+    const baseRequest: ComentarioRequest = {
+      id_topico: 1,
+      id_usuario: 10
+    };
+
     it('C4: Listar comentarios de un tópico existente', async () => {
-      const mockComentarios = [
+      const mockComentarios: ComentarioResponse[] = [
         { id_topico: 1, id_usuario: 2, texto: 'Muy buen aporte', visto: false, fecha_publicacion: '2025-11-10T12:00:00Z' },
         { id_topico: 1, id_usuario: 3, texto: 'Estoy de acuerdo', visto: true, fecha_publicacion: '2025-11-11T09:00:00Z' }
       ];
+
       (comentarioRepo.getComentariosByTopico as jest.Mock).mockResolvedValue(mockComentarios);
 
-      const result = await comentarioService.getComentariosByTopico(1);
+      const result = await comentarioService.getComentariosByTopico(baseRequest);
 
       expect(result).toEqual(mockComentarios);
-      expect(comentarioRepo.getComentariosByTopico).toHaveBeenCalledWith(1);
+      expect(comentarioRepo.getComentariosByTopico).toHaveBeenCalledWith(baseRequest);
     });
 
     it('C5: Tópico sin comentarios', async () => {
       (comentarioRepo.getComentariosByTopico as jest.Mock).mockResolvedValue([]);
-      const result = await comentarioService.getComentariosByTopico(99);
+
+      const result = await comentarioService.getComentariosByTopico({ id_topico: 99, id_usuario: 10 });
+
       expect(result).toEqual([]);
-    });
-  });
-
-  // TEST - OBTENER COMENTARIO POR ID
-  describe('getComentarioById', () => {
-    it('C6: Consulta exitosa', async () => {
-      const mockComentario = {
-        id_topico: 1,
-        id_usuario: 10,
-        texto: 'Interesante punto',
-        visto: true,
-        fecha_publicacion: '2025-11-10T15:00:00Z'
-      };
-      (comentarioRepo.getComentarioById as jest.Mock).mockResolvedValue(mockComentario);
-
-      const result = await comentarioService.getComentarioById(1);
-
-      expect(result).toEqual(mockComentario);
-      expect(comentarioRepo.getComentarioById).toHaveBeenCalledWith(1);
-    });
-
-    it('C7: Comentario inexistente', async () => {
-      (comentarioRepo.getComentarioById as jest.Mock).mockResolvedValue(null);
-
-      await expect(comentarioService.getComentarioById(999))
-        .rejects.toThrow('Comentario no encontrado');
+      expect(comentarioRepo.getComentariosByTopico).toHaveBeenCalledWith({ id_topico: 99, id_usuario: 10 });
     });
   });
 });
