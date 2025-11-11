@@ -8,12 +8,16 @@ import TemplateRenderer from './components/templates/TemplateRenderer';
 import TemplateSelectorModal from './components/templates/TemplateSelectorModal';
 import { useParams } from 'next/navigation';
 import { useContenidos } from '@/hooks/useContenidos';
-import  { useConfirmDialog } from '@/components/ConfirmDialog';
+import { useConfirmDialog } from '@/components/ConfirmDialog';
+import TopicCommentsSection from './components/TopicCommentsSection';
+import { useAuth } from '@/contexts/AuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function TopicEditorPage() {
+  // ✅ TODOS LOS HOOKS DEBEN ESTAR AQUÍ, ANTES DE CUALQUIER RETORNO
   const { topicoId } = useParams();
+  const { user } = useAuth();
   const [vista, setVista] = useState<'preview' | 'editar'>('editar');
   const [plantilla, setPlantilla] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
@@ -31,16 +35,28 @@ export default function TopicEditorPage() {
     setContenidos
   } = useContenidos();
 
+  // ✅ Los useEffect también van aquí, DESPUÉS de todos los useState pero sin condicionales
   useEffect(() => {
     if (topicoId) {
       fetchContenidos(Number(topicoId));
     }
   }, [topicoId, fetchContenidos]);
 
+  // ✅ AHORA SÍ podemos retornar si faltan datos
+  if (!topicoId || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 text-blue-500 mx-auto animate-spin" />
+          <p className="mt-4 text-gray-400">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleActualizar = async (index: number, contenidoActualizado: ContenidoData) => {
     const contenido = contenidos[index];
 
-    // Si tiene ID numérico, actualizar en BD
     if (contenido.id && typeof contenido.id === 'number') {
       try {
         await updateContenido(contenido.id, contenidoActualizado);
@@ -48,12 +64,12 @@ export default function TopicEditorPage() {
         console.error('Error al actualizar:', err);
       }
     } else {
-      // Si no tiene ID, solo actualizar localmente (se guardará al guardar todo)
       const nuevos = [...contenidos];
       nuevos[index] = contenidoActualizado;
       setContenidos(nuevos);
     }
   };
+
   const handleEliminar = async (index: number) => {
     const contenido = contenidos[index];
 
@@ -64,7 +80,6 @@ export default function TopicEditorPage() {
       cancelText: 'Cancelar',
       type: 'danger',
       onConfirm: async () => {
-        // Si tiene ID, eliminar de BD
         if (contenido.id && typeof contenido.id === 'number') {
           try {
             await deleteContenido(contenido.id);
@@ -72,17 +87,15 @@ export default function TopicEditorPage() {
             console.error('Error al eliminar:', err);
           }
         } else {
-          // Si no tiene ID, solo eliminar localmente
           setContenidos(contenidos.filter((_, i) => i !== index));
         }
       }
     });
   };
 
-
   const handleAgregarContenido = (tipo: 'TEXTO' | 'IMAGEN' | 'VIDEO') => {
     const nuevoContenido: ContenidoData = {
-      id: `temp-${Date.now()}`, // ID temporal
+      id: `temp-${Date.now()}`,
       tipo,
       orden: contenidos.length + 1,
       titulo: `Nuevo ${tipo}`,
@@ -94,7 +107,6 @@ export default function TopicEditorPage() {
   };
 
   const handleGuardarTodo = async () => {
-    // Guardar todos los contenidos nuevos (sin ID numérico)
     const contenidosNuevos = contenidos.filter(c =>
       !c.id || typeof c.id !== 'number'
     );
@@ -106,14 +118,10 @@ export default function TopicEditorPage() {
 
     try {
       setGuardando(true);
-
-      // Preparar contenidos para enviar (sin el ID temporal)
       const contenidosParaCrear = contenidosNuevos.map(({ id, ...rest }) => rest);
 
       await createContenidos(Number(topicoId), contenidosParaCrear);
       alert('Contenidos guardados exitosamente');
-
-      // Recargar contenidos
       await fetchContenidos(Number(topicoId));
     } catch (err) {
       console.error('Error:', err);
@@ -282,33 +290,17 @@ export default function TopicEditorPage() {
                 />
               </div>
             </div>
-
-            {/* Info de la plantilla */}
-            <div className="mt-8 relative bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/20 p-6 shadow-xl before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/5 before:to-transparent before:-z-10">
-              <div className="grid md:grid-cols-4 gap-6 text-sm relative z-10">
-                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
-                  <p className="text-gray-400 mb-1 font-medium">Plantilla Actual</p>
-                  <p className="text-white font-bold text-lg">Plantilla #{plantilla}</p>
-                </div>
-                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
-                  <p className="text-gray-400 mb-1 font-medium">Contenidos</p>
-                  <p className="text-white font-bold text-lg">{contenidos.length} elementos</p>
-                </div>
-                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
-                  <p className="text-gray-400 mb-1 font-medium">Modo</p>
-                  <p className="text-white font-bold text-lg">{vista === 'editar' ? 'Edición' : 'Visualización'}</p>
-                </div>
-                <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
-                  <p className="text-gray-400 mb-1 font-medium">Estado</p>
-                  <p className="text-white font-bold text-lg">
-                    {hayContenidosNuevos ? '⚠️ Sin guardar' : '✅ Guardado'}
-                  </p>
-                </div>
-              </div>
-            </div>
           </>
         )}
+        <div className='mt-8'></div>
+        <TopicCommentsSection
+          topicoId={Number(topicoId as string)}
+          currentUserId={user.id}
+          currentUserName={user.nombre}
+          currentUserAvatar={user.avatar_url || ''}
+        />
       </div>
+
       <ConfirmDialogComponent />
 
       {mostrarSelector && (
@@ -318,6 +310,10 @@ export default function TopicEditorPage() {
           onCerrar={() => setMostrarSelector(false)}
         />
       )}
+
+
+
+
     </div>
   );
 }
