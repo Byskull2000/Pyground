@@ -35,9 +35,13 @@ model Usuario {
   google_id      String?   @unique
   provider       String?   @default("local")
   
-  
+
 
   Inscripcion Inscripcion[]
+
+  comentarios_publicados Comentario[]
+
+  comentarios_vistos Visto[]
 }
 
 model Curso {
@@ -148,6 +152,8 @@ model Topico {
 
   // a futuro: contenidos específicos de la edición
   contenidos           Contenido[]
+
+  comentarios Comentario[]
 }
 
 model Cargo {
@@ -194,4 +200,25 @@ model Contenido {
   activo              Boolean         @default(true)
   fecha_creacion      DateTime        @default(now())
   fecha_actualizacion DateTime?
+}
+
+model Comentario {
+  id                  Int             @id @default(autoincrement())
+  id_topico           Int
+  topico              Topico          @relation(fields: [id_topico], references: [id])
+  id_usuario          Int
+  usuario             Usuario         @relation(fields: [id_usuario], references: [id])
+  texto               String          @db.Text
+  fecha_publicacion   DateTime        @default(now())
+  vistos Visto[]
+}
+
+model Visto {
+  id                  Int             @id @default(autoincrement())
+  id_comentario       Int
+  comentario          Comentario      @relation(fields: [id_comentario], references: [id])
+  id_usuario          Int
+  usuario             Usuario         @relation(fields: [id_usuario], references: [id])
+  fue_visto           Boolean         @default(true)
+  fecha_visto         DateTime        @default(now())
 }
