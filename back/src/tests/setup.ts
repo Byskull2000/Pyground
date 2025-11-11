@@ -20,6 +20,8 @@ afterAll(async () => {
 
 afterEach(async () => {
   // Limpiar datos después de cada test en orden para evitar violaciones de FK
+  await prisma.visto.deleteMany();
+  await prisma.comentario.deleteMany();
   await prisma.inscripcion.deleteMany();
   await prisma.contenido.deleteMany({});
   await prisma.topico.deleteMany();
