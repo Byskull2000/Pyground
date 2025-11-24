@@ -1,3 +1,5 @@
 back/.env
 *.env
+back/.env.production
+*.env.production
 back\coverage
