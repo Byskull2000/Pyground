@@ -14,9 +14,6 @@ import {
 
 const router = express.Router();
 
-// Todos estos endpoints requieren autenticación y rol de ADMIN o ACADEMICO
-router.use(authRequired);
-router.use(requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]));
 
 // Obtener tópicos por unidad
 router.get('/unidad/:id_unidad', getTopicosByUnidad);
@@ -25,14 +22,15 @@ router.get('/unidad/:id_unidad', getTopicosByUnidad);
 router.get('/:id', getTopicoById);
 
 // Crear nuevo tópico
-router.post('/unidad/:id_unidad', createTopico);
+router.post('/unidad/:id_unidad', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), createTopico);
 
-router.put('/reordenar', reorderTopicos);
+router.put('/reordenar', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), reorderTopicos);
 
 // Actualizar tópico
-router.put('/:id', updateTopico);
+router.put('/:id', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), updateTopico);
 
-// Eliminar tópico (soft delete)
-router.delete('/:id', deleteTopico);
+// Eliminar tópico 
+router.delete('/:id', authRequired, requireRoles([RolesEnum.ADMIN, RolesEnum.ACADEMICO]), deleteTopico);
+
 
 export default router;
