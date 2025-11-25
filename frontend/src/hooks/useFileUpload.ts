@@ -3,11 +3,6 @@ import { useState } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-interface UploadResult {
-  url: string;
-  urls?: string[];
-}
-
 interface UseFileUploadReturn {
   uploading: boolean;
   progress: number;

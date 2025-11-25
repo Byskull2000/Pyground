@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BookOpen, Plus, Edit2, Trash2, AlertCircle, Loader, Save, Clock, Target } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { DraggableList } from '@/components/DraggableList';
@@ -48,11 +48,7 @@ export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true }:
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-    useEffect(() => {
-        fetchTopicos();
-    }, [unidadId]);
-
-    const fetchTopicos = async () => {
+    const fetchTopicos = useCallback(async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
@@ -71,7 +67,11 @@ export default function TopicosPanel({ unidadId, unidadTitulo, canEdit = true }:
         } finally {
             setLoading(false);
         }
-    };
+    }, [unidadId, API_URL]);
+
+    useEffect(() => {
+        fetchTopicos();
+    }, [fetchTopicos]);
 
     const handleSubmit = async () => {
         if (!formData.titulo || !formData.descripcion || !formData.objetivos_aprendizaje) {

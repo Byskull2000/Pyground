@@ -163,7 +163,7 @@ function LoginContent() {
             apellido: lastName
           })
         });
-        
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -194,9 +194,14 @@ function LoginContent() {
           repeat: 1
         });
       }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error al procesar la solicitud';
-      
+    } catch (err: unknown) {
+      let errorMessage = 'Error al procesar la solicitud';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = String(err)
+      }
+
       // Si el email ya está registrado, redirigir a verificación
       if (errorMessage.includes('email ya está registrado') || errorMessage.includes('already exists')) {
         // Animación de éxito

@@ -1,10 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Users, Loader, AlertCircle, Check, X } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import type { Usuario } from '@/interfaces/Usuario';
 import type { Inscripcion } from '@/interfaces/Inscripcion';
 import type { Edicion } from '@/interfaces/Edicion';
+import Image from 'next/image';
 
 export const CARGOS = [
     { id: 1, nombre: 'Docente' },
@@ -35,12 +36,8 @@ export default function InscripcionPage() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-    useEffect(() => {
-        fetchData();
-        getCurrentUser();
-    }, [edicionId]);
 
-    const getCurrentUser = async () => {
+    const getCurrentUser = useCallback(async () => {
         try {
             const userStr = localStorage.getItem('user');
             if (userStr) {
@@ -58,9 +55,9 @@ export default function InscripcionPage() {
         } catch (err) {
             console.error('Error getting current user:', err);
         }
-    };
+    }, [])
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
 
@@ -98,7 +95,11 @@ export default function InscripcionPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL, edicionId]);
+    useEffect(() => {
+        fetchData();
+        getCurrentUser();
+    }, [edicionId, getCurrentUser, fetchData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -315,7 +316,7 @@ export default function InscripcionPage() {
                                 <div key={inscripcion.id} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors">
                                     <div className="flex items-center gap-4">
                                         {inscripcion.usuario.avatar_url ? (
-                                            <img
+                                            <Image
                                                 src={inscripcion.usuario.avatar_url}
                                                 alt={inscripcion.usuario.nombre}
                                                 className="w-12 h-12 rounded-full object-cover border border-white/20"

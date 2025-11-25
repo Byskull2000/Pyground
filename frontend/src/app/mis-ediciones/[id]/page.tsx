@@ -1,7 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import EdicionInfoPanel from './components/EdicionInfoPanel';
 import EdicionActionsPanel from './components/EdicionActionsPanel';
@@ -48,7 +48,6 @@ interface Inscripcion {
 
 export default function EdicionDetailPage() {
     const { user, loading: authLoading } = useAuth();
-    const router = useRouter();
     const params = useParams();
     const edicionId = params?.id;
 
@@ -60,14 +59,7 @@ export default function EdicionDetailPage() {
     const [error, setError] = useState('');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-    useEffect(() => {
-        if (!authLoading && user && edicionId) {
-            fetchEdicionData();
-        }
-    }, [user, authLoading, edicionId]);
-
-    const fetchEdicionData = async () => {
+    const fetchEdicionData = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
 
@@ -114,7 +106,14 @@ export default function EdicionDetailPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [edicionId, user, API_URL]);
+
+    useEffect(() => {
+        if (!authLoading && user && edicionId) {
+            fetchEdicionData();
+        }
+    }, [user, authLoading, edicionId, fetchEdicionData]);
+
 
     const handleToggleEstado = async (nuevoEstado: boolean) => {
         try {
@@ -180,7 +179,7 @@ export default function EdicionDetailPage() {
                             <UnidadesPanel
                                 unidades={unidades}
                                 cursoId={edicion!.id_curso}
-                                edicionId={edicion!.id}  
+                                edicionId={edicion!.id}
                             />
 
                             <InscritosPanel inscripciones={inscripciones} />

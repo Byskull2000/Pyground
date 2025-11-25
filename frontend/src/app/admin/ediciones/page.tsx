@@ -1,6 +1,6 @@
 'use client'
 import { ArrowLeft, Search, Edit2, Trash2, Calendar, BookOpen, Plus, Users, AlertCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Edicion {
@@ -30,10 +30,6 @@ export default function EdicionesPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     useEffect(() => {
-        fetchEdiciones();
-    }, [cursoId]);
-
-    useEffect(() => {
         if (searchTerm) {
             const filtered = ediciones.filter(e =>
                 e.nombre_edicion.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,33 +41,39 @@ export default function EdicionesPage() {
         }
     }, [searchTerm, ediciones]);
 
-    const fetchEdiciones = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
+    const fetchEdiciones = useCallback(
+        async () => {
+            try {
+                setLoading(true);
+                const token = localStorage.getItem('token');
 
-            const url = `${API_URL}/api/ediciones/curso/${cursoId}`;
+                const url = `${API_URL}/api/ediciones/curso/${cursoId}`;
 
-            const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-            if (!response.ok) {
-                throw new Error('Error al cargar las ediciones');
+                if (!response.ok) {
+                    throw new Error('Error al cargar las ediciones');
+                }
+
+                const result = await response.json();
+                const edicionesData = result.data || [];
+                setEdiciones(edicionesData);
+                setFilteredEdiciones(edicionesData);
+                setError('');
+            } catch (err) {
+                console.error('Error fetching ediciones:', err);
+                setError('Error al cargar las ediciones. Intenta recargar la página.');
+            } finally {
+                setLoading(false);
             }
+        }, [API_URL, cursoId]
+    )
 
-            const result = await response.json();
-            const edicionesData = result.data || [];
-            setEdiciones(edicionesData);
-            setFilteredEdiciones(edicionesData);
-            setError('');
-        } catch (err) {
-            console.error('Error fetching ediciones:', err);
-            setError('Error al cargar las ediciones. Intenta recargar la página.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+        fetchEdiciones();
+    }, [cursoId, fetchEdiciones]);
 
     const handleDelete = async (edicion: Edicion) => {
         setDeleting(true);

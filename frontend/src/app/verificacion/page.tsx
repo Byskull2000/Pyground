@@ -165,8 +165,14 @@ function VerifyEmailContent() {
                 router.push(data.data?.token ? '/dashboard' : '/login?verified=true');
             }, 500);
 
-        } catch (err: any) {
-            setFormError(err.message || 'Error al verificar el código');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setFormError(err.message || 'Error al verificar el código');
+
+            } else {
+                setFormError(String(err) || 'Error al verificar el código');
+
+            }
 
             // Animación de error
             gsap.fromTo(formRef.current,
@@ -214,8 +220,13 @@ function VerifyEmailContent() {
                 yoyo: true,
                 repeat: 1
             });
-        } catch (err: any) {
-            setFormError(err.message || 'Error al reenviar el código');
+        } catch (err: unknown) {
+            if(err instanceof Error) {
+                setFormError(err.message || 'Error al reenviar el código');
+            }
+            else {
+                setFormError(String(err) || 'Error al reenviar el código');
+            }
         }
     };
 

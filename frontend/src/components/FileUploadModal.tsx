@@ -1,7 +1,7 @@
 // components/FileUploadModal.tsx
 'use client';
 import { useState, useCallback } from 'react';
-import { X, Upload, Image as ImageIcon, Video, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Video, AlertCircle } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import Image from 'next/image';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, type ComponentType, type SVGProps } from 'react';
 import { Users, Shield, Activity, ChevronRight, BookOpen, } from 'lucide-react';
 
 // Interfaces
@@ -10,6 +10,11 @@ interface User {
   email: string;
   rol: string;
   fecha_registro: string;
+}
+
+interface UsuarioData {
+  activo: boolean;
+  rol: string;
 }
 
 interface Stats {
@@ -23,7 +28,7 @@ interface Stats {
 interface AdminCard {
   title: string;
   description: string;
-  icon: any;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   color: string;
   route: string;
   stat: string;
@@ -40,7 +45,7 @@ const useAdminStats = (apiUrl: string) => {
   });
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const headers = { 'Authorization': `Bearer ${token}` };
@@ -58,14 +63,14 @@ const useAdminStats = (apiUrl: string) => {
           cursosRes.json()
         ]);
 
-        const usuarios = usuariosData.data || [];
+        const usuarios = (usuariosData.data || []) as UsuarioData[];
         const ediciones = edicionesData.data || [];
         const cursos = cursosData.data || [];
 
         setStats({
           totalUsuarios: usuarios.length,
-          usuariosActivos: usuarios.filter((u: any) => u.activo).length,
-          admins: usuarios.filter((u: any) => u.rol === 'ADMIN').length,
+          usuariosActivos: usuarios.filter((u: UsuarioData) => u.activo).length,
+          admins: usuarios.filter((u: UsuarioData) => u.rol === 'ADMIN').length,
           ediciones: ediciones.length,
           cursos: cursos.length
         });
@@ -75,11 +80,11 @@ const useAdminStats = (apiUrl: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   return { stats, loading };
 };
