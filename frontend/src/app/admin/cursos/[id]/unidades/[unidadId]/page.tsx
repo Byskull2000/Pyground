@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { ArrowLeft, Loader, AlertCircle, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import TopicosPanel from '../../components/TopicosPanel';
 import type { Unidad } from '@/interfaces/Unidad';
 
@@ -12,7 +12,6 @@ export default function AdminUnidadDetailPage() {
     const router = useRouter();
     const params = useParams();
     const unidadId = params?.unidadId as string;
-    const cursoId = params?.cursoId as string;
 
     const [unidad, setUnidad] = useState<Unidad | null>(null);
     const [loading, setLoading] = useState(true);
@@ -20,13 +19,7 @@ export default function AdminUnidadDetailPage() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-    useEffect(() => {
-        if (unidadId) {
-            fetchUnidad();
-        }
-    }, [unidadId]);
-
-    const fetchUnidad = async () => {
+    const fetchUnidad = useCallback(async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
@@ -49,7 +42,13 @@ export default function AdminUnidadDetailPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL, unidadId]);
+    useEffect(() => {
+        if (unidadId) {
+            fetchUnidad();
+        }
+    }, [unidadId, fetchUnidad]);
+
 
     if (loading) {
         return (

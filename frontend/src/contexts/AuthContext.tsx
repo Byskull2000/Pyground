@@ -1,10 +1,8 @@
 // src/contexts/AuthContext.tsx
 'use client';
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Usuario } from '@/interfaces/Usuario';
-
-
 
 interface AuthContextType {
   user: Usuario | null;
@@ -24,21 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   const checkAuthRef = useRef(false);
 
-  // Verificar token al cargar
-  useEffect(() => {
-    console.log('🔄 AuthContext: useEffect ejecutándose');
-
-    // Evitar que checkAuth se ejecute múltiples veces
-    if (checkAuthRef.current) {
-      console.log('⚠️ AuthContext: checkAuth ya se está ejecutando, saliendo...');
-      return;
-    }
-
-    checkAuthRef.current = true;
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     console.log('🔍 AuthContext: Iniciando checkAuth');
     try {
       const token = localStorage.getItem('token');
@@ -105,7 +89,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🏁 AuthContext: checkAuth finalizado, estableciendo loading=false');
       setLoading(false);
     }
-  };
+  }, [API_URL]);
+
+  // Verificar token al cargar
+  useEffect(() => {
+    console.log('🔄 AuthContext: useEffect ejecutándose');
+
+    // Evitar que checkAuth se ejecute múltiples veces
+    if (checkAuthRef.current) {
+      console.log('⚠️ AuthContext: checkAuth ya se está ejecutando, saliendo...');
+      return;
+    }
+
+    checkAuthRef.current = true;
+    checkAuth();
+  }, [checkAuth]);
 
   // Login con Google
   const login = () => {
@@ -163,11 +161,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (userData.rol === 'ADMIN') {
         console.log('🔐 AuthContext: Usuario es ADMIN, redirigiendo a /admin');
         router.push('/admin');
-      }else if (userData.rol === 'ACADEMIC') {
+      } else if (userData.rol === 'ACADEMIC') {
         console.log('👩‍🏫 AuthContext: Usuario es ACADEMIC, redirigiendo a /mis-ediciones');
         router.push('/mis-ediciones');
-      } 
-      else {
+      } else {
         console.log('👤 AuthContext: Usuario normal, redirigiendo a /dashboard');
         router.push('/dashboard');
       }

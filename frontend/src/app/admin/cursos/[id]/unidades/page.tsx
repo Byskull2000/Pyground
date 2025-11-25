@@ -1,14 +1,14 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useParams } from 'next/navigation';
-import { 
-    BookOpen, 
-    Plus, 
-    Edit2, 
-    Trash2, 
-    ArrowLeft, 
-    Loader, 
+import {
+    BookOpen,
+    Plus,
+    Edit2,
+    Trash2,
+    ArrowLeft,
+    Loader,
     AlertCircle,
     GripVertical,
     Save,
@@ -50,7 +50,7 @@ export default function UnidadesPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     const iconos = ['📘', '📗', '📙', '📕', '📚', '🎓', '💡', '🔬', '🎨', '🎭', '🎪', '🎯', '🚀', '⚡', '🌟', '💻', '🔧', '📊', '🎵', '🏆'];
-    
+
     const colores = [
         { name: 'Azul', value: '#4B8BBE' },
         { name: 'Verde', value: '#48BB78' },
@@ -62,16 +62,10 @@ export default function UnidadesPage() {
         { name: 'Amarillo', value: '#ECC94B' }
     ];
 
-    useEffect(() => {
-        if (!authLoading && user && cursoId) {
-            fetchCursoAndUnidades();
-        }
-    }, [user, authLoading, cursoId]);
-
-    const fetchCursoAndUnidades = async () => {
+    const fetchCursoAndUnidades = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            
+
             // Obtener información del curso
             const cursoResponse = await fetch(`${API_URL}/api/cursos/${cursoId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -102,7 +96,15 @@ export default function UnidadesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL, cursoId]);
+
+    
+    useEffect(() => {
+        if (!authLoading && user && cursoId) {
+            fetchCursoAndUnidades();
+        }
+    }, [user, authLoading, cursoId, fetchCursoAndUnidades]);
+
 
     const handleSubmit = async () => {
         if (!cursoId) {
@@ -117,10 +119,10 @@ export default function UnidadesPage() {
 
         try {
             const token = localStorage.getItem('token');
-            const url = editingUnidad 
+            const url = editingUnidad
                 ? `${API_URL}/api/unidades-plantilla/${editingUnidad.id}`
                 : `${API_URL}/api/unidades-plantilla`;
-            
+
             const method = editingUnidad ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
@@ -328,7 +330,7 @@ export default function UnidadesPage() {
                         ))
                     )}
                 </div>
-                
+
                 {showModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-gray-900 rounded-2xl shadow-2xl border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -396,11 +398,10 @@ export default function UnidadesPage() {
                                                 key={icono}
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, icono })}
-                                                className={`p-3 text-2xl rounded-xl transition-all ${
-                                                    formData.icono === icono
-                                                        ? 'bg-purple-500/30 border-2 border-purple-500 scale-110'
-                                                        : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                                                }`}
+                                                className={`p-3 text-2xl rounded-xl transition-all ${formData.icono === icono
+                                                    ? 'bg-purple-500/30 border-2 border-purple-500 scale-110'
+                                                    : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                                                    }`}
                                             >
                                                 {icono}
                                             </button>
@@ -418,11 +419,10 @@ export default function UnidadesPage() {
                                                 key={color.value}
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, color: color.value })}
-                                                className={`p-4 rounded-xl transition-all ${
-                                                    formData.color === color.value
-                                                        ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-105'
-                                                        : 'hover:scale-105'
-                                                }`}
+                                                className={`p-4 rounded-xl transition-all ${formData.color === color.value
+                                                    ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-105'
+                                                    : 'hover:scale-105'
+                                                    }`}
                                                 style={{ backgroundColor: color.value }}
                                             >
                                                 <span className="text-white font-medium text-sm">

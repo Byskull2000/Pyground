@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
     BookOpen,
@@ -60,11 +60,7 @@ export default function UnidadesPage() {
         { name: 'Amarillo', value: '#ECC94B' }
     ];
 
-    useEffect(() => {
-        fetchUnidades();
-    }, []);
-
-    const fetchUnidades = async () => {
+    const fetchUnidades = useCallback(async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
@@ -86,7 +82,11 @@ export default function UnidadesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL, id])
+    useEffect(() => {
+        fetchUnidades();
+    }, [fetchUnidades]);
+
 
     const handleReorderUnidades = async (reorderedUnidades: Unidad[]) => {
         const token = localStorage.getItem('token');

@@ -27,7 +27,7 @@ export function CursoDetailContent({ cursoId }: CursoDetailContentProps) {
         const fetchCurso = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:5000/api/cursos/${id}`); 
+                const response = await fetch(`http://localhost:5000/api/cursos/${id}`);
 
                 if (!response.ok) {
                     throw new Error('Error al cargar el curso');
@@ -36,8 +36,12 @@ export function CursoDetailContent({ cursoId }: CursoDetailContentProps) {
                 const data = await response.json();
                 setCurso(data.data);
                 setError(null);
-            } catch (err: any) {
-                setError(err.message || 'Error desconocido');
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError(err.message || 'Error desconocido');
+                } else {
+                    setError(String(err) || 'Error desconocido');
+                } 
                 setCurso(null);
             } finally {
                 setLoading(false);

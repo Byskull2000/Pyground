@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { ArrowLeft, Loader, AlertCircle, BookOpen } from 'lucide-react';
+import { ArrowLeft, Loader, AlertCircle, } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from '@/components/Header';
 import TopicosPanel from '@/app/admin/cursos/[id]/components/TopicosPanel';
 
@@ -22,7 +22,6 @@ interface Unidad {
 export default function EdicionUnidadDetailPage() {
     const router = useRouter();
     const params = useParams();
-    const edicionId = params?.id as string;
     const unidadId = params?.unidadId as string;
 
     const [unidad, setUnidad] = useState<Unidad | null>(null);
@@ -31,13 +30,8 @@ export default function EdicionUnidadDetailPage() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-    useEffect(() => {
-        if (unidadId) {
-            fetchUnidad();
-        }
-    }, [unidadId]);
 
-    const fetchUnidad = async () => {
+    const fetchUnidad = useCallback(async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
@@ -60,8 +54,14 @@ export default function EdicionUnidadDetailPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL, unidadId]);
 
+
+    useEffect(() => {
+        if (unidadId) {
+            fetchUnidad();
+        }
+    }, [unidadId, fetchUnidad]);
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">

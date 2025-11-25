@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ContentEditable from '../../topic/ContentEditable';
 import { TemplateProps, ContenidoData } from '../../../types/content';
 
-
 export default function CarouselLayout({ contenidos, editable, onActualizar, onEliminar }: TemplateProps) {
   const [actual, setActual] = useState(0);
   const imagenes = contenidos.filter((c: ContenidoData) => c.tipo === 'IMAGEN');
@@ -34,7 +33,7 @@ export default function CarouselLayout({ contenidos, editable, onActualizar, onE
               </button>
 
               <div className="flex gap-2">
-                {imagenes.map((_: any, idx: number) => (
+                {imagenes.map((_imagen: ContenidoData, idx: number) => (
                   <button
                     key={idx}
                     onClick={() => setActual(idx)}

@@ -43,31 +43,31 @@ export default function CrearEdicionPage({
 
     useEffect(() => {
         if (!authLoading && user) {
+            const fetchCursos = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`${API_URL}/api/cursos`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Error al cargar los cursos');
+                    }
+
+                    const result = await response.json();
+                    const cursosData = result.data || [];
+                    setCursos(cursosData.filter((c: Curso) => c.activo));
+                } catch (error) {
+                    console.error('Error fetching cursos:', error);
+                    setError('Error al cargar los cursos. Intenta recargar la página.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
             fetchCursos();
         }
-    }, [cursoIdParam, authLoading, user]);
-
-    const fetchCursos = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/api/cursos`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al cargar los cursos');
-            }
-
-            const result = await response.json();
-            const cursosData = result.data || [];
-            setCursos(cursosData.filter((c: Curso) => c.activo));
-        } catch (error) {
-            console.error('Error fetching cursos:', error);
-            setError('Error al cargar los cursos. Intenta recargar la página.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [cursoIdParam, authLoading, user, API_URL]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -230,7 +230,6 @@ export default function CrearEdicionPage({
         );
     }
 
-    const canSelectCourse = modo === 'admin';
     const cursoDisabled = !!cursoIdParam && modo !== 'admin';
 
     return (

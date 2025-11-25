@@ -88,8 +88,6 @@ interface DraggableListProps<T extends DraggableItem> {
 export function DraggableList<T extends DraggableItem>({
     items,
     onReorder,
-    onEdit,
-    onDelete,
     renderItem,
     emptyState
 }: DraggableListProps<T>) {

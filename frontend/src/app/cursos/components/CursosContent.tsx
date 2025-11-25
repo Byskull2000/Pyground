@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { BookOpen, ChevronRight, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Curso } from "../interfaces/Curso";
 import { CursoCard } from "./CursoCard";
@@ -24,8 +23,9 @@ export function CursosContent() {
                 const data = await response.json();
                 setCursos(data.data || []);
                 setError(null);
-            } catch (err: any) {
-                setError(err.message || 'Error desconocido');
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                setError(message || 'Error desconocido');
                 setCursos([]);
             } finally {
                 setLoading(false);

@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Search, BookOpen, Plus, AlertCircle, Loader } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, Search, BookOpen, AlertCircle, } from 'lucide-react';
 import Link from 'next/link';
 
 interface Curso {
@@ -21,25 +21,7 @@ export default function AdminCursosPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-    useEffect(() => {
-        fetchCursos();
-    }, []);
-
-    useEffect(() => {
-        if (searchTerm) {
-            const filtered = cursos.filter(c =>
-                c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                c.codigo_curso.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                c.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            setFilteredCursos(filtered);
-        } else {
-            setFilteredCursos(cursos);
-        }
-    }, [searchTerm, cursos]);
-
-    const fetchCursos = async () => {
+    const fetchCursos = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/api/cursos`, {
@@ -61,7 +43,25 @@ export default function AdminCursosPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL]);
+
+    useEffect(() => {
+        fetchCursos();
+    }, [fetchCursos]);
+
+    useEffect(() => {
+        if (searchTerm) {
+            const filtered = cursos.filter(c =>
+                c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                c.codigo_curso.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                c.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredCursos(filtered);
+        } else {
+            setFilteredCursos(cursos);
+        }
+    }, [searchTerm, cursos]);
+
 
 
     if (loading) {

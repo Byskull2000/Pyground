@@ -2,7 +2,7 @@
 'use client';
 import Header from '@/components/Header';
 import React, { useEffect, useState } from 'react';
-import { Edit2, ChevronRight, Layout, Eye, FileText, Image, Video, Loader } from 'lucide-react';
+import { Edit2, ChevronRight, Layout, Eye, FileText, Image as ImageIcon, Video, Loader } from 'lucide-react';
 import { ContenidoData } from './types/content';
 import TemplateRenderer from './components/templates/TemplateRenderer';
 import TemplateSelectorModal from './components/templates/TemplateSelectorModal';
@@ -12,10 +12,7 @@ import { useConfirmDialog } from '@/components/ConfirmDialog';
 import TopicCommentsSection from './components/TopicCommentsSection';
 import { useAuth } from '@/contexts/AuthContext';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
 export default function TopicEditorPage() {
-  // ✅ TODOS LOS HOOKS DEBEN ESTAR AQUÍ, ANTES DE CUALQUIER RETORNO
   const { topicoId } = useParams();
   const { user } = useAuth();
   const [vista, setVista] = useState<'preview' | 'editar'>('editar');
@@ -118,7 +115,7 @@ export default function TopicEditorPage() {
 
     try {
       setGuardando(true);
-      const contenidosParaCrear = contenidosNuevos.map(({ id, ...rest }) => rest);
+      const contenidosParaCrear = contenidosNuevos.map(({  ...rest }) => rest);
 
       await createContenidos(Number(topicoId), contenidosParaCrear);
       alert('Contenidos guardados exitosamente');
@@ -244,7 +241,9 @@ export default function TopicEditorPage() {
                 className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-500/80 to-pink-600/80 text-white rounded-xl hover:shadow-lg hover:shadow-pink-500/40 hover:scale-[1.05] transition-all font-medium backdrop-blur-md relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all"></div>
-                <Image className="w-5 h-5 relative z-10" />
+                <ImageIcon 
+                 className="w-5 h-5 relative z-10" 
+                 />
                 <span className="relative z-10">Agregar Imagen</span>
               </button>
 

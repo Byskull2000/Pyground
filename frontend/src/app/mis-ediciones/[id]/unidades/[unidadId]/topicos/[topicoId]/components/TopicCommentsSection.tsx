@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Reply, Heart, Trash2, MoreVertical, Check, CheckCheck, Clock } from 'lucide-react';
-import type { ComentarioWithUser, ReadReceipt, ComentarioFormData, AvatarProps } from '@/interfaces/Comentario';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Send, Reply, Heart, Trash2, MoreVertical, CheckCheck, Clock } from 'lucide-react';
+import type { ComentarioWithUser, ReadReceipt, AvatarProps } from '@/interfaces/Comentario';
+import Image from 'next/image';
 
 const Avatar = ({ src, alt, size = 'md' }: AvatarProps) => {
   const sizes = {
@@ -9,7 +10,7 @@ const Avatar = ({ src, alt, size = 'md' }: AvatarProps) => {
     lg: 'w-12 h-12'
   };
   return (
-    <img
+    <Image
       src={src || '/gatito.png'}
       alt={alt}
       className={`${sizes[size]} rounded-full object-cover ring-2 ring-white/10`}
@@ -20,7 +21,7 @@ const Avatar = ({ src, alt, size = 'md' }: AvatarProps) => {
   );
 };
 
-const ReadIndicator = ({ readBy, userName }: { readBy: ReadReceipt[] | undefined, userName: string }) => {
+const ReadIndicator = ({ readBy }: { readBy: ReadReceipt[] | undefined, userName: string }) => {
   const [showList, setShowList] = useState(false);
   const receipts = readBy || [];
 
@@ -73,10 +74,10 @@ interface CommentInputProps {
   currentUserAvatar?: string;
 }
 
-const CommentInput = ({ 
-  onSubmit, 
-  placeholder = "Escribe un comentario...", 
-  isReply = false, 
+const CommentInput = ({
+  onSubmit,
+  placeholder = "Escribe un comentario...",
+  isReply = false,
   onCancel,
   currentUserAvatar = '/gatito.png'
 }: CommentInputProps) => {
@@ -208,11 +209,10 @@ const CommentItem = ({ comment, currentUserId, onReply, onDelete, onLike, level 
             <div className="flex items-center gap-3">
               <button
                 onClick={() => comment.id && onLike(comment.id)}
-                className={`flex items-center gap-1 text-xs transition-colors ${
-                  comment.hasLiked
-                    ? 'text-red-400'
-                    : 'text-gray-400 hover:text-red-400'
-                }`}
+                className={`flex items-center gap-1 text-xs transition-colors ${comment.hasLiked
+                  ? 'text-red-400'
+                  : 'text-gray-400 hover:text-red-400'
+                  }`}
               >
                 <Heart className={`w-4 h-4 ${comment.hasLiked ? 'fill-current' : ''}`} />
                 <span>{comment.likes || 0}</span>
@@ -256,22 +256,16 @@ interface TopicCommentsSectionProps {
   currentUserAvatar: string;
 }
 
-export default function TopicCommentsSection({ 
-  topicoId, 
-  currentUserId, 
-  currentUserName, 
-  currentUserAvatar 
+export default function TopicCommentsSection({
+  topicoId,
+  currentUserId,
+  currentUserAvatar
 }: TopicCommentsSectionProps) {
   const [comments, setComments] = useState<ComentarioWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-  useEffect(() => {
-    fetchComments();
-  }, [topicoId]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -279,7 +273,7 @@ export default function TopicCommentsSection({
         `${API_URL}/api/comentarios`,
         {
           method: 'POST',
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
@@ -301,7 +295,12 @@ export default function TopicCommentsSection({
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_URL, currentUserId, topicoId]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [topicoId, fetchComments]);
+
 
   const handleAddComment = async (text: string) => {
     try {

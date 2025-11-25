@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react';
-import { BookOpen, Lock, Edit2, CheckCircle, AlertCircle, Plus, Eye, EyeOff, Loader } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { BookOpen, Lock, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
@@ -36,16 +36,8 @@ export default function MisEdicionesPage() {
     const [error, setError] = useState('');
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.replace('/login'); 
-        }
-        if (!authLoading && user) {
-            fetchInscripciones();
-        }
-    }, [authLoading, user, router]);
 
-    const fetchInscripciones = async () => {
+    const fetchInscripciones = useCallback(async () => {
         try {
             if (!user?.id) {
                 setError('No hay usuario autenticado');
@@ -77,7 +69,16 @@ export default function MisEdicionesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id, API_URL]);
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.replace('/login'); 
+        }
+        if (!authLoading && user) {
+            fetchInscripciones();
+        }
+    }, [authLoading, user, router, fetchInscripciones]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {

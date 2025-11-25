@@ -1,11 +1,8 @@
 import { BookOpen, ChevronRight, Users } from "lucide-react";
 import type { Curso } from "../interfaces/Curso";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export function CursoCard({ curso }: { curso: Curso }) {
-    const router = useRouter();
-
     return (
         <div
             key={curso.id}

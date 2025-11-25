@@ -1,8 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react';
-import { AlertCircle, Loader, ArrowLeft, Eye, EyeOff, Edit2, Plus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, Loader, ArrowLeft, Eye, EyeOff, } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import UnidadesPanel from './components/UnidadesPanel'
 import type { Curso } from '@/app/cursos/interfaces/Curso';
 
@@ -28,11 +27,7 @@ export default function CursoDetailPage() {
   const API_URL = 'http://localhost:5000';
   const { id } = useParams();
 
-  useEffect(() => {
-    fetchCursoYUnidades();
-  }, [id]);
-
-  const fetchCursoYUnidades = async () => {
+  const fetchCursoYUnidades = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -62,11 +57,16 @@ export default function CursoDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-const handleTogglePublicacion = async () => {
+
+  useEffect(() => {
+    fetchCursoYUnidades();
+  }, [id, fetchCursoYUnidades]);
+
+  const handleTogglePublicacion = async () => {
     if (!curso) return;
-    
+
     setPublishing(true);
     try {
       const token = localStorage.getItem('token');

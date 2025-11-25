@@ -25,8 +25,12 @@ export function EdicionesContent() {
                 const data = await response.json();
                 setEdiciones(data.data || []);
                 setError(null);
-            } catch (err: any) {
-                setError(err.message || 'Error desconocido');
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError(err.message || 'Error desconocido');
+                } else {
+                    setError(String(err) || 'Error desconocido');
+                }
                 setEdiciones([]);
             } finally {
                 setLoading(false);

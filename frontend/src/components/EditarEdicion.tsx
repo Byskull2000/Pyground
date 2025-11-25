@@ -1,19 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Calendar, BookOpen, Loader, AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface Edicion {
-    id: number;
-    id_curso: number;
-    nombre_edicion: string;
-    descripcion?: string;
-    fecha_apertura: string;
-    fecha_cierre?: string;
-    activo: boolean;
-    estado_publicado: boolean;
-}
 
 interface Curso {
     id: number;
@@ -27,7 +17,7 @@ interface EditarEdicionProps {
     redirigirA?: string;
 }
 
-export default function EditarEdicionPage({ 
+export default function EditarEdicionPage({
     modo = 'admin',
     redirigirA = '/admin/ediciones'
 }: EditarEdicionProps) {
@@ -41,7 +31,6 @@ export default function EditarEdicionPage({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
-    const [edicion, setEdicion] = useState<Edicion | null>(null);
 
     const [formData, setFormData] = useState({
         id_curso: '',
@@ -53,14 +42,7 @@ export default function EditarEdicionPage({
     });
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-    useEffect(() => {
-        if (!authLoading && user) {
-            fetchEdicionAndCursos();
-        }
-    }, [edicionId, user, authLoading]);
-
-    const fetchEdicionAndCursos = async () => {
+    const fetchEdicionAndCursos = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
 
@@ -83,7 +65,6 @@ export default function EditarEdicionPage({
             ]);
 
             const edicionActual = edicionData.data;
-            setEdicion(edicionActual);
 
             const cursosActivos = (cursosData.data || []).filter((c: Curso) => c.activo);
             setCursos(cursosActivos);
@@ -104,7 +85,14 @@ export default function EditarEdicionPage({
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_URL, edicionId]);
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            fetchEdicionAndCursos();
+        }
+    }, [edicionId, user, authLoading, fetchEdicionAndCursos]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -422,11 +410,10 @@ export default function EditarEdicionPage({
                                         estado_publicado: !prev.estado_publicado
                                     }))}
                                     disabled={!canEditFields}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                                        formData.estado_publicado
-                                            ? 'bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30'
-                                            : 'bg-orange-500/20 text-orange-300 border border-orange-500/30 hover:bg-orange-500/30'
-                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${formData.estado_publicado
+                                        ? 'bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30'
+                                        : 'bg-orange-500/20 text-orange-300 border border-orange-500/30 hover:bg-orange-500/30'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     {formData.estado_publicado ? (
                                         <>

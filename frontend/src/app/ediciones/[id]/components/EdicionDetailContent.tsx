@@ -37,8 +37,20 @@ export function EdicionDetailContent({ edicionId }: EdicionDetailContentProps) {
                 const data = await response.json();
                 setEdicion(data.data);
                 setError(null);
-            } catch (err: any) {
-                setError(err.message || 'Error desconocido');
+            } catch (err: unknown) {
+                let message = 'Error desconocido';
+                if (err instanceof Error && err.message) {
+                    message = err.message;
+                } else if (typeof err === 'string' && err.length) {
+                    message = err;
+                } else if (err && typeof err === 'object') {
+                    try {
+                        message = JSON.stringify(err);
+                    } catch {
+                        // ignore JSON stringify errors
+                    }
+                }
+                setError(message);
                 setEdicion(null);
             } finally {
                 setLoading(false);

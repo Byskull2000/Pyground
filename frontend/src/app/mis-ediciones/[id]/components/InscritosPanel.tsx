@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, UserCheck, GraduationCap, Shield, User, Calendar, Mail, CheckCircle, XCircle } from 'lucide-react';
+import Image from 'next/image';
 
 interface Inscripcion {
     id: number;
@@ -186,7 +187,7 @@ export default function InscritosPanel({ inscripciones }: InscritosPanelProps) {
                                     {/* Avatar */}
                                     <div className="relative flex-shrink-0">
                                         {inscripcion.usuario.avatar_url ? (
-                                            <img
+                                            <Image
                                                 src={inscripcion.usuario.avatar_url}
                                                 alt={`${inscripcion.usuario.nombre} ${inscripcion.usuario.apellido}`}
                                                 className="w-14 h-14 rounded-xl object-cover ring-2 ring-white/20"

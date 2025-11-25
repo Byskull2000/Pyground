@@ -2,9 +2,10 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Search } from 'lucide-react';
 import { CambiarRolModal } from './components/CambiarRolModal';
+import Image from 'next/image';
 
 interface Usuario {
     id: number;
@@ -27,39 +28,7 @@ export default function AdminUsuariosPage() {
     const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-    useEffect(() => {
-        if (!loading) {
-            if (!isAuthenticated) {
-                router.push('/login');
-                return;
-            }
-
-            const esAdmin = user?.rol === 'admin' || user?.rol === 'ADMIN';
-
-            if (!esAdmin) {
-                router.push('/dashboard');
-                return;
-            }
-
-            fetchUsuarios();
-        }
-    }, [loading, isAuthenticated, user, router]);
-
-    useEffect(() => {
-        if (searchTerm) {
-            const filtered = usuarios.filter(u =>
-                u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                u.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                u.email.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            setFilteredUsuarios(filtered);
-        } else {
-            setFilteredUsuarios(usuarios);
-        }
-    }, [searchTerm, usuarios]);
-
-    const fetchUsuarios = async () => {
+    const fetchUsuarios = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/api/usuarios`, {
@@ -77,7 +46,39 @@ export default function AdminUsuariosPage() {
         } finally {
             setLoadingUsuarios(false);
         }
-    };
+    }, [API_URL]);
+    useEffect(() => {
+        if (!loading) {
+            if (!isAuthenticated) {
+                router.push('/login');
+                return;
+            }
+
+            const esAdmin = user?.rol === 'ADMIN';
+
+            if (!esAdmin) {
+                router.push('/dashboard');
+                return;
+            }
+
+            fetchUsuarios();
+        }
+    }, [loading, isAuthenticated, user, router, fetchUsuarios]);
+
+    useEffect(() => {
+        if (searchTerm) {
+            const filtered = usuarios.filter(u =>
+                u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                u.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                u.email.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredUsuarios(filtered);
+        } else {
+            setFilteredUsuarios(usuarios);
+        }
+    }, [searchTerm, usuarios]);
+
+
 
     if (loading || loadingUsuarios) {
         return (
@@ -150,7 +151,7 @@ export default function AdminUsuariosPage() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
-                                                    <img
+                                                    <Image
                                                         className="h-10 w-10 rounded-full object-cover border-2 border-white/20"
                                                         src={usuario.avatar_url || '/gatito.png'}
                                                         alt={`${usuario.nombre} ${usuario.apellido}`}
