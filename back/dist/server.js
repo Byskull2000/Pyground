@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/server.ts
+require("module-alias/register");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const express_1 = __importDefault(require("express"));
@@ -41,11 +42,13 @@ app.use('/api/protected', protected_1.default);
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
 });
-app.use((err, req, res, next) => {
-    console.error(err.stack);
+app.use((err, req, res, _next) => {
+    console.error(err.stack ?? err);
+    void _next;
+    const message = err.message ?? 'Internal server error';
     res.status(500).json({
         error: 'Something went wrong!',
-        message: err.message
+        message,
     });
 });
 const PORT = process.env.PORT || 5000;

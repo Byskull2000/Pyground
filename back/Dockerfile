@@ -3,18 +3,22 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Instalar OpenSSL (requerido por Prisma)
+RUN apk add --no-cache openssl
+
 # Copiar archivos de dependencias
 COPY package*.json ./
+COPY tsconfig.json ./
 COPY prisma ./prisma/
 
 # Instalar dependencias (incluyendo devDependencies para el build)
 RUN npm ci
 
-# Copiar el código fuente
-COPY . .
-
-# Generar el cliente de Prisma
+# Generar el cliente de Prisma ANTES de copiar el código
 RUN npx prisma generate
+
+# Copiar el código fuente (después de generar Prisma)
+COPY . .
 
 # Compilar TypeScript
 RUN npm run build
@@ -24,6 +28,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Instalar OpenSSL (requerido por Prisma)
+RUN apk add --no-cache openssl
+
 # Copiar archivos de dependencias
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -31,9 +38,12 @@ COPY prisma ./prisma/
 # Instalar solo dependencias de producción
 RUN npm ci --omit=dev
 
-# Copiar los archivos compilados desde la etapa de build
+# Generar el cliente de Prisma en producción
+RUN npx prisma generate
+
+# Copiar los archivos compilados y generated desde la etapa de build
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/generated ./generated
 
 # Crear directorio para uploads
 RUN mkdir -p /app/uploads && chmod 755 /app/uploads
