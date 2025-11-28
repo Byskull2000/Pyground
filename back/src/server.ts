@@ -52,7 +52,7 @@ app.use('/api/protected', protectedRoutes);
 
 
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  res.json({ status: 'OK', message: 'Server is running Test CD' });
 });
 
 
