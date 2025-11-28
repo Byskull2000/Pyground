@@ -41,7 +41,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
-          docker build -t "$IMAGE" .
+          docker build -t "$IMAGE" ./backend
           docker push "$IMAGE"
           echo "IMAGE_URL=$IMAGE" >> $GITHUB_ENV
 
